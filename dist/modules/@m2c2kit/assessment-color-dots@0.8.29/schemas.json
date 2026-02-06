@@ -1,0 +1,385 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Color Dots version 0.8.29, 62ccf312",
+  "type": "object",
+  "description": "All game schemas",
+  "properties": {
+    "GameParameters": {
+      "type": "object",
+      "description": "Game parameters schema",
+      "properties": {
+        "fixation_duration_ms": {
+          "default": 500,
+          "description": "How long fixation scene is shown, milliseconds.",
+          "type": "number"
+        },
+        "dot_colors": {
+          "type": "array",
+          "description": "Array of colors for dots.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "colorName": {
+                "type": "string",
+                "description": "Human-friendly name of color."
+              },
+              "rgbaColor": {
+                "type": "array",
+                "description": "Color as array, [r,g,b,a].",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "default": [
+            {
+              "colorName": "black",
+              "rgbaColor": [
+                0,
+                0,
+                0,
+                1
+              ]
+            },
+            {
+              "colorName": "green",
+              "rgbaColor": [
+                0,
+                158,
+                115,
+                1
+              ]
+            },
+            {
+              "colorName": "yellow",
+              "rgbaColor": [
+                240,
+                228,
+                66,
+                1
+              ]
+            },
+            {
+              "colorName": "blue",
+              "rgbaColor": [
+                0,
+                114,
+                178,
+                1
+              ]
+            },
+            {
+              "colorName": "orange",
+              "rgbaColor": [
+                213,
+                94,
+                0,
+                1
+              ]
+            },
+            {
+              "colorName": "pink",
+              "rgbaColor": [
+                204,
+                121,
+                167,
+                1
+              ]
+            }
+          ]
+        },
+        "dot_diameter": {
+          "default": 48,
+          "description": "Diameter of dots.",
+          "type": "number"
+        },
+        "number_of_dots": {
+          "default": 3,
+          "description": "How many dots to present. Must be at least 3.",
+          "type": "integer"
+        },
+        "dot_present_duration_ms": {
+          "default": 1000,
+          "description": "How long the dots are shown, milliseconds.",
+          "type": "number"
+        },
+        "dot_blank_duration_ms": {
+          "default": 750,
+          "description": "How long to show a blank square after dots are removed, milliseconds.",
+          "type": "number"
+        },
+        "color_selected_hold_duration_ms": {
+          "default": 500,
+          "description": "How long to show a square with the dot colored by the user's choice, before advancing to next scene, milliseconds.",
+          "type": "number"
+        },
+        "number_of_trials": {
+          "default": 5,
+          "description": "How many trials to run.",
+          "type": "integer"
+        },
+        "show_trials_complete_scene": {
+          "default": true,
+          "type": "boolean",
+          "description": "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end."
+        },
+        "instruction_type": {
+          "default": "long",
+          "description": "Type of instructions to show, 'short' or 'long'.",
+          "type": "string",
+          "enum": [
+            "short",
+            "long"
+          ]
+        },
+        "instructions": {
+          "default": null,
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "When non-null, an InstructionsOptions object that will completely override the built-in instructions."
+        },
+        "show_quit_button": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the activity quit button be shown?"
+        },
+        "show_fps": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the FPS be shown?"
+        },
+        "show_locale_picker": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the icon that allows the participant to switch the locale be shown?"
+        }
+      }
+    },
+    "TrialSchema": {
+      "type": "object",
+      "description": "Trial data schema",
+      "properties": {
+        "data_type": {
+          "type": "string",
+          "description": "Type of data."
+        },
+        "study_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The short human-readable text ID of the study (protocol, experiment, or other aggregate) that contains the administration of this activity."
+        },
+        "study_uuid": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid",
+          "description": "Unique identifier of the study (protocol, experiment, or other aggregate) that contains the administration of this activity."
+        },
+        "document_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this data document."
+        },
+        "session_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for all activities in this administration of the session. This identifier changes each time a new session starts."
+        },
+        "activity_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for all trials in this administration of the activity. This identifier changes each time the activity starts."
+        },
+        "activity_id": {
+          "type": "string",
+          "description": "Human-readable identifier of the activity."
+        },
+        "activity_publish_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Persistent unique identifier of the activity. This identifier never changes. It can be used to identify the activity across different studies and sessions."
+        },
+        "activity_version": {
+          "type": "string",
+          "description": "Version of the activity."
+        },
+        "device_timezone": {
+          "type": "string",
+          "description": "Timezone of the device. Calculated from Intl.DateTimeFormat().resolvedOptions().timeZone."
+        },
+        "device_timezone_offset_minutes": {
+          "type": "integer",
+          "description": "Difference in minutes between UTC and device timezone. Calculated from Date.getTimezoneOffset()."
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Locale of the trial. null if the activity does not support localization."
+        },
+        "activity_begin_iso8601_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the beginning of the game activity."
+        },
+        "trial_begin_iso8601_timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped."
+        },
+        "trial_end_iso8601_timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the end of the trial (when user presses 'Done' after placing the dot). Null if trial was skipped."
+        },
+        "trial_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Index of the trial within this assessment, 0-based."
+        },
+        "square_side_length": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Length of square side, in pixels. This is the square in which the dots are shown. Null if trial was skipped."
+        },
+        "presented_dots": {
+          "description": "Configuration of dots presented to the user. Null if trial was skipped.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "color_name": {
+                "type": "string",
+                "description": "Human-friendly name of color."
+              },
+              "rgba_color": {
+                "type": "array",
+                "description": "Color as array, [r,g,b,a].",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "location": {
+                "type": "object",
+                "description": "Location of dot.",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "description": "X coordinate of dot."
+                  },
+                  "y": {
+                    "type": "number",
+                    "description": "Y coordinate of dot."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "color_target_dot_index": {
+          "description": "Index (0-based) of presented dot whose color the user was asked to recall. Null if trial was skipped.",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "color_selected": {
+          "description": "Color selected by user. Null if trial was skipped.",
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "color_name": {
+              "type": "string",
+              "description": "Human-friendly name of color."
+            },
+            "rgba_color": {
+              "type": "array",
+              "description": "Color as array, [r,g,b,a].",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "color_selected_correct": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Was the color selected by the user correct? Null if trial was skipped."
+        },
+        "location_target_dot_index": {
+          "description": "Index (0-based) of presented dot whose location the user was asked to recall. Null if trial was skipped.",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "location_selected": {
+          "description": "Location selected by user. Null if trial was skipped.",
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "x": {
+              "type": "number",
+              "description": "X coordinate of dot."
+            },
+            "y": {
+              "type": "number",
+              "description": "Y coordinate of dot."
+            }
+          }
+        },
+        "location_selected_delta": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Euclidean distance between location target dot and the location selected by user. Null if trial was skipped."
+        },
+        "color_selection_response_time_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Milliseconds from the beginning of color selection task until the user taps the done button. Null if trial was skipped."
+        },
+        "location_selection_response_time_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Milliseconds from the beginning of location selection task until the user taps the done button. Null if trial was skipped."
+        },
+        "quit_button_pressed": {
+          "type": "boolean",
+          "description": "Was the quit button pressed?"
+        }
+      }
+    }
+  }
+}

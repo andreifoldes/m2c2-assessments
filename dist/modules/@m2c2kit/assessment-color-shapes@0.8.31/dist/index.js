@@ -1,0 +1,895 @@
+import { Game, RandomDraws, Sprite, Scene, M2Error, WebColors, Transition, Shape, Label, Action, Timer, Easings, TransitionDirection } from '@m2c2kit/core';
+import { LocalePicker, Instructions, CountdownScene, Grid, Button } from '@m2c2kit/addons';
+
+class ColorShapes extends Game {
+  constructor() {
+    const defaultParameters = {
+      fixation_duration_ms: {
+        default: 500,
+        description: "How long fixation scene is shown, milliseconds.",
+        type: "number"
+      },
+      shape_colors: {
+        type: "array",
+        description: "Array of colors for shapes.",
+        items: {
+          type: "object",
+          properties: {
+            colorName: {
+              type: "string",
+              description: "Human-friendly name of color."
+            },
+            rgbaColor: {
+              type: "array",
+              description: "Color as array, [r,g,b,a].",
+              items: {
+                type: "number"
+              }
+            }
+          }
+        },
+        default: [
+          { colorName: "black", rgbaColor: [0, 0, 0, 1] },
+          { colorName: "green", rgbaColor: [0, 158, 115, 1] },
+          { colorName: "yellow", rgbaColor: [240, 228, 66, 1] },
+          { colorName: "blue", rgbaColor: [0, 114, 178, 1] },
+          { colorName: "orange", rgbaColor: [213, 94, 0, 1] },
+          { colorName: "pink", rgbaColor: [204, 121, 167, 1] }
+        ]
+      },
+      number_of_shapes_shown: {
+        default: 3,
+        description: "How many shapes to show on the grid at one time.",
+        type: "integer"
+      },
+      number_of_shapes_changing_color: {
+        default: 2,
+        description: "If a different color trial, how many shapes should change color (minimum is 2, because changes are swaps with other shapes).",
+        type: "integer"
+      },
+      shapes_presented_duration_ms: {
+        default: 2e3,
+        description: "How long the shapes are shown, milliseconds.",
+        type: "number"
+      },
+      shapes_removed_duration_ms: {
+        default: 1e3,
+        description: "How long to show a blank square after shapes are removed, milliseconds.",
+        type: "number"
+      },
+      cells_per_side: {
+        default: 3,
+        description: "How many cell positions for each side of the square grid (e.g., 3 is a 3x3 grid; 4 is a 4x4 grid).",
+        type: "integer"
+      },
+      number_of_different_colors_trials: {
+        default: 6,
+        type: "integer",
+        description: "Number of trials where the shapes have different colors."
+      },
+      number_of_trials: {
+        default: 12,
+        description: "How many trials to run.",
+        type: "integer"
+      },
+      show_trials_complete_scene: {
+        default: true,
+        type: "boolean",
+        description: "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end."
+      },
+      instruction_type: {
+        default: "long",
+        description: "Type of instructions to show, 'short' or 'long'.",
+        type: "string",
+        enum: ["short", "long"]
+      },
+      instructions: {
+        default: null,
+        type: ["object", "null"],
+        description: "When non-null, an InstructionsOptions object that will completely override the built-in instructions."
+      },
+      show_quit_button: {
+        type: "boolean",
+        default: false,
+        description: "Should the activity quit button be shown?"
+      },
+      show_fps: {
+        type: "boolean",
+        default: false,
+        description: "Should the FPS be shown?"
+      },
+      show_locale_picker: {
+        type: "boolean",
+        default: false,
+        description: "Should the icon that allows the participant to switch the locale be shown?"
+      },
+      seed: {
+        type: ["string", "null"],
+        default: null,
+        description: "Optional seed for the seeded pseudo-random number generator. When null, the default Math.random() is used."
+      }
+    };
+    const colorShapesTrialSchema = {
+      activity_begin_iso8601_timestamp: {
+        type: "string",
+        format: "date-time",
+        description: "ISO 8601 timestamp at the beginning of the game activity."
+      },
+      trial_begin_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description: "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped."
+      },
+      trial_end_iso8601_timestamp: {
+        type: ["string", "null"],
+        format: "date-time",
+        description: "ISO 8601 timestamp at the end of the trial (when user presses 'Same' or 'Different'). Null if trial was skipped."
+      },
+      trial_index: {
+        type: ["integer", "null"],
+        description: "Index of the trial within this assessment, 0-based."
+      },
+      present_shapes: {
+        description: "Configuration of shapes shown to the user in the presentation phase. Null if trial was skipped.",
+        type: ["array", "null"],
+        items: {
+          type: "object",
+          properties: {
+            shape_index: {
+              type: "integer",
+              description: "Index of the shape within the library of shapes, 0-based"
+            },
+            color_name: {
+              type: "string",
+              description: "Human-friendly name of color."
+            },
+            rgba_color: {
+              type: "array",
+              description: "Color as array, [r,g,b,a].",
+              items: {
+                type: "number"
+              }
+            },
+            location: {
+              type: "object",
+              description: "Location of shape.",
+              properties: {
+                row: {
+                  type: "number",
+                  description: "Row of the shape, 0-based."
+                },
+                column: {
+                  type: "number",
+                  description: "Column of the shape, 0-based."
+                }
+              }
+            }
+          }
+        }
+      },
+      response_shapes: {
+        description: "Configuration of shapes shown to the user in the response phase. Null if trial was skipped.",
+        type: ["array", "null"],
+        items: {
+          type: "object",
+          properties: {
+            shape_index: {
+              type: "integer",
+              description: "Index of the shape within the library of shapes, 0-based"
+            },
+            color_name: {
+              type: "string",
+              description: "Human-friendly name of color."
+            },
+            rgba_color: {
+              type: "array",
+              description: "Color as array, [r,g,b,a].",
+              items: {
+                type: "number"
+              }
+            },
+            location: {
+              type: "object",
+              description: "Location of shape.",
+              properties: {
+                row: {
+                  type: "number",
+                  description: "Row of the shape, 0-based."
+                },
+                column: {
+                  type: "number",
+                  description: "Column of the shape, 0-based."
+                }
+              }
+            }
+          }
+        }
+      },
+      response_time_duration_ms: {
+        type: ["number", "null"],
+        description: "Milliseconds from when the response configuration of shapes is shown until the user taps a response. Null if trial was skipped."
+      },
+      user_response: {
+        type: ["string", "null"],
+        enum: ["same", "different"],
+        description: "User's response to whether the shapes are same colors or different."
+      },
+      user_response_correct: {
+        type: ["boolean", "null"],
+        description: "Was the user's response correct?"
+      },
+      quit_button_pressed: {
+        type: "boolean",
+        description: "Was the quit button pressed?"
+      }
+    };
+    const translation = {
+      configuration: {
+        baseLocale: "en-US"
+      },
+      "en-US": {
+        localeName: "English",
+        INSTRUCTIONS_TITLE: "Color Shapes",
+        SHORT_INSTRUCTIONS_TEXT_PAGE_1: "Try to remember the color of 3 shapes, because they will soon disappear. When the shapes reappear, answer whether they have the SAME or DIFFERENT colors as they had before",
+        INSTRUCTIONS_TEXT_PAGE_1: "Try to remember the color of 3 shapes, because they will soon disappear.",
+        INSTRUCTIONS_TEXT_PAGE_2: "Next you will see the same shapes reappear.",
+        INSTRUCTIONS_TEXT_PAGE_3: "Answer whether the shapes have the SAME or DIFFERENT colors as they had before.",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Next",
+        BACK_BUTTON_TEXT: "Back",
+        GET_READY_COUNTDOWN_TEXT: "GET READY!",
+        SAME_BUTTON_TEXT: "Same",
+        DIFFERENT_BUTTON_TEXT: "Different",
+        TRIALS_COMPLETE_SCENE_TEXT: "This activity is complete.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK"
+      },
+      // cSpell:disable (for VS Code extension, Code Spell Checker)
+      "es-MX": {
+        localeName: "Espa\xF1ol",
+        INSTRUCTIONS_TITLE: "Formas de Color",
+        // Short instructions need to be translated.
+        // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
+        INSTRUCTIONS_TEXT_PAGE_1: "Intenta recordar el color de las 3 formas, porque pronto desaparecer\xE1n.",
+        INSTRUCTIONS_TEXT_PAGE_2: "Luego ver\xE1s reaparecer las mismas formas.",
+        INSTRUCTIONS_TEXT_PAGE_3: "Responde si las formas tienen el MISMO o DIFERENTE color que antes.",
+        START_BUTTON_TEXT: "COMENZAR",
+        NEXT_BUTTON_TEXT: "Siguiente",
+        BACK_BUTTON_TEXT: "Atr\xE1s",
+        GET_READY_COUNTDOWN_TEXT: "PREP\xC1RESE",
+        SAME_BUTTON_TEXT: "Mismo",
+        DIFFERENT_BUTTON_TEXT: "Diferente",
+        TRIALS_COMPLETE_SCENE_TEXT: "Esta actividad est\xE1 completa.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK"
+      },
+      "de-DE": {
+        localeName: "Deutsch",
+        INSTRUCTIONS_TITLE: "Farb-Formen",
+        // Short instructions need to be translated.
+        // SHORT_INSTRUCTIONS_TEXT_PAGE_1: "",
+        INSTRUCTIONS_TEXT_PAGE_1: "Oben und unten sehen Sie Symbolpaare.",
+        INSTRUCTIONS_TEXT_PAGE_2: "Ihre Aufgabe wird es sein, auf dasjenige untere Paar zu tippen, welches mit einem der obigen Paare exakt \xFCbereinstimmt.",
+        INSTRUCTIONS_TEXT_PAGE_3: "Versuchen Sie bitte, so schnell und korrekt wie m\xF6glich zu sein.",
+        START_BUTTON_TEXT: "START",
+        NEXT_BUTTON_TEXT: "Weiter",
+        BACK_BUTTON_TEXT: "Vorherige",
+        GET_READY_COUNTDOWN_TEXT: "BEREIT MACHEN",
+        SAME_BUTTON_TEXT: "Gleich",
+        DIFFERENT_BUTTON_TEXT: "Unterschiedlich",
+        TRIALS_COMPLETE_SCENE_TEXT: "Die Aufgabe ist beendet.",
+        TRIALS_COMPLETE_SCENE_BUTTON_TEXT: "OK"
+      }
+      // cSpell:enable
+    };
+    const options = {
+      name: "Color Shapes",
+      /**
+       * This id must match the property m2c2kit.assessmentId in package.json
+       */
+      id: "color-shapes",
+      publishUuid: "394cb010-2ccf-4a87-9d23-cda7fb07a960",
+      version: "0.8.31 (92cfffbe)",
+      moduleMetadata: { "name": "@m2c2kit/assessment-color-shapes", "version": "0.8.31", "dependencies": { "@m2c2kit/addons": "0.3.32", "@m2c2kit/core": "0.3.33" } },
+      translation,
+      shortDescription: "Color Shapes is a visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli.",
+      longDescription: `Color Shapes is a change detection paradigm used to measure visual short-term memory binding (Parra et al., 2009). Participants are asked to memorize the shapes and colors of three different polygons for 3 seconds. The three polygons are then removed from the screen and re-displayed at different locations, either having the same or different colors. Participants are then asked to decide whether the combination of colors and shapes are the "Same" or "Different" between the study and test phases.`,
+      showFps: defaultParameters.show_fps.default,
+      width: 400,
+      height: 800,
+      trialSchema: colorShapesTrialSchema,
+      parameters: defaultParameters,
+      fonts: [
+        {
+          fontName: "roboto",
+          url: "fonts/roboto/Roboto-Regular.ttf"
+        }
+      ],
+      images: [
+        {
+          imageName: "instructions-1",
+          height: 256,
+          width: 256,
+          url: "images/cs-instructions-1.png"
+        },
+        {
+          imageName: "instructions-2",
+          height: 256,
+          width: 256,
+          url: "images/cs-instructions-2.png"
+        },
+        {
+          imageName: "instructions-3",
+          height: 350,
+          width: 300,
+          url: "images/cs-instructions-3.png",
+          localize: true
+        },
+        {
+          imageName: "circle-x",
+          height: 32,
+          width: 32,
+          // the svg is from evericons and is licensed under CC0 1.0
+          // Universal (Public Domain). see https://www.patreon.com/evericons
+          url: "images/circle-x.svg"
+        }
+      ]
+    };
+    super(options);
+  }
+  async initialize() {
+    await super.initialize();
+    const game = this;
+    const seed = game.getParameter("seed");
+    if (typeof seed === "string") {
+      RandomDraws.setSeed(seed);
+    }
+    const SHAPE_SVG_HEIGHT = 96;
+    const SQUARE_SIDE_LENGTH = 350;
+    const numberOfShapesShown = game.getParameter(
+      "number_of_shapes_shown"
+    );
+    const shapeLibrary = this.makeShapes(SHAPE_SVG_HEIGHT);
+    if (game.getParameter("show_quit_button")) {
+      const quitSprite = new Sprite({
+        imageName: "circle-x",
+        position: { x: 380, y: 20 },
+        isUserInteractionEnabled: true
+      });
+      game.addFreeNode(quitSprite);
+      quitSprite.onTapDown((e) => {
+        game.removeAllFreeNodes();
+        e.handled = true;
+        const blankScene = new Scene();
+        game.addScene(blankScene);
+        game.presentScene(blankScene);
+        game.addTrialData("quit_button_pressed", true);
+        game.trialComplete();
+        game.cancel();
+      });
+    }
+    let localePicker;
+    if (game.getParameter("show_locale_picker")) {
+      localePicker = new LocalePicker();
+      game.addFreeNode(localePicker);
+    }
+    let instructionsScenes;
+    const customInstructions = game.getParameter(
+      "instructions"
+    );
+    if (customInstructions) {
+      instructionsScenes = Instructions.create(customInstructions);
+    } else {
+      switch (game.getParameter("instruction_type")) {
+        case "short": {
+          instructionsScenes = Instructions.create({
+            instructionScenes: [
+              {
+                title: "INSTRUCTIONS_TITLE",
+                text: "SHORT_INSTRUCTIONS_TEXT_PAGE_1",
+                imageName: "instructions-1",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+                nextButtonText: "START_BUTTON_TEXT",
+                nextButtonBackgroundColor: WebColors.Green,
+                nextSceneTransition: Transition.none()
+              }
+            ]
+          });
+          break;
+        }
+        case "long": {
+          instructionsScenes = Instructions.create({
+            instructionScenes: [
+              {
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_1",
+                imageName: "instructions-1",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+                nextButtonText: "NEXT_BUTTON_TEXT",
+                backButtonText: "BACK_BUTTON_TEXT"
+              },
+              {
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_2",
+                imageName: "instructions-2",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+                nextButtonText: "NEXT_BUTTON_TEXT",
+                backButtonText: "BACK_BUTTON_TEXT"
+              },
+              {
+                title: "INSTRUCTIONS_TITLE",
+                text: "INSTRUCTIONS_TEXT_PAGE_3",
+                imageName: "instructions-3",
+                imageAboveText: false,
+                imageMarginTop: 32,
+                textFontSize: 24,
+                titleFontSize: 30,
+                textVerticalBias: 0.2,
+                nextButtonText: "START_BUTTON_TEXT",
+                nextButtonBackgroundColor: WebColors.Green,
+                backButtonText: "BACK_BUTTON_TEXT"
+              }
+            ]
+          });
+          break;
+        }
+        default: {
+          throw new M2Error("invalid value for instruction_type");
+        }
+      }
+    }
+    instructionsScenes[0].onAppear(() => {
+      game.addTrialData(
+        "activity_begin_iso8601_timestamp",
+        this.beginIso8601Timestamp
+      );
+    });
+    game.addScenes(instructionsScenes);
+    const countdownScene = new CountdownScene({
+      milliseconds: 3e3,
+      text: "GET_READY_COUNTDOWN_TEXT",
+      zeroDwellMilliseconds: 1e3,
+      transition: Transition.none()
+    });
+    game.addScene(countdownScene);
+    const gridRows = game.getParameter("cells_per_side");
+    const gridColumns = game.getParameter("cells_per_side");
+    const numberOfTrials = game.getParameter("number_of_trials");
+    const shapeColors = game.getParameter(
+      "shape_colors"
+    );
+    const trialConfigurations = [];
+    const rows = game.getParameter("cells_per_side");
+    const columns = rows;
+    const numberOfDifferentColorsTrials = game.getParameter(
+      "number_of_different_colors_trials"
+    );
+    const differentColorsTrialIndexes = RandomDraws.fromRangeWithoutReplacement(
+      numberOfDifferentColorsTrials,
+      0,
+      numberOfTrials - 1
+    );
+    for (let i = 0; i < numberOfTrials; i++) {
+      const presentShapes = new Array();
+      const responseShapes = new Array();
+      const shapesToShowIndexes = RandomDraws.fromRangeWithoutReplacement(
+        numberOfShapesShown,
+        0,
+        shapeLibrary.length - 1
+      );
+      const shapeColorsIndexes = RandomDraws.fromRangeWithoutReplacement(
+        numberOfShapesShown,
+        0,
+        shapeColors.length - 1
+      );
+      const onDiagonal = (locations) => {
+        if (locations.map((c) => c.row === 0 && c.column === 0).some((e) => e === true) && locations.map((c) => c.row === 1 && c.column === 1).some((e) => e === true) && locations.map((c) => c.row === 2 && c.column === 2).some((e) => e === true)) {
+          return true;
+        }
+        if (locations.map((c) => c.row === 2 && c.column === 0).some((e) => e === true) && locations.map((c) => c.row === 1 && c.column === 1).some((e) => e === true) && locations.map((c) => c.row === 0 && c.column === 2).some((e) => e === true)) {
+          return true;
+        }
+        return false;
+      };
+      const inLine = (locations) => {
+        const uniqueRows = new Set(locations.map((l) => l.row)).size;
+        const uniqueColumns = new Set(locations.map((l) => l.column)).size;
+        if (uniqueRows !== 1 && uniqueColumns !== 1) {
+          return false;
+        }
+        return true;
+      };
+      let presentLocationsOk = false;
+      let presentLocations;
+      do {
+        presentLocations = RandomDraws.fromGridWithoutReplacement(
+          numberOfShapesShown,
+          rows,
+          columns
+        );
+        if (!inLine(presentLocations) && !onDiagonal(presentLocations)) {
+          presentLocationsOk = true;
+        } else {
+          presentLocationsOk = false;
+        }
+      } while (!presentLocationsOk);
+      for (let j = 0; j < numberOfShapesShown; j++) {
+        const presentShape = {
+          shape: shapeLibrary[shapesToShowIndexes[j]],
+          shapeIndex: shapesToShowIndexes[j],
+          color: shapeColors[shapeColorsIndexes[j]].rgbaColor,
+          colorName: shapeColors[shapeColorsIndexes[j]].colorName,
+          location: presentLocations[j]
+        };
+        presentShapes.push(presentShape);
+      }
+      let responseLocationsOk = false;
+      let responseLocations;
+      do {
+        responseLocations = RandomDraws.fromGridWithoutReplacement(
+          numberOfShapesShown,
+          rows,
+          columns
+        );
+        if (!inLine(responseLocations) && !onDiagonal(responseLocations)) {
+          responseLocationsOk = true;
+        } else {
+          responseLocationsOk = false;
+        }
+      } while (!responseLocationsOk);
+      for (let j = 0; j < numberOfShapesShown; j++) {
+        const responseShape = {
+          shape: presentShapes[j].shape,
+          shapeIndex: shapesToShowIndexes[j],
+          color: presentShapes[j].color,
+          colorName: shapeColors[shapeColorsIndexes[j]].colorName,
+          location: responseLocations[j]
+        };
+        responseShapes.push(responseShape);
+      }
+      let numberOfShapesWithDifferentColors = 0;
+      const differentColorTrial = differentColorsTrialIndexes.includes(i);
+      if (differentColorTrial) {
+        const numberOfShapesToChange = game.getParameter(
+          "number_of_shapes_changing_color"
+        );
+        if (numberOfShapesToChange > numberOfShapesShown) {
+          throw new M2Error(
+            `number_of_shapes_changing_color is ${numberOfShapesToChange}, but it must be less than or equal to number_of_shapes_shown (which is ${numberOfShapesShown}).`
+          );
+        }
+        const shapesToChangeIndexes = RandomDraws.fromRangeWithoutReplacement(
+          numberOfShapesToChange,
+          0,
+          numberOfShapesShown - 1
+        );
+        const shapesToChange = shapesToChangeIndexes.map(
+          (index) => responseShapes[index]
+        );
+        numberOfShapesWithDifferentColors = shapesToChange.length;
+        const firstShapeColor = shapesToChange[0].color;
+        for (let j = 0; j < numberOfShapesToChange; j++) {
+          const shape = shapesToChange[j];
+          if (j + 1 < numberOfShapesToChange) {
+            shape.color = shapesToChange[j + 1].color;
+          } else {
+            shape.color = firstShapeColor;
+          }
+        }
+      }
+      trialConfigurations.push({
+        presentShapes,
+        responseShapes,
+        numberOfShapesWithDifferentColors
+      });
+    }
+    const fixationScene = new Scene();
+    game.addScene(fixationScene);
+    const fixationSceneSquare = new Shape({
+      rect: { size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH } },
+      fillColor: WebColors.Transparent,
+      strokeColor: WebColors.Gray,
+      lineWidth: 4,
+      position: { x: 200, y: 300 }
+    });
+    fixationScene.addChild(fixationSceneSquare);
+    const plusLabel = new Label({
+      text: "+",
+      fontSize: 32,
+      fontColor: WebColors.Black,
+      localize: false
+    });
+    fixationSceneSquare.addChild(plusLabel);
+    fixationScene.onAppear(() => {
+      game.addTrialData(
+        "activity_begin_iso8601_timestamp",
+        this.beginIso8601Timestamp
+      );
+      game.addTrialData(
+        "trial_begin_iso8601_timestamp",
+        (/* @__PURE__ */ new Date()).toISOString()
+      );
+      fixationScene.run(
+        Action.sequence([
+          Action.wait({ duration: game.getParameter("fixation_duration_ms") }),
+          Action.custom({
+            callback: () => {
+              game.presentScene(shapePresentationScene);
+            }
+          })
+        ])
+      );
+    });
+    const shapePresentationScene = new Scene();
+    game.addScene(shapePresentationScene);
+    const presentationSceneSquare = new Shape({
+      rect: { size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH } },
+      fillColor: WebColors.Transparent,
+      strokeColor: WebColors.Gray,
+      lineWidth: 4,
+      position: { x: 200, y: 300 }
+    });
+    shapePresentationScene.addChild(presentationSceneSquare);
+    const presentationGrid = new Grid({
+      rows: gridRows,
+      columns: gridColumns,
+      size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH },
+      position: { x: 200, y: 300 },
+      backgroundColor: WebColors.Transparent,
+      gridLineColor: WebColors.Transparent
+    });
+    shapePresentationScene.addChild(presentationGrid);
+    shapePresentationScene.onAppear(() => {
+      const trialConfiguration = trialConfigurations[game.trialIndex];
+      for (let i = 0; i < trialConfiguration.presentShapes.length; i++) {
+        const presentShape = trialConfiguration.presentShapes[i].shape;
+        presentShape.fillColor = trialConfiguration.presentShapes[i].color;
+        presentShape.position = { x: 0, y: 0 };
+        presentationGrid.addAtCell(
+          presentShape,
+          trialConfiguration.presentShapes[i].location.row,
+          trialConfiguration.presentShapes[i].location.column
+        );
+      }
+      shapePresentationScene.run(
+        Action.sequence([
+          Action.wait({
+            duration: game.getParameter("shapes_presented_duration_ms")
+          }),
+          Action.custom({
+            callback: () => {
+              presentationGrid.removeAllGridChildren();
+            }
+          }),
+          Action.wait({
+            duration: game.getParameter("shapes_removed_duration_ms")
+          }),
+          Action.custom({
+            callback: () => {
+              presentationGrid.removeAllGridChildren();
+              game.presentScene(shapeResponseScene);
+            }
+          })
+        ])
+      );
+    });
+    const shapeResponseScene = new Scene();
+    game.addScene(shapeResponseScene);
+    const responseSceneSquare = new Shape({
+      rect: { size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH } },
+      fillColor: WebColors.Transparent,
+      strokeColor: WebColors.Gray,
+      lineWidth: 4,
+      position: { x: 200, y: 300 }
+    });
+    shapeResponseScene.addChild(responseSceneSquare);
+    const responseGrid = new Grid({
+      rows: gridRows,
+      columns: gridColumns,
+      size: { width: SQUARE_SIDE_LENGTH, height: SQUARE_SIDE_LENGTH },
+      position: { x: 200, y: 300 },
+      backgroundColor: WebColors.Transparent,
+      gridLineColor: WebColors.Transparent
+    });
+    shapeResponseScene.addChild(responseGrid);
+    shapeResponseScene.onAppear(() => {
+      const trialConfiguration = trialConfigurations[game.trialIndex];
+      for (let i = 0; i < trialConfiguration.responseShapes.length; i++) {
+        const responseShape = trialConfiguration.responseShapes[i].shape;
+        responseShape.fillColor = trialConfiguration.responseShapes[i].color;
+        responseShape.position = { x: 0, y: 0 };
+        responseGrid.addAtCell(
+          responseShape,
+          trialConfiguration.responseShapes[i].location.row,
+          trialConfiguration.responseShapes[i].location.column
+        );
+      }
+      sameButton.isUserInteractionEnabled = true;
+      differentButton.isUserInteractionEnabled = true;
+      Timer.startNew("rt");
+    });
+    const sameButton = new Button({
+      text: "SAME_BUTTON_TEXT",
+      position: { x: 100, y: 700 },
+      size: { width: 150, height: 50 }
+    });
+    shapeResponseScene.addChild(sameButton);
+    sameButton.onTapDown(() => {
+      sameButton.isUserInteractionEnabled = false;
+      handleSelection(false);
+    });
+    const differentButton = new Button({
+      text: "DIFFERENT_BUTTON_TEXT",
+      position: { x: 300, y: 700 },
+      size: { width: 150, height: 50 }
+    });
+    shapeResponseScene.addChild(differentButton);
+    differentButton.onTapDown(() => {
+      differentButton.isUserInteractionEnabled = false;
+      handleSelection(true);
+    });
+    const handleSelection = (differentPressed) => {
+      const rt = Timer.elapsed("rt");
+      Timer.remove("rt");
+      responseGrid.removeAllGridChildren();
+      game.addTrialData(
+        "trial_end_iso8601_timestamp",
+        (/* @__PURE__ */ new Date()).toISOString()
+      );
+      const trialConfiguration = trialConfigurations[game.trialIndex];
+      game.addTrialData("response_time_duration_ms", rt);
+      game.addTrialData(
+        "user_response",
+        differentPressed ? "different" : "same"
+      );
+      const correctResponse = trialConfiguration.numberOfShapesWithDifferentColors === 0 && !differentPressed || trialConfiguration.numberOfShapesWithDifferentColors > 0 && differentPressed;
+      game.addTrialData("user_response_correct", correctResponse);
+      const presentShapes = trialConfiguration.presentShapes.map((p) => {
+        return {
+          shape_index: p.shapeIndex,
+          color_name: p.colorName,
+          rgba_color: p.color,
+          location: p.location
+        };
+      });
+      game.addTrialData("present_shapes", presentShapes);
+      game.addTrialData("quit_button_pressed", false);
+      const responseShapes = trialConfiguration.responseShapes.map((p) => {
+        return {
+          shape_index: p.shapeIndex,
+          color_name: p.colorName,
+          rgba_color: p.color,
+          location: p.location
+        };
+      });
+      game.addTrialData("response_shapes", responseShapes);
+      game.addTrialData("trial_index", game.trialIndex);
+      game.trialComplete();
+      if (game.trialIndex < numberOfTrials) {
+        game.presentScene(fixationScene);
+      } else {
+        game.presentScene(
+          doneScene,
+          Transition.slide({
+            direction: TransitionDirection.Left,
+            duration: 500,
+            easing: Easings.sinusoidalInOut
+          })
+        );
+      }
+    };
+    const doneScene = new Scene();
+    game.addScene(doneScene);
+    const doneSceneText = new Label({
+      text: "TRIALS_COMPLETE_SCENE_TEXT",
+      position: { x: 200, y: 400 }
+    });
+    doneScene.addChild(doneSceneText);
+    const okButton = new Button({
+      text: "TRIALS_COMPLETE_SCENE_BUTTON_TEXT",
+      position: { x: 200, y: 650 }
+    });
+    okButton.isUserInteractionEnabled = true;
+    okButton.onTapDown(() => {
+      okButton.isUserInteractionEnabled = false;
+      doneScene.removeAllChildren();
+      game.end();
+    });
+    doneScene.addChild(okButton);
+    doneScene.onSetup(() => {
+      game.removeAllFreeNodes();
+    });
+  }
+  makeShapes(svgHeight) {
+    const shape01 = new Shape({
+      path: {
+        pathString: shapePathStrings[0],
+        height: svgHeight
+      },
+      lineWidth: 0
+    });
+    const shape02 = new Shape({
+      path: {
+        pathString: shapePathStrings[1],
+        height: svgHeight
+      },
+      lineWidth: 0
+    });
+    const shape03 = new Shape({
+      path: {
+        pathString: shapePathStrings[2],
+        height: svgHeight * 0.8
+      },
+      lineWidth: 0
+    });
+    const shape04 = new Shape({
+      path: {
+        pathString: shapePathStrings[3],
+        height: svgHeight
+      },
+      lineWidth: 0
+    });
+    const shape05 = new Shape({
+      path: {
+        pathString: shapePathStrings[4],
+        height: svgHeight * 0.8
+      },
+      lineWidth: 0
+    });
+    const shape06 = new Shape({
+      path: {
+        pathString: shapePathStrings[5],
+        height: svgHeight
+      },
+      lineWidth: 0
+    });
+    const shape07 = new Shape({
+      path: {
+        pathString: shapePathStrings[6],
+        height: svgHeight
+      },
+      lineWidth: 0
+    });
+    const shape08 = new Shape({
+      path: {
+        pathString: shapePathStrings[7],
+        height: svgHeight
+      },
+      lineWidth: 0
+    });
+    const shapes = [
+      shape01,
+      shape02,
+      shape03,
+      shape04,
+      shape05,
+      shape06,
+      shape07,
+      shape08
+    ];
+    return shapes;
+  }
+}
+const shapePathStrings = [
+  "M0 89.94v-2L131.95 0h2v88.7c2.34 1.6 4.47 3.11 6.65 4.55 42.77 28.22 85.54 56.42 128.3 84.63v2c-44.65 29.65-89.3 59.29-133.95 88.94h-1v-90.84C89.44 148.72 44.72 119.33 0 89.94Z",
+  "M162 188c-.33 27-.67 54-1 81-26.87-26.18-53.74-52.35-80-77.94V269H0C0 180.83 0 92.67.04 4.5.04 3 .67 1.5 1 0c24.64 29.1 49.15 58.31 73.96 87.26 28.88 33.7 58.01 67.17 87.04 100.74Z",
+  "M3 148.86V61.12C41.76 40.75 80.52 20.37 119.28 0h2.91c21.32 20.7 42.64 41.4 63.96 62.11v89.71c-38.44 20.04-76.88 40.09-115.31 60.13h-2.91L3.01 148.86Z",
+  "M134 0h2c7.26 22.31 14.38 44.67 21.86 66.9 3.91 11.61 5.47 29.91 13.25 33.27C203 113.94 236.86 123.13 270 134v1L136 269h-1c-11.04-33.58-22.08-67.16-33.21-101.03C67.87 156.98 33.93 145.99 0 135v-1L134 0Z",
+  "M107 0h1l108 108v1c-26.67 35.33-53.33 70.66-80 106h-1c-8.82-35.03-17.64-70.07-27-107.28C98.62 145.01 89.81 180 81.01 215h-1C53.33 179.66 26.67 144.33 0 109v-2L107 0Z",
+  "M0 1C2.17.67 4.33.05 6.5.04 58.33-.01 110.17 0 162 0v270H2c26.2-22.17 52.41-44.33 78.86-66.71V67.4c-3.85-3.22-7.35-6.2-10.9-9.11C46.64 39.18 23.32 20.09 0 1Z",
+  "M95 268.99h-1C62.66 238.66 31.33 208.33 0 178V88C26.67 58.67 53.33 29.33 80 0h1c0 29.45 0 58.89-.01 88.38 35.99 29.57 72 59.09 108.01 88.61v1l-94 91Z",
+  "M13 0h67l135 135v1L81 270c-27-.33-54-.67-81-1 11.73-12.51 23.61-24.87 35.16-37.54 33.14-36.35 66.14-72.82 100.23-110.38C94.4 80.52 53.7 40.26 13 0Z"
+];
+
+export { ColorShapes };
+//# sourceMappingURL=index.js.map

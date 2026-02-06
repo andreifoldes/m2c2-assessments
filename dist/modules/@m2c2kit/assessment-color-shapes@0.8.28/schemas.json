@@ -1,0 +1,374 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Color Shapes version 0.8.28, 9f27c146",
+  "type": "object",
+  "description": "All game schemas",
+  "properties": {
+    "GameParameters": {
+      "type": "object",
+      "description": "Game parameters schema",
+      "properties": {
+        "fixation_duration_ms": {
+          "default": 500,
+          "description": "How long fixation scene is shown, milliseconds.",
+          "type": "number"
+        },
+        "shape_colors": {
+          "type": "array",
+          "description": "Array of colors for shapes.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "colorName": {
+                "type": "string",
+                "description": "Human-friendly name of color."
+              },
+              "rgbaColor": {
+                "type": "array",
+                "description": "Color as array, [r,g,b,a].",
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "default": [
+            {
+              "colorName": "black",
+              "rgbaColor": [
+                0,
+                0,
+                0,
+                1
+              ]
+            },
+            {
+              "colorName": "green",
+              "rgbaColor": [
+                0,
+                158,
+                115,
+                1
+              ]
+            },
+            {
+              "colorName": "yellow",
+              "rgbaColor": [
+                240,
+                228,
+                66,
+                1
+              ]
+            },
+            {
+              "colorName": "blue",
+              "rgbaColor": [
+                0,
+                114,
+                178,
+                1
+              ]
+            },
+            {
+              "colorName": "orange",
+              "rgbaColor": [
+                213,
+                94,
+                0,
+                1
+              ]
+            },
+            {
+              "colorName": "pink",
+              "rgbaColor": [
+                204,
+                121,
+                167,
+                1
+              ]
+            }
+          ]
+        },
+        "number_of_shapes_shown": {
+          "default": 3,
+          "description": "How many shapes to show on the grid at one time.",
+          "type": "integer"
+        },
+        "number_of_shapes_changing_color": {
+          "default": 2,
+          "description": "If a different color trial, how many shapes should change color (minimum is 2, because changes are swaps with other shapes).",
+          "type": "integer"
+        },
+        "shapes_presented_duration_ms": {
+          "default": 2000,
+          "description": "How long the shapes are shown, milliseconds.",
+          "type": "number"
+        },
+        "shapes_removed_duration_ms": {
+          "default": 1000,
+          "description": "How long to show a blank square after shapes are removed, milliseconds.",
+          "type": "number"
+        },
+        "cells_per_side": {
+          "default": 3,
+          "description": "How many cell positions for each side of the square grid (e.g., 3 is a 3x3 grid; 4 is a 4x4 grid).",
+          "type": "integer"
+        },
+        "number_of_different_colors_trials": {
+          "default": 2,
+          "type": "integer",
+          "description": "Number of trials where the shapes have different colors."
+        },
+        "number_of_trials": {
+          "default": 4,
+          "description": "How many trials to run.",
+          "type": "integer"
+        },
+        "show_trials_complete_scene": {
+          "default": true,
+          "type": "boolean",
+          "description": "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end."
+        },
+        "instruction_type": {
+          "default": "long",
+          "description": "Type of instructions to show, 'short' or 'long'.",
+          "type": "string",
+          "enum": [
+            "short",
+            "long"
+          ]
+        },
+        "instructions": {
+          "default": null,
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "When non-null, an InstructionsOptions object that will completely override the built-in instructions."
+        },
+        "show_quit_button": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the activity quit button be shown?"
+        },
+        "show_fps": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the FPS be shown?"
+        },
+        "show_locale_picker": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the icon that allows the participant to switch the locale be shown?"
+        }
+      }
+    },
+    "TrialSchema": {
+      "type": "object",
+      "description": "Trial data schema",
+      "properties": {
+        "data_type": {
+          "type": "string",
+          "description": "Type of data."
+        },
+        "study_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The short human-readable text ID of the study (protocol, experiment, or other aggregate) that contains the administration of this activity."
+        },
+        "study_uuid": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid",
+          "description": "Unique identifier of the study (protocol, experiment, or other aggregate) that contains the administration of this activity."
+        },
+        "document_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this data document."
+        },
+        "session_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for all activities in this administration of the session. This identifier changes each time a new session starts."
+        },
+        "activity_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for all trials in this administration of the activity. This identifier changes each time the activity starts."
+        },
+        "activity_id": {
+          "type": "string",
+          "description": "Human-readable identifier of the activity."
+        },
+        "activity_publish_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Persistent unique identifier of the activity. This identifier never changes. It can be used to identify the activity across different studies and sessions."
+        },
+        "activity_version": {
+          "type": "string",
+          "description": "Version of the activity."
+        },
+        "device_timezone": {
+          "type": "string",
+          "description": "Timezone of the device. Calculated from Intl.DateTimeFormat().resolvedOptions().timeZone."
+        },
+        "device_timezone_offset_minutes": {
+          "type": "integer",
+          "description": "Difference in minutes between UTC and device timezone. Calculated from Date.getTimezoneOffset()."
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Locale of the trial. null if the activity does not support localization."
+        },
+        "activity_begin_iso8601_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the beginning of the game activity."
+        },
+        "trial_begin_iso8601_timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped."
+        },
+        "trial_end_iso8601_timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the end of the trial (when user presses 'Same' or 'Different'). Null if trial was skipped."
+        },
+        "trial_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Index of the trial within this assessment, 0-based."
+        },
+        "present_shapes": {
+          "description": "Configuration of shapes shown to the user in the presentation phase. Null if trial was skipped.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "shape_index": {
+                "type": "integer",
+                "description": "Index of the shape within the library of shapes, 0-based"
+              },
+              "color_name": {
+                "type": "string",
+                "description": "Human-friendly name of color."
+              },
+              "rgba_color": {
+                "type": "array",
+                "description": "Color as array, [r,g,b,a].",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "location": {
+                "type": "object",
+                "description": "Location of shape.",
+                "properties": {
+                  "row": {
+                    "type": "number",
+                    "description": "Row of the shape, 0-based."
+                  },
+                  "column": {
+                    "type": "number",
+                    "description": "Column of the shape, 0-based."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "response_shapes": {
+          "description": "Configuration of shapes shown to the user in the response phase. Null if trial was skipped.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "shape_index": {
+                "type": "integer",
+                "description": "Index of the shape within the library of shapes, 0-based"
+              },
+              "color_name": {
+                "type": "string",
+                "description": "Human-friendly name of color."
+              },
+              "rgba_color": {
+                "type": "array",
+                "description": "Color as array, [r,g,b,a].",
+                "items": {
+                  "type": "number"
+                }
+              },
+              "location": {
+                "type": "object",
+                "description": "Location of shape.",
+                "properties": {
+                  "row": {
+                    "type": "number",
+                    "description": "Row of the shape, 0-based."
+                  },
+                  "column": {
+                    "type": "number",
+                    "description": "Column of the shape, 0-based."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "response_time_duration_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Milliseconds from when the response configuration of shapes is shown until the user taps a response. Null if trial was skipped."
+        },
+        "user_response": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "same",
+            "different"
+          ],
+          "description": "User's response to whether the shapes are same colors or different."
+        },
+        "user_response_correct": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Was the user's response correct?"
+        },
+        "quit_button_pressed": {
+          "type": "boolean",
+          "description": "Was the quit button pressed?"
+        }
+      }
+    }
+  }
+}

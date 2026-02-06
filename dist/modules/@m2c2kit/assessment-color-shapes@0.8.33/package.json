@@ -1,0 +1,64 @@
+{
+  "name": "@m2c2kit/assessment-color-shapes",
+  "version": "0.8.33",
+  "m2c2kit": {
+    "assessmentId": "color-shapes",
+    "locales": [
+      "en-US",
+      "es-MX",
+      "de-DE"
+    ]
+  },
+  "description": "A visual array change detection task, measuring intra-item feature binding, where participants determine if shapes change color across two sequential presentations of shape stimuli",
+  "scripts": {
+    "build": "npm run clean && tsc && rollup -c && npm run schemas",
+    "serve": "concurrently \"rollup -c rollup.config.runner.mjs --watch --configServe\" \"tsc --project tsconfig.runner.json --watch\" --names rollup,typescript --prefix-colors auto,red",
+    "schemas": "node ../schema-util/build/index.js list --schema=all --files=src/index.ts --format=json-schema --title=\"Color Shapes version __VERSION__\" > schemas.json",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo tsconfig.runner.tsbuildinfo"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist/**",
+    "assets/**",
+    "schemas.json"
+  ],
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Scott T. Yabiku",
+    "email": "syabiku@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2c2-project/m2c2kit.git",
+    "directory": "packages/assessment-color-shapes"
+  },
+  "homepage": "https://m2c2-project.github.io/m2c2kit",
+  "dependencies": {
+    "@m2c2kit/addons": "0.3.34",
+    "@m2c2kit/core": "0.3.35"
+  },
+  "devDependencies": {
+    "@m2c2kit/build-helpers": "0.3.31",
+    "@m2c2kit/schema-util": "0.1.25",
+    "@m2c2kit/session": "0.3.17",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "concurrently": "9.2.1",
+    "rimraf": "6.1.2",
+    "rollup": "4.57.0",
+    "rollup-plugin-copy": "3.5.0",
+    "rollup-plugin-esbuild": "6.2.1",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

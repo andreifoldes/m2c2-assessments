@@ -1,0 +1,463 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "Symbol Search version 0.8.31, 92cfffbe",
+  "type": "object",
+  "description": "All game schemas",
+  "properties": {
+    "GameParameters": {
+      "type": "object",
+      "description": "Game parameters schema",
+      "properties": {
+        "number_of_top_pairs": {
+          "default": 3,
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "description": "Number of pairs to be shown on top. (1-4)"
+        },
+        "lure_percent": {
+          "default": 0.5,
+          "type": "number",
+          "description": "Percentage of lure trials. Number from 0 to 1. A lure trial is when the incorrect symbol pair on the bottom contains exactly one symbol that is found on the top.(1 unique symbol). A non-lure trial is when the incorrect symbol pair contains exactly zero symbols that match the top. (2 unique symbols.)"
+        },
+        "lure_position_on_card": {
+          "default": "either",
+          "type": "string",
+          "enum": [
+            "top",
+            "bottom",
+            "either"
+          ],
+          "description": "If a lure trial, must the lure symbol occupy the top position on the the card, the bottom, or either? If either, then the lure symbol will be equally distributed across trials to be in the top and bottom positions."
+        },
+        "left_correct_percent": {
+          "default": 0.5,
+          "type": "number",
+          "description": "Percentage of trials where the left pair is the correct answer. Number from 0 to 1."
+        },
+        "countdown_duration_ms": {
+          "default": 3000,
+          "type": "number",
+          "description": "Duration of the countdown phase, milliseconds. Multiples of 1000 recommended."
+        },
+        "after_countdown_transition_duration_ms": {
+          "default": 500,
+          "type": "number",
+          "description": "Duration, in milliseconds, of the slide in animation after the countdown phase."
+        },
+        "number_of_trials": {
+          "default": 20,
+          "type": "integer",
+          "description": "How many trials to run."
+        },
+        "interstimulus_animation": {
+          "default": true,
+          "type": "boolean",
+          "description": "Should new trials slide in from right to left?"
+        },
+        "interstimulus_interval_duration_ms": {
+          "default": 500,
+          "type": "number",
+          "description": "If interstimulus_animation == true, the duration, in milliseconds, of the slide in animation after each trial. Otherwise, the duration, in milliseconds, to wait after a trial has been completed until a new trial appears."
+        },
+        "instruction_type": {
+          "default": "long",
+          "type": "string",
+          "enum": [
+            "short",
+            "long"
+          ],
+          "description": "Type of instructions to show, 'short' or 'long'."
+        },
+        "instructions": {
+          "default": null,
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "When non-null, an InstructionsOptions object that will completely override the built-in instructions."
+        },
+        "show_trials_complete_scene": {
+          "default": true,
+          "type": "boolean",
+          "description": "After the final trial, should a completion scene be shown? Otherwise, the game will immediately end."
+        },
+        "show_quit_button": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the activity quit button be shown?"
+        },
+        "show_fps": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the FPS be shown?"
+        },
+        "show_locale_picker": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should the icon that allows the participant to switch the locale be shown?"
+        },
+        "scoring": {
+          "type": "boolean",
+          "default": false,
+          "description": "Should scoring data be generated? Default is false."
+        },
+        "scoring_filter_response_time_duration_ms": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [
+            100,
+            10000
+          ],
+          "description": "When scoring, values of response_time_duration_ms less than the lower bound or greater than the upper bound are discarded. This array contains two numbers, the lower and upper bounds."
+        },
+        "seed": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Optional seed for the seeded pseudo-random number generator. When null, the default Math.random() is used."
+        }
+      }
+    },
+    "TrialSchema": {
+      "type": "object",
+      "description": "Trial data schema",
+      "properties": {
+        "data_type": {
+          "type": "string",
+          "description": "Type of data."
+        },
+        "study_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The short human-readable text ID of the study (protocol, experiment, or other aggregate) that contains the administration of this activity."
+        },
+        "study_uuid": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid",
+          "description": "Unique identifier of the study (protocol, experiment, or other aggregate) that contains the administration of this activity."
+        },
+        "document_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this data document."
+        },
+        "session_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for all activities in this administration of the session. This identifier changes each time a new session starts."
+        },
+        "activity_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for all trials in this administration of the activity. This identifier changes each time the activity starts."
+        },
+        "activity_id": {
+          "type": "string",
+          "description": "Human-readable identifier of the activity."
+        },
+        "activity_publish_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Persistent unique identifier of the activity. This identifier never changes. It can be used to identify the activity across different studies and sessions."
+        },
+        "activity_version": {
+          "type": "string",
+          "description": "Version of the activity."
+        },
+        "device_timezone": {
+          "type": "string",
+          "description": "Timezone of the device. Calculated from Intl.DateTimeFormat().resolvedOptions().timeZone."
+        },
+        "device_timezone_offset_minutes": {
+          "type": "integer",
+          "description": "Difference in minutes between UTC and device timezone. Calculated from Date.getTimezoneOffset()."
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Locale of the trial. null if the activity does not support localization."
+        },
+        "activity_begin_iso8601_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the beginning of the game activity."
+        },
+        "trial_begin_iso8601_timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the beginning of the trial. Null if trial was skipped."
+        },
+        "trial_end_iso8601_timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the end of the trial (when user selects a card). Null if trial was skipped."
+        },
+        "trial_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Index of the trial within this assessment, 0-based."
+        },
+        "trial_type": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "normal",
+            "lure",
+            null
+          ],
+          "description": "Indicates if trial was normal or lure. Null if trial was skipped."
+        },
+        "card_configuration": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Symbols used on cards. Null if trial was skipped.",
+          "properties": {
+            "top_cards_symbols": {
+              "type": "array",
+              "description": "Symbols of the top cards, starting at 0 for leftmost upper card and incrementing by 1 moving right.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "top": {
+                    "type": "integer",
+                    "description": "Index of the top symbol within the card, 1-based."
+                  },
+                  "bottom": {
+                    "type": "integer",
+                    "description": "Index of the bottom symbol within the card, 1-based."
+                  }
+                }
+              }
+            },
+            "bottom_cards_symbols": {
+              "type": "array",
+              "description": "Symbols of the bottom cards, starting at 0 for leftmost card and incrementing by 1 moving right.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "top": {
+                    "type": "integer",
+                    "description": "Index of the top symbol within the card, 1-based."
+                  },
+                  "bottom": {
+                    "type": "integer",
+                    "description": "Index of the bottom symbol within the card, 1-based."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "response_time_duration_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Milliseconds from the beginning of the trial until a user taps a response. Null if trial was skipped."
+        },
+        "user_response_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Index of user selected response, starting at 0 for leftmost card and incrementing by 1 moving right. Null if trial was skipped."
+        },
+        "correct_response_index": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Index of correct response, starting at 0 for leftmost card and incrementing by 1 moving right. Null if trial was skipped."
+        },
+        "quit_button_pressed": {
+          "type": "boolean",
+          "description": "Was the quit button pressed?"
+        }
+      }
+    },
+    "ScoringSchema": {
+      "type": "object",
+      "description": "Scoring data schema",
+      "properties": {
+        "data_type": {
+          "type": "string",
+          "description": "Type of data."
+        },
+        "study_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The short human-readable text ID of the study (protocol, experiment, or other aggregate) that contains the administration of this activity."
+        },
+        "study_uuid": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "uuid",
+          "description": "Unique identifier of the study (protocol, experiment, or other aggregate) that contains the administration of this activity."
+        },
+        "document_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for this data document."
+        },
+        "session_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for all activities in this administration of the session. This identifier changes each time a new session starts."
+        },
+        "activity_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for all trials in this administration of the activity. This identifier changes each time the activity starts."
+        },
+        "activity_id": {
+          "type": "string",
+          "description": "Human-readable identifier of the activity."
+        },
+        "activity_publish_uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Persistent unique identifier of the activity. This identifier never changes. It can be used to identify the activity across different studies and sessions."
+        },
+        "activity_version": {
+          "type": "string",
+          "description": "Version of the activity."
+        },
+        "device_timezone": {
+          "type": "string",
+          "description": "Timezone of the device. Calculated from Intl.DateTimeFormat().resolvedOptions().timeZone."
+        },
+        "device_timezone_offset_minutes": {
+          "type": "integer",
+          "description": "Difference in minutes between UTC and device timezone. Calculated from Date.getTimezoneOffset()."
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Locale of the trial. null if the activity does not support localization."
+        },
+        "activity_begin_iso8601_timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the beginning of the game activity."
+        },
+        "first_trial_begin_iso8601_timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the beginning of the first trial. Null if no trials were completed."
+        },
+        "last_trial_end_iso8601_timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "description": "ISO 8601 timestamp at the end of the last trial. Null if no trials were completed."
+        },
+        "n_trials": {
+          "type": "integer",
+          "description": "Number of trials completed."
+        },
+        "n_trials_lure": {
+          "type": "integer",
+          "description": "Number of lure trials completed."
+        },
+        "n_trials_normal": {
+          "type": "integer",
+          "description": "Number of normal trials completed."
+        },
+        "flag_trials_match_expected": {
+          "type": "integer",
+          "description": "Does the number of completed and expected trials match? 1 = true, 0 = false."
+        },
+        "n_trials_correct": {
+          "type": "integer",
+          "description": "Number of correct trials."
+        },
+        "n_trials_incorrect": {
+          "type": "integer",
+          "description": "Number of incorrect trials."
+        },
+        "median_response_time_overall": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Median response time for all trials."
+        },
+        "median_response_time_filtered": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Median response time for trials within the specified filter response time filter."
+        },
+        "response_time_filter_lower_bound": {
+          "type": "number",
+          "description": "Response times less than this lower bound were discarded when calculating filtered response times."
+        },
+        "response_time_filter_upper_bound": {
+          "type": "number",
+          "description": "Response times greater than this upper bound were discarded when calculating filtered response times."
+        },
+        "median_response_time_correct": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Median response time for correct trials."
+        },
+        "median_response_time_incorrect": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Median response time for incorrect trials."
+        },
+        "participant_score": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Participant-facing score, calculated as 10,000 / median response time for correct responses. This is a simple metric to provide feedback to the participant. Null if no correct responses."
+        }
+      }
+    }
+  }
+}

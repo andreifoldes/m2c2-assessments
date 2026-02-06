@@ -1,0 +1,49 @@
+{
+  "name": "@m2c2kit/session",
+  "version": "0.3.17",
+  "description": "The session runner for m2c2kit activities.",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**",
+    "assets/**"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc && rollup -c",
+    "clean": "rimraf build dist .rollup.cache tsconfig.tsbuildinfo",
+    "test": "cd ../.. && npx env-cmd -f .env.jest jest --selectProjects @m2c2kit/session"
+  },
+  "license": "Apache-2.0",
+  "author": "Scott T. Yabiku <syabiku@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m2c2-project/m2c2kit.git",
+    "directory": "packages/session"
+  },
+  "homepage": "https://m2c2-project.github.io/m2c2kit",
+  "engines": {
+    "node": ">=18"
+  },
+  "bugs": {
+    "url": "https://github.com/m2c2-project/m2c2kit/issues"
+  },
+  "dependencies": {
+    "@m2c2kit/core": "^0.3.30"
+  },
+  "devDependencies": {
+    "@m2c2kit/build-helpers": "0.3.31",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "rimraf": "6.1.2",
+    "rollup": "4.57.0",
+    "rollup-plugin-copy": "3.5.0",
+    "rollup-plugin-dts": "6.3.0",
+    "rollup-plugin-esbuild": "6.2.1",
+    "typescript": "5.9.3"
+  }
+}
