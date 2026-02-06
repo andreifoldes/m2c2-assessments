@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Assessment</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        #status {
+            text-align: center;
+            max-width: 400px;
+        }
+        #status h1 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        #status p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        .spinner {
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #4a90d9;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .success { color: #2e7d32 !important; }
+        .error { color: #c62828 !important; }
+        #assessment-container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="status">
+        <h1>Loading Assessment...</h1>
+        <div class="spinner"></div>
+        <p>Please wait while the cognitive task loads.</p>
+    </div>
+    <div id="assessment-container" style="display:none;"></div>
+
+    <script type="module">
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        const assessment = params.get('assessment');
+        const callbackUrl = params.get('callback_url');
+        const numberOfTrials = params.get('number_of_trials');
+
+        const statusEl = document.getElementById('status');
+        const containerEl = document.getElementById('assessment-container');
+
+        function showError(msg) {
+            statusEl.innerHTML = `
+                <h1 class="error">Error</h1>
+                <p class="error">${msg}</p>
+            `;
+        }
+
+        function showComplete() {
+            statusEl.style.display = 'block';
+            containerEl.style.display = 'none';
+            statusEl.innerHTML = `
+                <h1 class="success">Assessment Complete</h1>
+                <p class="success">Your results have been recorded. Thank you!</p>
+                <p>You can now close this window and return to Telegram.</p>
+            `;
+            // If running inside Telegram Mini App, close the WebView
+            if (window.Telegram && window.Telegram.WebApp) {
+                setTimeout(() => window.Telegram.WebApp.close(), 2000);
+            }
+        }
+
+        if (!token || !assessment || !callbackUrl) {
+            showError('Missing required parameters. Please use the link provided in Telegram.');
+        } else {
+            loadAssessment();
+        }
+
+        async function loadAssessment() {
+            try {
+                // Map assessment names to module paths (relative to this page)
+                const assessmentModules = {
+                    'symbol-search': './assessments/symbol-search/index.js',
+                    'color-dots': './assessments/color-dots/index.js',
+                    'color-shapes': './assessments/color-shapes/index.js',
+                };
+
+                const modulePath = assessmentModules[assessment];
+                if (!modulePath) {
+                    showError(`Unknown assessment type: ${assessment}`);
+                    return;
+                }
+
+                const module = await import(modulePath);
+
+                // Hide status, show container
+                statusEl.style.display = 'none';
+                containerEl.style.display = 'block';
+
+                // Build options
+                const options = {};
+                if (numberOfTrials) {
+                    options.number_of_trials = parseInt(numberOfTrials, 10);
+                }
+
+                // Initialize m2c2kit assessment
+                const session = module.createSession
+                    ? module.createSession(containerEl, options)
+                    : new module.default(containerEl, options);
+
+                // Listen for completion
+                session.addEventListener('ActivityData', async (event) => {
+                    await submitResults(event.detail || event.data);
+                });
+
+                if (session.start) {
+                    await session.start();
+                }
+
+            } catch (err) {
+                console.error('Failed to load assessment:', err);
+                showError('Failed to load the assessment. Please try again using the link in Telegram.');
+            }
+        }
+
+        async function submitResults(data) {
+            try {
+                const resp = await fetch(callbackUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, data }),
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.detail || `Server error: ${resp.status}`);
+                }
+
+                showComplete();
+            } catch (err) {
+                console.error('Failed to submit results:', err);
+                showError('Failed to submit results. Please contact the research team.');
+            }
+        }
+    </script>
+</body>
+</html>
