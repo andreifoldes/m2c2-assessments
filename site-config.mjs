@@ -41,6 +41,14 @@ export default {
         show_quit_button: false,
       },
     },
+    {
+      name: "@m2c2kit/assessment-grid-memory",
+      versions: ">=0.8.26",
+      parameters: {
+        number_of_trials: 12,
+        show_quit_button: false,
+      },
+    },
   ],
   configure: (context, session, assessment) => {
     const params = new URLSearchParams(window.location.search);
