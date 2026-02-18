@@ -49,6 +49,14 @@ export default {
         show_quit_button: false,
       },
     },
+    {
+      name: "pvt-ba",
+      versions: "1.0.0",
+      parameters: {
+        max_duration_seconds: 180,
+        show_quit_button: false,
+      },
+    },
   ],
   configure: (context, session, assessment) => {
     const params = new URLSearchParams(window.location.search);
