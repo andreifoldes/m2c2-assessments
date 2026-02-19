@@ -422,13 +422,13 @@ export class PvtBa extends Game {
   }
 
   _buildInstructionsScene() {
-    const scene = new Scene({ name: "instructions", backgroundColor: DARK_BG });
+    const scene = new Scene({ name: "instructions", backgroundColor: SCENE_BG });
     this.addScene(scene);
 
     const title = new Label({
       text: "Psychomotor Vigilance Test",
       fontSize: 28,
-      fontColor: WHITE,
+      fontColor: TEXT_PRIMARY,
       position: { x: 200, y: 140 },
     });
     scene.addChild(title);
@@ -454,7 +454,7 @@ export class PvtBa extends Game {
     const instr1 = new Label({
       text: "A counter will appear in the box above.",
       fontSize: 18,
-      fontColor: MUTED_WHITE,
+      fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 420 },
       preferredMaxLayoutWidth: 340,
     });
@@ -463,7 +463,7 @@ export class PvtBa extends Game {
     const instr2 = new Label({
       text: "Tap the screen as quickly as possible\nwhen the counter appears.",
       fontSize: 18,
-      fontColor: MUTED_WHITE,
+      fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 490 },
       preferredMaxLayoutWidth: 340,
     });
@@ -472,7 +472,7 @@ export class PvtBa extends Game {
     const instr3 = new Label({
       text: "Do NOT tap when the box is empty.",
       fontSize: 18,
-      fontColor: YELLOW,
+      fontColor: RED,
       position: { x: 200, y: 560 },
       preferredMaxLayoutWidth: 340,
     });
@@ -481,7 +481,7 @@ export class PvtBa extends Game {
     const tapHint = new Label({
       text: "Tap anywhere to begin",
       fontSize: 14,
-      fontColor: LIGHT_GRAY,
+      fontColor: TEXT_TERTIARY,
       position: { x: 200, y: 720 },
     });
     scene.addChild(tapHint);
@@ -489,7 +489,7 @@ export class PvtBa extends Game {
     const startBtn = new Shape({
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
-      fillColor: GREEN,
+      fillColor: START_BUTTON_BG,
       position: { x: 200, y: 670 },
     });
     scene.addChild(startBtn);
@@ -497,7 +497,7 @@ export class PvtBa extends Game {
     const startLabel = new Label({
       text: "START",
       fontSize: 22,
-      fontColor: DARK_BG,
+      fontColor: BUTTON_TEXT,
       position: { x: 200, y: 670 },
     });
     scene.addChild(startLabel);
@@ -585,13 +585,13 @@ export class PvtBa extends Game {
   }
 
   _buildEndScene() {
-    const scene = new Scene({ name: "end", backgroundColor: DARK_BG });
+    const scene = new Scene({ name: "end", backgroundColor: SCENE_BG });
     this.addScene(scene);
 
     const title = new Label({
       text: "Test Complete",
       fontSize: 28,
-      fontColor: WHITE,
+      fontColor: TEXT_PRIMARY,
       position: { x: 200, y: 340 },
     });
     scene.addChild(title);
@@ -599,7 +599,7 @@ export class PvtBa extends Game {
     const subtitle = new Label({
       text: "Thank you for participating.",
       fontSize: 18,
-      fontColor: MUTED_WHITE,
+      fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 400 },
       preferredMaxLayoutWidth: 340,
     });
@@ -621,14 +621,14 @@ export class PvtBa extends Game {
   }
 
   _buildResultsScene() {
-    const scene = new Scene({ name: "results", backgroundColor: DARK_BG });
+    const scene = new Scene({ name: "results", backgroundColor: SCENE_BG });
     this.addScene(scene);
 
     const resultTitle = new Label({
       name: "resultTitle",
       text: "Test Complete",
       fontSize: 28,
-      fontColor: WHITE,
+      fontColor: TEXT_PRIMARY,
       position: { x: 200, y: 120 },
     });
     scene.addChild(resultTitle);
@@ -661,7 +661,7 @@ export class PvtBa extends Game {
     const lightLabelGreen = new Label({
       text: "HIGH",
       fontSize: 16,
-      fontColor: LIGHT_GRAY,
+      fontColor: TEXT_TERTIARY,
       position: { x: 300, y: 280 },
     });
     scene.addChild(lightLabelGreen);
@@ -669,7 +669,7 @@ export class PvtBa extends Game {
     const lightLabelYellow = new Label({
       text: "MEDIUM",
       fontSize: 16,
-      fontColor: LIGHT_GRAY,
+      fontColor: TEXT_TERTIARY,
       position: { x: 300, y: 390 },
     });
     scene.addChild(lightLabelYellow);
@@ -677,7 +677,7 @@ export class PvtBa extends Game {
     const lightLabelRed = new Label({
       text: "LOW",
       fontSize: 16,
-      fontColor: LIGHT_GRAY,
+      fontColor: TEXT_TERTIARY,
       position: { x: 300, y: 500 },
     });
     scene.addChild(lightLabelRed);
@@ -686,7 +686,7 @@ export class PvtBa extends Game {
       name: "classificationLabel",
       text: "",
       fontSize: 24,
-      fontColor: WHITE,
+      fontColor: TEXT_PRIMARY,
       position: { x: 200, y: 600 },
     });
     scene.addChild(classLabel);
@@ -695,7 +695,7 @@ export class PvtBa extends Game {
       name: "statsLabel",
       text: "",
       fontSize: 16,
-      fontColor: LIGHT_GRAY,
+      fontColor: TEXT_TERTIARY,
       position: { x: 200, y: 670 },
       preferredMaxLayoutWidth: 340,
     });
