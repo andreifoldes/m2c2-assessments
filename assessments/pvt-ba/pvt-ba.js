@@ -925,10 +925,11 @@ export class PvtBa extends Game {
       feedbackLabel.fontColor = RED;
       stimulusBox.strokeColor = RED;
     } else if (isLapse) {
-      counterLabel.text = "TOO SLOW";
-      counterLabel.fontSize = 32;
+      const displayRT = isTimeout ? "---" : String(Math.round(rt));
+      counterLabel.text = displayRT;
+      counterLabel.fontSize = 56;
       counterLabel.fontColor = RED;
-      feedbackLabel.text = isTimeout ? "No response" : `${Math.round(rt)} ms`;
+      feedbackLabel.text = isTimeout ? "" : "ms";
       feedbackLabel.fontColor = RED;
       stimulusBox.strokeColor = RED;
     } else {
