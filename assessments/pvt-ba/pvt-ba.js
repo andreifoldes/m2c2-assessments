@@ -11,6 +11,7 @@ import {
 } from "@m2c2kit/core";
 import { AdaptiveAlgorithm, Classification } from "./adaptive-algorithm.js";
 
+// Trial scene (dark background for PVT counter)
 const DARK_BG = [26, 26, 46, 1];
 const DARK_GRAY = [40, 40, 60, 1];
 const STIMULUS_BOX_BORDER = [80, 80, 120, 1];
@@ -20,6 +21,15 @@ const YELLOW = [255, 193, 7, 1];
 const RED = [244, 67, 54, 1];
 const MUTED_WHITE = [200, 200, 220, 1];
 const LIGHT_GRAY = [160, 160, 180, 1];
+
+// Instruction/UI scenes (m2c2kit standard palette)
+const SCENE_BG = [255, 255, 255, 1];
+const TEXT_PRIMARY = [0, 0, 0, 1];
+const TEXT_SECONDARY = [100, 100, 100, 1];
+const TEXT_TERTIARY = [140, 140, 140, 1];
+const BUTTON_BG = [0, 0, 0, 1];
+const BUTTON_TEXT = [255, 255, 255, 1];
+const START_BUTTON_BG = [0, 128, 0, 1];
 
 export class PvtBa extends Game {
   constructor() {
@@ -69,6 +79,12 @@ export class PvtBa extends Game {
         type: "boolean",
         description:
           "Whether to show the multi-screen tutorial before the test",
+      },
+      show_results: {
+        default: false,
+        type: "boolean",
+        description:
+          "Whether to show the detailed results page with High/Medium/Low classification. When false, participants see a simple completion message.",
       },
     };
 
@@ -171,32 +187,25 @@ export class PvtBa extends Game {
       this._buildInstructionsScene();
     }
     this._buildTrialScene();
-    this._buildResultsScene();
+    if (this.getParameter("show_results")) {
+      this._buildResultsScene();
+    } else {
+      this._buildEndScene();
+    }
   }
 
   _addSkipTutorialButton(scene, zPos = 20) {
-    const skipBtn = new Shape({
-      rect: { width: 130, height: 36 },
-      cornerRadius: 18,
-      fillColor: [60, 60, 80, 1],
-      strokeColor: LIGHT_GRAY,
-      lineWidth: 1,
-      position: { x: 335, y: 30 },
+    const skipLabel = new Label({
+      text: "Skip tutorial",
+      fontSize: 14,
+      fontColor: TEXT_TERTIARY,
+      position: { x: 200, y: 740 },
       isUserInteractionEnabled: true,
       zPosition: zPos,
     });
-    scene.addChild(skipBtn);
-
-    const skipLabel = new Label({
-      text: "Skip tutorial",
-      fontSize: 13,
-      fontColor: LIGHT_GRAY,
-      position: { x: 335, y: 30 },
-      zPosition: zPos + 1,
-    });
     scene.addChild(skipLabel);
 
-    skipBtn.onTapDown(() => {
+    skipLabel.onTapDown(() => {
       this.presentScene("trial", Transition.none());
     });
   }
@@ -205,7 +214,7 @@ export class PvtBa extends Game {
     // --- Screen 1: Welcome ---
     const scene1 = new Scene({
       name: "tutorial_1",
-      backgroundColor: DARK_BG,
+      backgroundColor: SCENE_BG,
     });
     this.addScene(scene1);
     this._addSkipTutorialButton(scene1);
@@ -213,7 +222,7 @@ export class PvtBa extends Game {
     const welcome = new Label({
       text: "Psychomotor\nVigilance Test",
       fontSize: 32,
-      fontColor: WHITE,
+      fontColor: TEXT_PRIMARY,
       position: { x: 200, y: 200 },
       preferredMaxLayoutWidth: 340,
     });
@@ -222,7 +231,7 @@ export class PvtBa extends Game {
     const desc = new Label({
       text: "This is a brief test of your\nreaction time and attention.",
       fontSize: 20,
-      fontColor: MUTED_WHITE,
+      fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 340 },
       preferredMaxLayoutWidth: 340,
     });
@@ -231,7 +240,7 @@ export class PvtBa extends Game {
     const desc2 = new Label({
       text: "It will take about 3 minutes\nor less.",
       fontSize: 18,
-      fontColor: LIGHT_GRAY,
+      fontColor: TEXT_TERTIARY,
       position: { x: 200, y: 430 },
       preferredMaxLayoutWidth: 340,
     });
@@ -240,7 +249,7 @@ export class PvtBa extends Game {
     const nextBtn1 = new Shape({
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
-      fillColor: GREEN,
+      fillColor: BUTTON_BG,
       position: { x: 200, y: 670 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -250,7 +259,7 @@ export class PvtBa extends Game {
     const nextLabel1 = new Label({
       text: "NEXT",
       fontSize: 22,
-      fontColor: DARK_BG,
+      fontColor: BUTTON_TEXT,
       position: { x: 200, y: 670 },
       zPosition: 11,
     });
@@ -263,7 +272,7 @@ export class PvtBa extends Game {
     // --- Screen 2: Thumb positioning ---
     const scene2 = new Scene({
       name: "tutorial_2",
-      backgroundColor: DARK_BG,
+      backgroundColor: SCENE_BG,
     });
     this.addScene(scene2);
     this._addSkipTutorialButton(scene2);
@@ -271,7 +280,7 @@ export class PvtBa extends Game {
     const thumbTitle = new Label({
       text: "Get Ready",
       fontSize: 28,
-      fontColor: WHITE,
+      fontColor: TEXT_PRIMARY,
       position: { x: 200, y: 120 },
     });
     scene2.addChild(thumbTitle);
@@ -289,7 +298,7 @@ export class PvtBa extends Game {
     const thumbInstr = new Label({
       text: "Hover the thumb of your\ndominant hand over the\nscreen and watch the box.",
       fontSize: 20,
-      fontColor: MUTED_WHITE,
+      fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 460 },
       preferredMaxLayoutWidth: 340,
     });
@@ -298,7 +307,7 @@ export class PvtBa extends Game {
     const thumbHint = new Label({
       text: "Keep your thumb close to the\nscreen so you can tap quickly.",
       fontSize: 16,
-      fontColor: LIGHT_GRAY,
+      fontColor: TEXT_TERTIARY,
       position: { x: 200, y: 570 },
       preferredMaxLayoutWidth: 340,
     });
@@ -307,7 +316,7 @@ export class PvtBa extends Game {
     const nextBtn2 = new Shape({
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
-      fillColor: GREEN,
+      fillColor: BUTTON_BG,
       position: { x: 200, y: 670 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -317,7 +326,7 @@ export class PvtBa extends Game {
     const nextLabel2 = new Label({
       text: "NEXT",
       fontSize: 22,
-      fontColor: DARK_BG,
+      fontColor: BUTTON_TEXT,
       position: { x: 200, y: 670 },
       zPosition: 11,
     });
@@ -330,7 +339,7 @@ export class PvtBa extends Game {
     // --- Screen 3: How it works ---
     const scene3 = new Scene({
       name: "tutorial_3",
-      backgroundColor: DARK_BG,
+      backgroundColor: SCENE_BG,
     });
     this.addScene(scene3);
     this._addSkipTutorialButton(scene3);
@@ -338,7 +347,7 @@ export class PvtBa extends Game {
     const howTitle = new Label({
       text: "How It Works",
       fontSize: 28,
-      fontColor: WHITE,
+      fontColor: TEXT_PRIMARY,
       position: { x: 200, y: 100 },
     });
     scene3.addChild(howTitle);
@@ -364,7 +373,7 @@ export class PvtBa extends Game {
     const howInstr1 = new Label({
       text: "A counter will appear in the box.",
       fontSize: 18,
-      fontColor: MUTED_WHITE,
+      fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 360 },
       preferredMaxLayoutWidth: 340,
     });
@@ -373,7 +382,7 @@ export class PvtBa extends Game {
     const howInstr2 = new Label({
       text: "Tap the screen as quickly as\npossible when the counter appears.",
       fontSize: 18,
-      fontColor: MUTED_WHITE,
+      fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 430 },
       preferredMaxLayoutWidth: 340,
     });
@@ -382,7 +391,7 @@ export class PvtBa extends Game {
     const howInstr3 = new Label({
       text: "Do NOT tap when the box is empty.",
       fontSize: 18,
-      fontColor: YELLOW,
+      fontColor: RED,
       position: { x: 200, y: 510 },
       preferredMaxLayoutWidth: 340,
     });
@@ -391,7 +400,7 @@ export class PvtBa extends Game {
     const beginBtn = new Shape({
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
-      fillColor: GREEN,
+      fillColor: START_BUTTON_BG,
       position: { x: 200, y: 670 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -401,7 +410,7 @@ export class PvtBa extends Game {
     const beginLabel = new Label({
       text: "BEGIN",
       fontSize: 22,
-      fontColor: DARK_BG,
+      fontColor: BUTTON_TEXT,
       position: { x: 200, y: 670 },
       zPosition: 11,
     });
@@ -572,6 +581,42 @@ export class PvtBa extends Game {
       console.log("[pvt-ba] trial:started");
       this._testStartTime = Timer.now();
       this._beginTrial();
+    });
+  }
+
+  _buildEndScene() {
+    const scene = new Scene({ name: "end", backgroundColor: DARK_BG });
+    this.addScene(scene);
+
+    const title = new Label({
+      text: "Test Complete",
+      fontSize: 28,
+      fontColor: WHITE,
+      position: { x: 200, y: 340 },
+    });
+    scene.addChild(title);
+
+    const subtitle = new Label({
+      text: "Thank you for participating.",
+      fontSize: 18,
+      fontColor: MUTED_WHITE,
+      position: { x: 200, y: 400 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene.addChild(subtitle);
+
+    const self = this;
+    scene.onAppear(() => {
+      scene.run(
+        Action.sequence([
+          Action.wait({ duration: 3000 }),
+          Action.custom({
+            callback: () => {
+              self.end();
+            },
+          }),
+        ]),
+      );
     });
   }
 
@@ -990,7 +1035,8 @@ export class PvtBa extends Game {
       this._counterInterval = null;
     }
 
-    this.presentScene("results", Transition.none());
+    const endScene = this.getParameter("show_results") ? "results" : "end";
+    this.presentScene(endScene, Transition.none());
   }
 
   _getNode(name) {
