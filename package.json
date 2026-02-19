@@ -10,7 +10,8 @@
     "@m2c2kit/assessment-color-dots": "^0.8",
     "@m2c2kit/assessment-color-shapes": "^0.8",
     "@m2c2kit/assessment-grid-memory": "^0.8",
-    "@m2c2kit/assessment-symbol-search": "^0.8"
+    "@m2c2kit/assessment-symbol-search": "^0.8",
+    "puppeteer": "^24.37.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
