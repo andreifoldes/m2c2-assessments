@@ -64,6 +64,12 @@ export class PvtBa extends Game {
         type: "boolean",
         description: "Whether to show a quit button",
       },
+      show_tutorial: {
+        default: true,
+        type: "boolean",
+        description:
+          "Whether to show the multi-screen tutorial before the test",
+      },
     };
 
     super({
@@ -159,9 +165,251 @@ export class PvtBa extends Game {
     this._currentISI = 0;
     this._testEnded = false;
 
-    this._buildInstructionsScene();
+    if (this.getParameter("show_tutorial")) {
+      this._buildTutorialScenes();
+    } else {
+      this._buildInstructionsScene();
+    }
     this._buildTrialScene();
     this._buildResultsScene();
+  }
+
+  _addSkipTutorialButton(scene, zPos = 20) {
+    const skipBtn = new Shape({
+      rect: { width: 130, height: 36 },
+      cornerRadius: 18,
+      fillColor: [60, 60, 80, 1],
+      strokeColor: LIGHT_GRAY,
+      lineWidth: 1,
+      position: { x: 335, y: 30 },
+      isUserInteractionEnabled: true,
+      zPosition: zPos,
+    });
+    scene.addChild(skipBtn);
+
+    const skipLabel = new Label({
+      text: "Skip tutorial",
+      fontSize: 13,
+      fontColor: LIGHT_GRAY,
+      position: { x: 335, y: 30 },
+      zPosition: zPos + 1,
+    });
+    scene.addChild(skipLabel);
+
+    skipBtn.onTapDown(() => {
+      this.presentScene("trial", Transition.none());
+    });
+  }
+
+  _buildTutorialScenes() {
+    // --- Screen 1: Welcome ---
+    const scene1 = new Scene({
+      name: "tutorial_1",
+      backgroundColor: DARK_BG,
+    });
+    this.addScene(scene1);
+    this._addSkipTutorialButton(scene1);
+
+    const welcome = new Label({
+      text: "Psychomotor\nVigilance Test",
+      fontSize: 32,
+      fontColor: WHITE,
+      position: { x: 200, y: 200 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene1.addChild(welcome);
+
+    const desc = new Label({
+      text: "This is a brief test of your\nreaction time and attention.",
+      fontSize: 20,
+      fontColor: MUTED_WHITE,
+      position: { x: 200, y: 340 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene1.addChild(desc);
+
+    const desc2 = new Label({
+      text: "It will take about 3 minutes\nor less.",
+      fontSize: 18,
+      fontColor: LIGHT_GRAY,
+      position: { x: 200, y: 430 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene1.addChild(desc2);
+
+    const nextBtn1 = new Shape({
+      rect: { width: 200, height: 56 },
+      cornerRadius: 28,
+      fillColor: GREEN,
+      position: { x: 200, y: 670 },
+      isUserInteractionEnabled: true,
+      zPosition: 10,
+    });
+    scene1.addChild(nextBtn1);
+
+    const nextLabel1 = new Label({
+      text: "NEXT",
+      fontSize: 22,
+      fontColor: DARK_BG,
+      position: { x: 200, y: 670 },
+      zPosition: 11,
+    });
+    scene1.addChild(nextLabel1);
+
+    nextBtn1.onTapDown(() => {
+      this.presentScene("tutorial_2", Transition.none());
+    });
+
+    // --- Screen 2: Thumb positioning ---
+    const scene2 = new Scene({
+      name: "tutorial_2",
+      backgroundColor: DARK_BG,
+    });
+    this.addScene(scene2);
+    this._addSkipTutorialButton(scene2);
+
+    const thumbTitle = new Label({
+      text: "Get Ready",
+      fontSize: 28,
+      fontColor: WHITE,
+      position: { x: 200, y: 120 },
+    });
+    scene2.addChild(thumbTitle);
+
+    const thumbBox = new Shape({
+      rect: { width: 220, height: 90 },
+      cornerRadius: 12,
+      fillColor: DARK_GRAY,
+      strokeColor: STIMULUS_BOX_BORDER,
+      lineWidth: 2,
+      position: { x: 200, y: 300 },
+    });
+    scene2.addChild(thumbBox);
+
+    const thumbInstr = new Label({
+      text: "Hover the thumb of your\ndominant hand over the\nscreen and watch the box.",
+      fontSize: 20,
+      fontColor: MUTED_WHITE,
+      position: { x: 200, y: 460 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene2.addChild(thumbInstr);
+
+    const thumbHint = new Label({
+      text: "Keep your thumb close to the\nscreen so you can tap quickly.",
+      fontSize: 16,
+      fontColor: LIGHT_GRAY,
+      position: { x: 200, y: 570 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene2.addChild(thumbHint);
+
+    const nextBtn2 = new Shape({
+      rect: { width: 200, height: 56 },
+      cornerRadius: 28,
+      fillColor: GREEN,
+      position: { x: 200, y: 670 },
+      isUserInteractionEnabled: true,
+      zPosition: 10,
+    });
+    scene2.addChild(nextBtn2);
+
+    const nextLabel2 = new Label({
+      text: "NEXT",
+      fontSize: 22,
+      fontColor: DARK_BG,
+      position: { x: 200, y: 670 },
+      zPosition: 11,
+    });
+    scene2.addChild(nextLabel2);
+
+    nextBtn2.onTapDown(() => {
+      this.presentScene("tutorial_3", Transition.none());
+    });
+
+    // --- Screen 3: How it works ---
+    const scene3 = new Scene({
+      name: "tutorial_3",
+      backgroundColor: DARK_BG,
+    });
+    this.addScene(scene3);
+    this._addSkipTutorialButton(scene3);
+
+    const howTitle = new Label({
+      text: "How It Works",
+      fontSize: 28,
+      fontColor: WHITE,
+      position: { x: 200, y: 100 },
+    });
+    scene3.addChild(howTitle);
+
+    const demoBox = new Shape({
+      rect: { width: 220, height: 90 },
+      cornerRadius: 12,
+      fillColor: DARK_GRAY,
+      strokeColor: STIMULUS_BOX_BORDER,
+      lineWidth: 2,
+      position: { x: 200, y: 240 },
+    });
+    scene3.addChild(demoBox);
+
+    const demoCounter = new Label({
+      text: "325",
+      fontSize: 48,
+      fontColor: GREEN,
+      position: { x: 200, y: 240 },
+    });
+    scene3.addChild(demoCounter);
+
+    const howInstr1 = new Label({
+      text: "A counter will appear in the box.",
+      fontSize: 18,
+      fontColor: MUTED_WHITE,
+      position: { x: 200, y: 360 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene3.addChild(howInstr1);
+
+    const howInstr2 = new Label({
+      text: "Tap the screen as quickly as\npossible when the counter appears.",
+      fontSize: 18,
+      fontColor: MUTED_WHITE,
+      position: { x: 200, y: 430 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene3.addChild(howInstr2);
+
+    const howInstr3 = new Label({
+      text: "Do NOT tap when the box is empty.",
+      fontSize: 18,
+      fontColor: YELLOW,
+      position: { x: 200, y: 510 },
+      preferredMaxLayoutWidth: 340,
+    });
+    scene3.addChild(howInstr3);
+
+    const beginBtn = new Shape({
+      rect: { width: 200, height: 56 },
+      cornerRadius: 28,
+      fillColor: GREEN,
+      position: { x: 200, y: 670 },
+      isUserInteractionEnabled: true,
+      zPosition: 10,
+    });
+    scene3.addChild(beginBtn);
+
+    const beginLabel = new Label({
+      text: "BEGIN",
+      fontSize: 22,
+      fontColor: DARK_BG,
+      position: { x: 200, y: 670 },
+      zPosition: 11,
+    });
+    scene3.addChild(beginLabel);
+
+    beginBtn.onTapDown(() => {
+      this.presentScene("trial", Transition.none());
+    });
   }
 
   _buildInstructionsScene() {
