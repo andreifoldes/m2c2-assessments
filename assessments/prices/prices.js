@@ -78,7 +78,7 @@ const LOCALE_TO_CURRENCY = {
 };
 
 const LANGUAGE_FALLBACK_CURRENCY = {
-  en: "USD",
+  en: "GBP",
   fr: "EUR",
   de: "EUR",
   es: "EUR",
@@ -1590,7 +1590,7 @@ export class Prices extends Game {
     if (localeParam && localeParam !== "auto") {
       this._locale = localeParam;
     } else {
-      this._locale = navigator.language || navigator.userLanguage || "en-US";
+      this._locale = this._detectLocale();
     }
 
     if (currencyParam && currencyParam !== "auto") {
@@ -1628,6 +1628,21 @@ export class Prices extends Game {
     );
   }
 
+  _detectLocale() {
+    // navigator.languages often contains region-specific entries (e.g.
+    // ["en-GB", "en"]) even when navigator.language is just "en".
+    // Prefer the first entry that has a known currency mapping.
+    const candidates = navigator.languages || [];
+    for (const lang of candidates) {
+      if (LOCALE_TO_CURRENCY[lang]) return lang;
+      const lower = lang.toLowerCase();
+      for (const key of Object.keys(LOCALE_TO_CURRENCY)) {
+        if (key.toLowerCase() === lower) return lang;
+      }
+    }
+    return navigator.language || navigator.userLanguage || "en-GB";
+  }
+
   _currencyFromLocale(locale) {
     const exact = LOCALE_TO_CURRENCY[locale];
     if (exact) return exact;
@@ -1638,7 +1653,7 @@ export class Prices extends Game {
     }
 
     const lang = locale.split("-")[0].toLowerCase();
-    return LANGUAGE_FALLBACK_CURRENCY[lang] || "USD";
+    return LANGUAGE_FALLBACK_CURRENCY[lang] || "GBP";
   }
 
   _formatPrice(value) {

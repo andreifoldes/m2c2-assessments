@@ -187,7 +187,7 @@ Prices are displayed in the participant's local currency. By default the locale 
 
 The exchange rates are approximate and embedded in the source. They do not need to be precise — their purpose is to keep the distractor distance perceptually similar across currencies, not to reflect live market rates.
 
-**Supported locale → currency mappings:** en-US (USD), en-GB (GBP), en-AU (AUD), en-CA (CAD), en-NZ (NZD), en-IE/fr-FR/de-DE/es-ES/it-IT/nl-NL/pt-PT/fi-FI (EUR), fr-CA (CAD), fr-CH/de-CH/it-CH (CHF), pt-BR (BRL), es-MX (MXN), ja-JP (JPY), ko-KR (KRW), zh-CN (CNY), da-DK (DKK), sv-SE (SEK), nb-NO/nn-NO (NOK), and others. Unrecognised locales fall back to USD.
+**Supported locale → currency mappings:** en-US (USD), en-GB (GBP), en-AU (AUD), en-CA (CAD), en-NZ (NZD), en-IE/fr-FR/de-DE/es-ES/it-IT/nl-NL/pt-PT/fi-FI (EUR), fr-CA (CAD), fr-CH/de-CH/it-CH (CHF), pt-BR (BRL), es-MX (MXN), ja-JP (JPY), ko-KR (KRW), zh-CN (CNY), da-DK (DKK), sv-SE (SEK), nb-NO/nn-NO (NOK), and others. Unrecognised locales fall back to GBP.
 
 ### Trial Data Fields
 
