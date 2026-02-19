@@ -6,6 +6,7 @@ const assessment = new PvtBa();
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 const callbackUrl = params.get("callback_url");
+const debugMode = !token || !callbackUrl;
 
 const paramOverrides = {};
 for (const key of [
@@ -34,14 +35,27 @@ const session = new Session({
 
 session.onActivityData((ev) => {
   allTrialData.push(ev.newData);
+  if (debugMode) {
+    console.log("[PVT-BA debug] trial data:", ev.newData);
+  }
 });
 
 session.onEnd(async () => {
-  if (!token || !callbackUrl) {
+  if (debugMode) {
+    const summary = {
+      totalTrials: allTrialData.length,
+      trials: allTrialData,
+    };
+    console.log("[PVT-BA debug] all trial data:", summary);
     document.body.innerHTML = `
-      <div style="text-align:center;padding:40px;font-family:sans-serif;">
-        <h2 style="color:#c62828;">Missing parameters</h2>
-        <p>Please use the link provided in Telegram.</p>
+      <div style="text-align:center;padding:40px;font-family:sans-serif;color:#e0e0e0;background:#1a1a2e;min-height:100vh;box-sizing:border-box;">
+        <h1 style="color:#4CAF50;">Assessment Complete (Debug Mode)</h1>
+        <p>No token/callback_url provided &mdash; results shown below instead of being submitted.</p>
+        <p style="color:#90CAF9;">Total trials: ${allTrialData.length}</p>
+        <details open style="text-align:left;max-width:600px;margin:20px auto;">
+          <summary style="cursor:pointer;color:#FFC107;font-size:16px;">Trial Data (JSON)</summary>
+          <pre style="background:#0d0d1a;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;color:#ccc;max-height:60vh;">${JSON.stringify(allTrialData, null, 2)}</pre>
+        </details>
       </div>`;
     return;
   }

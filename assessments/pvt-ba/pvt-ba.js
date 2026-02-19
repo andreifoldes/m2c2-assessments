@@ -24,14 +24,46 @@ const LIGHT_GRAY = [160, 160, 180, 1];
 export class PvtBa extends Game {
   constructor() {
     const defaultParameters = {
-      max_duration_seconds: 180,
-      min_isi_ms: 1000,
-      max_isi_ms: 4000,
-      lapse_threshold_ms: 355,
-      false_start_threshold_ms: 100,
-      decision_threshold: 0.99619,
-      feedback_duration_ms: 1000,
-      show_quit_button: false,
+      max_duration_seconds: {
+        default: 180,
+        type: "number",
+        description: "Maximum test duration in seconds",
+      },
+      min_isi_ms: {
+        default: 1000,
+        type: "number",
+        description: "Minimum inter-stimulus interval in ms",
+      },
+      max_isi_ms: {
+        default: 4000,
+        type: "number",
+        description: "Maximum inter-stimulus interval in ms",
+      },
+      lapse_threshold_ms: {
+        default: 355,
+        type: "number",
+        description: "Reaction time threshold for a lapse in ms",
+      },
+      false_start_threshold_ms: {
+        default: 100,
+        type: "number",
+        description: "Reaction time threshold for a false start in ms",
+      },
+      decision_threshold: {
+        default: 0.99619,
+        type: "number",
+        description: "Posterior probability threshold to stop the test",
+      },
+      feedback_duration_ms: {
+        default: 1000,
+        type: "number",
+        description: "Duration of feedback display in ms",
+      },
+      show_quit_button: {
+        default: false,
+        type: "boolean",
+        description: "Whether to show a quit button",
+      },
     };
 
     super({
