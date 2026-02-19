@@ -1,13 +1,16 @@
 /**
  * PVT-BA Adaptive Algorithm
  *
- * Bayesian sequential decision algorithm based on Basner & Dinges (2011).
- * Classifies vigilance performance into HIGH, MEDIUM, or LOW categories
- * using likelihood ratios updated after each trial response.
+ * Bayesian sequential decision algorithm based on:
+ *   Basner M. "Ultra-short objective alertness assessment: an adaptive
+ *   duration version of the 3 minute PVT (PVT-BA) accurately tracks
+ *   changes in psychomotor vigilance induced by sleep restriction."
+ *   Sleep Advances. 2022;3(1):zpac038.
  *
- * Reference:
- *   Basner M, Dinges DF. "Maximizing sensitivity of the psychomotor
- *   vigilance test (PVT) to sleep loss." Sleep. 2011;34(5):581-591.
+ * Classifies vigilance performance into HIGH, MEDIUM, or LOW categories.
+ * Uses odds-form Bayesian updates (equations 1-5 from the paper) with
+ * likelihood ratios computed only for HIGH and LOW; MEDIUM is derived
+ * as the residual probability.
  */
 
 export const Classification = Object.freeze({
@@ -17,32 +20,32 @@ export const Classification = Object.freeze({
 });
 
 /**
- * Pre-computed likelihood ratios from Basner & Dinges validation data.
- * Rows = 6 time bins (each 30 seconds within the 3-minute test).
- * For each bin, LR values are given for an LpFS event and a non-LpFS event,
- * for each performance category.
+ * Likelihood ratios from the PVT-BA paper (Figure 1, Basner 2022).
+ * Per the paper, only LRs for HIGH and LOW are used.
+ * Rows = 6 time bins (each 30 s within the 3-minute test).
  *
  * LR > 1 means the event is more likely under that category.
  * LR < 1 means the event is less likely under that category.
+ *
+ * From the paper's Results:
+ *   - LpFS increased LOW likelihood 3-5x, decreased HIGH by 75-85%
+ *   - Non-LpFS decreased LOW likelihood by 22-43%, increased HIGH by 22-40%
+ *   - LRs during first 30s were closer to 1 (less informative)
  */
-const LIKELIHOOD_RATIOS = {
-  //                     LpFS event              non-LpFS event
-  //                HIGH    MEDIUM    LOW       HIGH    MEDIUM    LOW
-  bins: [
-    // 0-30s   (bin 0) — less informative early on
-    { lpfs: { HIGH: 0.25, MEDIUM: 1.20, LOW: 3.00 }, nonLpfs: { HIGH: 1.22, MEDIUM: 0.96, LOW: 0.78 } },
-    // 30-60s  (bin 1)
-    { lpfs: { HIGH: 0.18, MEDIUM: 1.40, LOW: 3.80 }, nonLpfs: { HIGH: 1.30, MEDIUM: 0.92, LOW: 0.68 } },
-    // 60-90s  (bin 2)
-    { lpfs: { HIGH: 0.15, MEDIUM: 1.50, LOW: 4.20 }, nonLpfs: { HIGH: 1.35, MEDIUM: 0.90, LOW: 0.62 } },
-    // 90-120s (bin 3)
-    { lpfs: { HIGH: 0.15, MEDIUM: 1.50, LOW: 4.50 }, nonLpfs: { HIGH: 1.38, MEDIUM: 0.88, LOW: 0.58 } },
-    // 120-150s (bin 4)
-    { lpfs: { HIGH: 0.15, MEDIUM: 1.55, LOW: 4.80 }, nonLpfs: { HIGH: 1.40, MEDIUM: 0.86, LOW: 0.57 } },
-    // 150-180s (bin 5)
-    { lpfs: { HIGH: 0.15, MEDIUM: 1.55, LOW: 5.00 }, nonLpfs: { HIGH: 1.40, MEDIUM: 0.85, LOW: 0.57 } },
-  ],
-};
+const LIKELIHOOD_RATIOS = [
+  // 0-30s (bin 0) — less informative early on
+  { lpfs: { HIGH: 0.25, LOW: 3.00 }, nonLpfs: { HIGH: 1.22, LOW: 0.78 } },
+  // 30-60s (bin 1)
+  { lpfs: { HIGH: 0.18, LOW: 3.80 }, nonLpfs: { HIGH: 1.30, LOW: 0.68 } },
+  // 60-90s (bin 2)
+  { lpfs: { HIGH: 0.15, LOW: 4.20 }, nonLpfs: { HIGH: 1.35, LOW: 0.62 } },
+  // 90-120s (bin 3)
+  { lpfs: { HIGH: 0.15, LOW: 4.50 }, nonLpfs: { HIGH: 1.38, LOW: 0.58 } },
+  // 120-150s (bin 4)
+  { lpfs: { HIGH: 0.15, LOW: 4.80 }, nonLpfs: { HIGH: 1.40, LOW: 0.57 } },
+  // 150-180s (bin 5)
+  { lpfs: { HIGH: 0.15, LOW: 5.00 }, nonLpfs: { HIGH: 1.40, LOW: 0.57 } },
+];
 
 export class AdaptiveAlgorithm {
   constructor(decisionThreshold = 0.99619) {
@@ -55,6 +58,17 @@ export class AdaptiveAlgorithm {
   }
 
   /**
+   * Update posteriors using the odds-form Bayesian approach from the paper.
+   *
+   * Algorithm per the paper (equations 1-5):
+   *  1. Compute prior odds for HIGH and LOW
+   *  2. Multiply by LR to get posterior odds
+   *  3. Convert back to posterior probability
+   *  4. MEDIUM = 1 - HIGH - LOW
+   *  5. If cumulative LpFS > 6: set HIGH = 0, rescale MEDIUM and LOW
+   *  6. If cumulative LpFS > 16: stop, classify LOW
+   *  7. Check decision threshold
+   *
    * @param {boolean} isLpfs - whether this trial was a lapse or false start
    * @param {number} timeBin - 0-based time bin index (0-5), clamped to 5
    */
@@ -65,11 +79,35 @@ export class AdaptiveAlgorithm {
     if (isLpfs) this.lpfsCount++;
 
     const bin = Math.min(Math.max(timeBin, 0), 5);
-    const lrTable = LIKELIHOOD_RATIOS.bins[bin];
-    const eventType = isLpfs ? "lpfs" : "nonLpfs";
-    const lr = lrTable[eventType];
+    const lr = LIKELIHOOD_RATIOS[bin][isLpfs ? "lpfs" : "nonLpfs"];
 
-    // Immediate LOW classification
+    // Equations 1-2: odds-form Bayesian update for HIGH
+    const priorOddsHigh = this.posteriors.HIGH / (1 - this.posteriors.HIGH);
+    const postOddsHigh = priorOddsHigh * lr.HIGH;
+    this.posteriors.HIGH = postOddsHigh / (1 + postOddsHigh);
+
+    // Equations 1-2: odds-form Bayesian update for LOW
+    const priorOddsLow = this.posteriors.LOW / (1 - this.posteriors.LOW);
+    const postOddsLow = priorOddsLow * lr.LOW;
+    this.posteriors.LOW = postOddsLow / (1 + postOddsLow);
+
+    // Equation 3: MEDIUM is the residual
+    this.posteriors.MEDIUM = Math.max(
+      0,
+      1 - this.posteriors.HIGH - this.posteriors.LOW,
+    );
+
+    // Equations 4-5: if cumulative LpFS > 6, HIGH is impossible
+    if (this.lpfsCount > 6) {
+      this.posteriors.HIGH = 0;
+      const medLowSum = this.posteriors.MEDIUM + this.posteriors.LOW;
+      if (medLowSum > 0) {
+        this.posteriors.MEDIUM = this.posteriors.MEDIUM / medLowSum;
+        this.posteriors.LOW = this.posteriors.LOW / medLowSum;
+      }
+    }
+
+    // If cumulative LpFS > 16, immediately classify LOW
     if (this.lpfsCount > 16) {
       this._classification = Classification.LOW;
       this.posteriors = { HIGH: 0, MEDIUM: 0, LOW: 1 };
@@ -77,27 +115,12 @@ export class AdaptiveAlgorithm {
       return;
     }
 
-    // If LpFS > 6, HIGH is no longer possible
-    if (this.lpfsCount > 6) {
-      this.posteriors.HIGH = 0;
-    }
-
-    // Bayesian update: posterior ∝ prior × likelihood
-    const unnormalized = {
-      HIGH: this.posteriors.HIGH * lr.HIGH,
-      MEDIUM: this.posteriors.MEDIUM * lr.MEDIUM,
-      LOW: this.posteriors.LOW * lr.LOW,
-    };
-
-    const total = unnormalized.HIGH + unnormalized.MEDIUM + unnormalized.LOW;
-    this.posteriors = {
-      HIGH: unnormalized.HIGH / total,
-      MEDIUM: unnormalized.MEDIUM / total,
-      LOW: unnormalized.LOW / total,
-    };
-
-    // Check if decision threshold is met
-    for (const cat of [Classification.HIGH, Classification.MEDIUM, Classification.LOW]) {
+    // Check decision threshold
+    for (const cat of [
+      Classification.HIGH,
+      Classification.MEDIUM,
+      Classification.LOW,
+    ]) {
       if (this.posteriors[cat] >= this.decisionThreshold) {
         this._classification = cat;
         this._stopped = true;
@@ -112,12 +135,12 @@ export class AdaptiveAlgorithm {
 
   /**
    * Returns the classification. If the algorithm hasn't stopped via
-   * threshold, classifies based on raw LpFS count.
+   * threshold, classifies based on raw LpFS count (always correct
+   * per the paper since the full 3 min elapsed).
    */
   getClassification() {
     if (this._classification) return this._classification;
 
-    // Fallback if max duration reached without threshold
     if (this.lpfsCount <= 6) return Classification.HIGH;
     if (this.lpfsCount <= 16) return Classification.MEDIUM;
     return Classification.LOW;

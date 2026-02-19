@@ -221,12 +221,19 @@ export class PvtBa extends Game {
     });
     scene.addChild(instr3);
 
+    const tapHint = new Label({
+      text: "Tap anywhere to begin",
+      fontSize: 14,
+      fontColor: LIGHT_GRAY,
+      position: { x: 200, y: 720 },
+    });
+    scene.addChild(tapHint);
+
     const startBtn = new Shape({
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
       fillColor: GREEN,
       position: { x: 200, y: 670 },
-      isUserInteractionEnabled: true,
     });
     scene.addChild(startBtn);
 
@@ -238,7 +245,20 @@ export class PvtBa extends Game {
     });
     scene.addChild(startLabel);
 
-    startBtn.onTapDown(() => {
+    // Full-screen overlay for cross-browser reliable tap detection.
+    // Firefox computes offsetX/offsetY differently on stretched canvases,
+    // so a small hit area can miss. A full-screen overlay avoids this.
+    const tapOverlay = new Shape({
+      rect: { width: 400, height: 800 },
+      fillColor: [0, 0, 0, 0.01],
+      position: { x: 200, y: 400 },
+      isUserInteractionEnabled: true,
+      zPosition: 10,
+    });
+    scene.addChild(tapOverlay);
+
+    tapOverlay.onTapDown(() => {
+      console.log("[pvt-ba] scene:trial");
       this.presentScene("trial", Transition.none());
     });
   }
@@ -301,6 +321,7 @@ export class PvtBa extends Game {
     });
 
     scene.onAppear(() => {
+      console.log("[pvt-ba] trial:started");
       this._testStartTime = Timer.now();
       this._beginTrial();
     });
@@ -443,7 +464,11 @@ export class PvtBa extends Game {
     });
   }
 
-  _beginTrial() {
+  /**
+   * @param {number} feedbackConsumedMs - time already consumed by feedback
+   *   display (part of the ISI per the paper). 0 for the first trial.
+   */
+  _beginTrial(feedbackConsumedMs = 0) {
     if (this._testEnded) return;
 
     const maxDuration = this.getParameter("max_duration_seconds") * 1000;
@@ -467,13 +492,17 @@ export class PvtBa extends Game {
     const maxISI = this.getParameter("max_isi_ms");
     this._currentISI = RandomDraws.singleFromRange(minISI, maxISI);
 
+    // Per the paper, ISI (1-4s) INCLUDES the feedback interval (1s).
+    // Subtract time already consumed by feedback display.
+    const waitMs = Math.max(0, this._currentISI - feedbackConsumedMs);
+
     const self = this;
     const trialScene = this._getScene("trial");
     trialScene.removeAllActions();
 
     trialScene.run(
       Action.sequence([
-        Action.wait({ duration: this._currentISI }),
+        Action.wait({ duration: waitMs }),
         Action.custom({
           callback: () => {
             self._showStimulus();
@@ -580,15 +609,18 @@ export class PvtBa extends Game {
 
     let isFalseStart = false;
     let isLapse = false;
+    let isTimeout = false;
     let rtValue = rt;
 
     if (rt === -1) {
-      // Tapped during ISI (no stimulus)
+      // Tapped during ISI (response without stimulus)
       isFalseStart = true;
       rtValue = null;
     } else if (rt === null) {
-      // No response within timeout
+      // No response within 30s — counted as lapse with 30s RT per paper
       isLapse = true;
+      isTimeout = true;
+      rtValue = 30000;
     } else if (rt < falseStartThreshold) {
       isFalseStart = true;
     } else if (rt >= lapseThreshold) {
@@ -609,7 +641,9 @@ export class PvtBa extends Game {
     this.addTrialData("stimulus_onset_timestamp", this._stimulusOnsetTime || 0);
     this.addTrialData(
       "response_timestamp",
-      rtValue !== null ? this._stimulusOnsetTime + rtValue : null,
+      rtValue !== null && !isTimeout
+        ? this._stimulusOnsetTime + rtValue
+        : null,
     );
     this.addTrialData("is_lapse", isLapse);
     this.addTrialData("is_false_start", isFalseStart);
@@ -625,10 +659,10 @@ export class PvtBa extends Game {
     );
     this.trialComplete();
 
-    this._showFeedback(rtValue, isFalseStart, isLapse, isFinal);
+    this._showFeedback(rtValue, isFalseStart, isLapse, isFinal, isTimeout);
   }
 
-  _showFeedback(rt, isFalseStart, isLapse, isFinal) {
+  _showFeedback(rt, isFalseStart, isLapse, isFinal, isTimeout = false) {
     this._stimulusActive = false;
 
     const counterLabel = this._getNode("counterLabel");
@@ -642,11 +676,11 @@ export class PvtBa extends Game {
       feedbackLabel.text = "Wait for the counter";
       feedbackLabel.fontColor = RED;
       stimulusBox.strokeColor = RED;
-    } else if (isLapse || rt === null) {
+    } else if (isLapse) {
       counterLabel.text = "TOO SLOW";
       counterLabel.fontSize = 32;
       counterLabel.fontColor = RED;
-      feedbackLabel.text = rt !== null ? `${Math.round(rt)} ms` : "No response";
+      feedbackLabel.text = isTimeout ? "No response" : `${Math.round(rt)} ms`;
       feedbackLabel.fontColor = RED;
       stimulusBox.strokeColor = RED;
     } else {
@@ -680,7 +714,6 @@ export class PvtBa extends Game {
         Action.wait({ duration: feedbackDuration }),
         Action.custom({
           callback: () => {
-            // Reset visual state
             counterLabel.fontSize = 56;
             counterLabel.fontColor = GREEN;
             stimulusBox.strokeColor = STIMULUS_BOX_BORDER;
@@ -689,7 +722,8 @@ export class PvtBa extends Game {
             if (isFinal) {
               self._endTest();
             } else {
-              self._beginTrial();
+              // Feedback is part of the ISI per the paper
+              self._beginTrial(feedbackDuration);
             }
           },
         }),
