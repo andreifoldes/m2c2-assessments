@@ -182,6 +182,7 @@ export class PvtBa extends Game {
     } else {
       this._buildInstructionsScene();
     }
+    this._buildCountdownScene();
     this._buildTrialScene();
     if (this.getParameter("show_results")) {
       this._buildResultsScene();
@@ -202,7 +203,7 @@ export class PvtBa extends Game {
     scene.addChild(skipLabel);
 
     skipLabel.onTapDown(() => {
-      this.presentScene("trial", Transition.none());
+      this.presentScene("countdown", Transition.none());
     });
   }
 
@@ -413,7 +414,7 @@ export class PvtBa extends Game {
     scene3.addChild(beginLabel);
 
     beginBtn.onTapDown(() => {
-      this.presentScene("trial", Transition.none());
+      this.presentScene("countdown", Transition.none());
     });
   }
 
@@ -511,8 +512,59 @@ export class PvtBa extends Game {
     scene.addChild(tapOverlay);
 
     tapOverlay.onTapDown(() => {
-      console.log("[pvt-ba] scene:trial");
-      this.presentScene("trial", Transition.none());
+      console.log("[pvt-ba] scene:countdown");
+      this.presentScene("countdown", Transition.none());
+    });
+  }
+
+  // ─── Countdown Scene ─────────────────────────────────────
+
+  _buildCountdownScene() {
+    const scene = new Scene({ name: "countdown", backgroundColor: SCENE_BG });
+    this.addScene(scene);
+
+    const circle = new Shape({
+      circleOfRadius: 80,
+      fillColor: WebColors.RoyalBlue,
+      position: { x: 200, y: 340 },
+    });
+    scene.addChild(circle);
+
+    const numberLabel = new Label({
+      name: "countdownNumber",
+      text: "",
+      fontSize: 50,
+      fontColor: WebColors.White,
+      position: { x: 200, y: 340 },
+    });
+    scene.addChild(numberLabel);
+
+    scene.addChild(
+      new Label({
+        text: "GET READY",
+        fontSize: 32,
+        fontColor: TEXT_PRIMARY,
+        position: { x: 200, y: 470 },
+      }),
+    );
+
+    const self = this;
+    scene.onAppear(() => {
+      numberLabel.text = "3";
+      scene.run(
+        Action.sequence([
+          Action.wait({ duration: 1000 }),
+          Action.custom({ callback: () => { numberLabel.text = "2"; } }),
+          Action.wait({ duration: 1000 }),
+          Action.custom({ callback: () => { numberLabel.text = "1"; } }),
+          Action.wait({ duration: 1000 }),
+          Action.custom({
+            callback: () => {
+              self.presentScene("trial", Transition.none());
+            },
+          }),
+        ]),
+      );
     });
   }
 

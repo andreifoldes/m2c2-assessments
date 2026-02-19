@@ -439,6 +439,7 @@ export class Prices extends Game {
       this._buildTutorialScenes();
     }
     this._buildInstructionsScene();
+    this._buildCountdownScene();
     this._buildLearningScene();
     this._buildTransitionScene();
     this._buildRecognitionScene();
@@ -853,6 +854,57 @@ export class Prices extends Game {
     );
     startBtnBg.onTapDown(() => {
       this._startTest();
+    });
+  }
+
+  // ─── Countdown Scene ─────────────────────────────────────
+
+  _buildCountdownScene() {
+    const scene = new Scene({ name: "countdown", backgroundColor: SCENE_BG });
+    this.addScene(scene);
+
+    const circle = new Shape({
+      circleOfRadius: 80,
+      fillColor: WebColors.RoyalBlue,
+      position: { x: 200, y: 340 },
+    });
+    scene.addChild(circle);
+
+    const numberLabel = new Label({
+      name: "countdownNumber",
+      text: "",
+      fontSize: 50,
+      fontColor: WebColors.White,
+      position: { x: 200, y: 340 },
+    });
+    scene.addChild(numberLabel);
+
+    scene.addChild(
+      new Label({
+        text: "GET READY",
+        fontSize: 32,
+        fontColor: TEXT_PRIMARY,
+        position: { x: 200, y: 470 },
+      }),
+    );
+
+    const self = this;
+    scene.onAppear(() => {
+      numberLabel.text = "3";
+      scene.run(
+        Action.sequence([
+          Action.wait({ duration: 1000 }),
+          Action.custom({ callback: () => { numberLabel.text = "2"; } }),
+          Action.wait({ duration: 1000 }),
+          Action.custom({ callback: () => { numberLabel.text = "1"; } }),
+          Action.wait({ duration: 1000 }),
+          Action.custom({
+            callback: () => {
+              self.presentScene("learning", Transition.none());
+            },
+          }),
+        ]),
+      );
     });
   }
 
@@ -1299,7 +1351,7 @@ export class Prices extends Game {
     this._learningTimestamps = new Array(numItems).fill(0);
     this._testStartTime = Timer.now();
 
-    this.presentScene("learning", Transition.none());
+    this.presentScene("countdown", Transition.none());
   }
 
   // ─── Learning Phase ──────────────────────────────────────
