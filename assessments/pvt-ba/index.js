@@ -57,13 +57,13 @@ session.onEnd(async () => {
     };
     console.log("[PVT-BA debug] all trial data:", summary);
     document.body.innerHTML = `
-      <div style="text-align:center;padding:40px;font-family:sans-serif;color:#e0e0e0;background:#1a1a2e;min-height:100vh;box-sizing:border-box;">
+      <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
         <h1 style="color:#4CAF50;">Assessment Complete (Debug Mode)</h1>
         <p>No token/callback_url provided &mdash; results shown below instead of being submitted.</p>
-        <p style="color:#90CAF9;">Total trials: ${allTrialData.length} &nbsp;|&nbsp; Session duration: ${totalDurationSeconds}s</p>
+        <p style="color:#555;">Total trials: ${allTrialData.length} &nbsp;|&nbsp; Session duration: ${totalDurationSeconds}s</p>
         <details open style="text-align:left;max-width:600px;margin:20px auto;">
-          <summary style="cursor:pointer;color:#FFC107;font-size:16px;">Trial Data (JSON)</summary>
-          <pre style="background:#0d0d1a;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;color:#ccc;max-height:60vh;">${JSON.stringify(allTrialData, null, 2)}</pre>
+          <summary style="cursor:pointer;color:#c68a00;font-size:16px;">Trial Data (JSON)</summary>
+          <pre style="background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;color:#333;max-height:60vh;">${JSON.stringify(allTrialData, null, 2)}</pre>
         </details>
       </div>`;
     return;
@@ -90,7 +90,7 @@ session.onEnd(async () => {
     }
 
     document.body.innerHTML = `
-      <div style="text-align:center;padding:40px;font-family:sans-serif;">
+      <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
         <h1 style="color:#2e7d32;">Assessment Complete</h1>
         <p style="color:#2e7d32;">Your results have been recorded. Thank you!</p>
         <p>You can now close this window and return to Telegram.</p>
@@ -102,7 +102,7 @@ session.onEnd(async () => {
   } catch (err) {
     console.error("Failed to submit results:", err);
     document.body.innerHTML = `
-      <div style="text-align:center;padding:40px;font-family:sans-serif;">
+      <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
         <h2 style="color:#c62828;">Submission Error</h2>
         <p>Failed to submit results. Please contact the research team.</p>
       </div>`;

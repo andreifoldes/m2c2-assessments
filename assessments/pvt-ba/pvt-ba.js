@@ -11,18 +11,7 @@ import {
 } from "@m2c2kit/core";
 import { AdaptiveAlgorithm, Classification } from "./adaptive-algorithm.js";
 
-// Trial scene (dark background for PVT counter)
-const DARK_BG = [26, 26, 46, 1];
-const DARK_GRAY = [40, 40, 60, 1];
-const STIMULUS_BOX_BORDER = [80, 80, 120, 1];
-const WHITE = [255, 255, 255, 1];
-const GREEN = [76, 175, 80, 1];
-const YELLOW = [255, 193, 7, 1];
-const RED = [244, 67, 54, 1];
-const MUTED_WHITE = [200, 200, 220, 1];
-const LIGHT_GRAY = [160, 160, 180, 1];
-
-// Instruction/UI scenes (m2c2kit standard palette)
+// m2c2kit standard palette (light background)
 const SCENE_BG = [255, 255, 255, 1];
 const TEXT_PRIMARY = [0, 0, 0, 1];
 const TEXT_SECONDARY = [100, 100, 100, 1];
@@ -30,6 +19,13 @@ const TEXT_TERTIARY = [140, 140, 140, 1];
 const BUTTON_BG = [0, 0, 0, 1];
 const BUTTON_TEXT = [255, 255, 255, 1];
 const START_BUTTON_BG = [0, 128, 0, 1];
+
+// Stimulus / feedback colors
+const STIMULUS_BOX_BG = [230, 230, 240, 1];
+const STIMULUS_BOX_BORDER = [180, 180, 200, 1];
+const GREEN = [76, 175, 80, 1];
+const YELLOW = [200, 160, 0, 1];
+const RED = [244, 67, 54, 1];
 
 export class PvtBa extends Game {
   constructor() {
@@ -288,7 +284,7 @@ export class PvtBa extends Game {
     const thumbBox = new Shape({
       rect: { width: 220, height: 90 },
       cornerRadius: 12,
-      fillColor: DARK_GRAY,
+      fillColor: STIMULUS_BOX_BG,
       strokeColor: STIMULUS_BOX_BORDER,
       lineWidth: 2,
       position: { x: 200, y: 300 },
@@ -355,7 +351,7 @@ export class PvtBa extends Game {
     const demoBox = new Shape({
       rect: { width: 220, height: 90 },
       cornerRadius: 12,
-      fillColor: DARK_GRAY,
+      fillColor: STIMULUS_BOX_BG,
       strokeColor: STIMULUS_BOX_BORDER,
       lineWidth: 2,
       position: { x: 200, y: 240 },
@@ -436,7 +432,7 @@ export class PvtBa extends Game {
     const box = new Shape({
       rect: { width: 220, height: 90 },
       cornerRadius: 12,
-      fillColor: DARK_GRAY,
+      fillColor: STIMULUS_BOX_BG,
       strokeColor: STIMULUS_BOX_BORDER,
       lineWidth: 2,
       position: { x: 200, y: 300 },
@@ -521,14 +517,14 @@ export class PvtBa extends Game {
   }
 
   _buildTrialScene() {
-    const scene = new Scene({ name: "trial", backgroundColor: DARK_BG });
+    const scene = new Scene({ name: "trial", backgroundColor: SCENE_BG });
     this.addScene(scene);
 
     const stimulusBox = new Shape({
       name: "stimulusBox",
       rect: { width: 260, height: 110 },
       cornerRadius: 14,
-      fillColor: DARK_GRAY,
+      fillColor: STIMULUS_BOX_BG,
       strokeColor: STIMULUS_BOX_BORDER,
       lineWidth: 2,
       position: { x: 200, y: 350 },
@@ -548,7 +544,7 @@ export class PvtBa extends Game {
       name: "feedbackLabel",
       text: "",
       fontSize: 20,
-      fontColor: MUTED_WHITE,
+      fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 450 },
     });
     scene.addChild(feedbackLabel);
@@ -557,7 +553,7 @@ export class PvtBa extends Game {
       name: "statusLabel",
       text: "",
       fontSize: 14,
-      fontColor: LIGHT_GRAY,
+      fontColor: TEXT_TERTIARY,
       position: { x: 200, y: 750 },
     });
     scene.addChild(statusLabel);
