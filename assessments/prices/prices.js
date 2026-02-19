@@ -10,21 +10,21 @@ import {
   Transition,
 } from "@m2c2kit/core";
 
-const DARK_BG = [26, 26, 46, 1];
-const CARD_BG = [255, 255, 255, 1];
-const GOLD = [255, 193, 7, 1];
-const GOLD_DARK = [245, 166, 35, 1];
-const WHITE = [255, 255, 255, 1];
-const TEXT_DARK = [33, 33, 33, 1];
-const TEXT_MID = [80, 80, 80, 1];
-const TEXT_LIGHT = [180, 180, 200, 1];
-const TEXT_MUTED = [140, 140, 160, 1];
-const BUTTON_DARK = [40, 40, 60, 1];
+// m2c2kit standard palette (light background)
+const SCENE_BG = [255, 255, 255, 1];
+const TEXT_PRIMARY = [0, 0, 0, 1];
+const TEXT_SECONDARY = [100, 100, 100, 1];
+const TEXT_TERTIARY = [140, 140, 140, 1];
+const BUTTON_BG = [0, 0, 0, 1];
 const BUTTON_TEXT = [255, 255, 255, 1];
+const START_BUTTON_BG = [0, 128, 0, 1];
+
+// Prices-specific colors
+const CARD_BG = [240, 240, 245, 1];
+const ACCENT = [200, 160, 0, 1];
 const GREEN = [76, 175, 80, 1];
 const RED = [211, 47, 47, 1];
-const PROGRESS_BG = [50, 50, 70, 1];
-const PROGRESS_FILL = [255, 193, 7, 1];
+const PROGRESS_BG = [220, 220, 230, 1];
 const TRANSPARENT = [0, 0, 0, 0];
 
 const LOCALE_TO_CURRENCY = {
@@ -449,14 +449,14 @@ export class Prices extends Game {
 
   _buildTutorialScenes() {
     // Screen 1: Welcome
-    const s1 = new Scene({ name: "tut_1", backgroundColor: DARK_BG });
+    const s1 = new Scene({ name: "tut_1", backgroundColor: SCENE_BG });
     this.addScene(s1);
 
     s1.addChild(
       new Label({
         text: "Prices",
         fontSize: 36,
-        fontColor: WHITE,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 160 },
       }),
     );
@@ -464,7 +464,7 @@ export class Prices extends Game {
     s1.addChild(
       new Shape({
         rect: { width: 280, height: 3 },
-        fillColor: GOLD,
+        fillColor: ACCENT,
         position: { x: 200, y: 195 },
       }),
     );
@@ -473,7 +473,7 @@ export class Prices extends Game {
       new Label({
         text: "This test has two parts.\n\nFirst, you will see items with\nprices. Try to remember each\nitem-price pair.\n\nThen, you will be asked to\nrecall which price went with\neach item.",
         fontSize: 18,
-        fontColor: TEXT_LIGHT,
+        fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 380 },
         preferredMaxLayoutWidth: 320,
       }),
@@ -482,7 +482,7 @@ export class Prices extends Game {
     const nextBtn1Bg = new Shape({
       rect: { width: 240, height: 54 },
       cornerRadius: 27,
-      fillColor: GOLD,
+      fillColor: BUTTON_BG,
       position: { x: 200, y: 640 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -492,7 +492,7 @@ export class Prices extends Game {
       new Label({
         text: "NEXT",
         fontSize: 20,
-        fontColor: TEXT_DARK,
+        fontColor: BUTTON_TEXT,
         position: { x: 200, y: 640 },
         zPosition: 11,
       }),
@@ -504,14 +504,14 @@ export class Prices extends Game {
     this._addSkipTutorialButton(s1);
 
     // Screen 2: Learning phase example
-    const s2 = new Scene({ name: "tut_2", backgroundColor: DARK_BG });
+    const s2 = new Scene({ name: "tut_2", backgroundColor: SCENE_BG });
     this.addScene(s2);
 
     s2.addChild(
       new Label({
         text: "Part 1: Learning",
         fontSize: 28,
-        fontColor: WHITE,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 80 },
       }),
     );
@@ -520,7 +520,7 @@ export class Prices extends Game {
       new Label({
         text: "You will see an item and its price.\nEach pair is shown for 3 seconds.",
         fontSize: 16,
-        fontColor: TEXT_LIGHT,
+        fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 135 },
         preferredMaxLayoutWidth: 320,
       }),
@@ -539,7 +539,7 @@ export class Prices extends Game {
       new Label({
         text: "Soup",
         fontSize: 30,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 260 },
       }),
     );
@@ -547,7 +547,7 @@ export class Prices extends Game {
       new Label({
         text: this._formatPrice(TUTORIAL_ITEMS[1].price),
         fontSize: 38,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 310 },
       }),
     );
@@ -555,7 +555,7 @@ export class Prices extends Game {
       new Label({
         text: "Is this a good price?",
         fontSize: 16,
-        fontColor: TEXT_MID,
+        fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 365 },
       }),
     );
@@ -564,7 +564,7 @@ export class Prices extends Game {
     const yesEx = new Shape({
       rect: { width: 80, height: 36 },
       cornerRadius: 18,
-      fillColor: [230, 230, 230, 1],
+      fillColor: [220, 220, 225, 1],
       position: { x: 155, y: 400 },
     });
     s2.addChild(yesEx);
@@ -572,7 +572,7 @@ export class Prices extends Game {
       new Label({
         text: "Yes",
         fontSize: 15,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 155, y: 400 },
       }),
     );
@@ -580,7 +580,7 @@ export class Prices extends Game {
     const noEx = new Shape({
       rect: { width: 80, height: 36 },
       cornerRadius: 18,
-      fillColor: [230, 230, 230, 1],
+      fillColor: [220, 220, 225, 1],
       position: { x: 245, y: 400 },
     });
     s2.addChild(noEx);
@@ -588,7 +588,7 @@ export class Prices extends Game {
       new Label({
         text: "No",
         fontSize: 15,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 245, y: 400 },
       }),
     );
@@ -597,7 +597,7 @@ export class Prices extends Game {
     const tooltipBg = new Shape({
       rect: { width: 280, height: 50 },
       cornerRadius: 10,
-      fillColor: GOLD,
+      fillColor: ACCENT,
       position: { x: 200, y: 490 },
     });
     s2.addChild(tooltipBg);
@@ -605,7 +605,7 @@ export class Prices extends Game {
       new Label({
         text: "Choose the answer that makes\nsense to you.",
         fontSize: 14,
-        fontColor: TEXT_DARK,
+        fontColor: [255, 255, 255, 1],
         position: { x: 200, y: 490 },
         preferredMaxLayoutWidth: 260,
       }),
@@ -614,7 +614,7 @@ export class Prices extends Game {
     const nextBtn2Bg = new Shape({
       rect: { width: 240, height: 54 },
       cornerRadius: 27,
-      fillColor: GOLD,
+      fillColor: BUTTON_BG,
       position: { x: 200, y: 640 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -624,7 +624,7 @@ export class Prices extends Game {
       new Label({
         text: "NEXT",
         fontSize: 20,
-        fontColor: TEXT_DARK,
+        fontColor: BUTTON_TEXT,
         position: { x: 200, y: 640 },
         zPosition: 11,
       }),
@@ -636,14 +636,14 @@ export class Prices extends Game {
     this._addSkipTutorialButton(s2);
 
     // Screen 3: Recognition phase example
-    const s3 = new Scene({ name: "tut_3", backgroundColor: DARK_BG });
+    const s3 = new Scene({ name: "tut_3", backgroundColor: SCENE_BG });
     this.addScene(s3);
 
     s3.addChild(
       new Label({
         text: "Part 2: Recognition",
         fontSize: 28,
-        fontColor: WHITE,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 80 },
       }),
     );
@@ -652,7 +652,7 @@ export class Prices extends Game {
       new Label({
         text: "You will see the item and two prices.\nTap the price you remember.",
         fontSize: 16,
-        fontColor: TEXT_LIGHT,
+        fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 135 },
         preferredMaxLayoutWidth: 320,
       }),
@@ -662,7 +662,7 @@ export class Prices extends Game {
       new Label({
         text: "Bananas",
         fontSize: 30,
-        fontColor: WHITE,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 230 },
       }),
     );
@@ -670,7 +670,7 @@ export class Prices extends Game {
       new Label({
         text: "What was the price?",
         fontSize: 18,
-        fontColor: TEXT_MUTED,
+        fontColor: TEXT_TERTIARY,
         position: { x: 200, y: 275 },
       }),
     );
@@ -687,7 +687,7 @@ export class Prices extends Game {
       new Label({
         text: this._formatPrice(TUTORIAL_ITEMS[0].price),
         fontSize: 26,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 370 },
       }),
     );
@@ -703,7 +703,7 @@ export class Prices extends Game {
       new Label({
         text: this._formatPrice(TUTORIAL_ITEMS[0].alt),
         fontSize: 26,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 460 },
       }),
     );
@@ -712,7 +712,7 @@ export class Prices extends Game {
     const tooltip3Bg = new Shape({
       rect: { width: 280, height: 50 },
       cornerRadius: 10,
-      fillColor: GOLD,
+      fillColor: ACCENT,
       position: { x: 200, y: 550 },
     });
     s3.addChild(tooltip3Bg);
@@ -720,7 +720,7 @@ export class Prices extends Game {
       new Label({
         text: "Try your best to recall the\nprice from part one.",
         fontSize: 14,
-        fontColor: TEXT_DARK,
+        fontColor: [255, 255, 255, 1],
         position: { x: 200, y: 550 },
         preferredMaxLayoutWidth: 260,
       }),
@@ -729,7 +729,7 @@ export class Prices extends Game {
     const beginBtnBg = new Shape({
       rect: { width: 240, height: 54 },
       cornerRadius: 27,
-      fillColor: GREEN,
+      fillColor: START_BUTTON_BG,
       position: { x: 200, y: 640 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -739,7 +739,7 @@ export class Prices extends Game {
       new Label({
         text: "BEGIN TEST",
         fontSize: 20,
-        fontColor: WHITE,
+        fontColor: BUTTON_TEXT,
         position: { x: 200, y: 640 },
         zPosition: 11,
       }),
@@ -755,7 +755,7 @@ export class Prices extends Game {
     const label = new Label({
       text: "Skip tutorial",
       fontSize: 14,
-      fontColor: TEXT_MUTED,
+      fontColor: TEXT_TERTIARY,
       position: { x: 200, y: 740 },
       isUserInteractionEnabled: true,
       zPosition: 20,
@@ -771,15 +771,15 @@ export class Prices extends Game {
   _buildInstructionsScene() {
     const scene = new Scene({
       name: "instructions",
-      backgroundColor: DARK_BG,
+      backgroundColor: SCENE_BG,
     });
     this.addScene(scene);
 
-    // Gold accent bar at top
+    // Accent bar at top
     scene.addChild(
       new Shape({
         rect: { width: 400, height: 6 },
-        fillColor: GOLD,
+        fillColor: ACCENT,
         position: { x: 200, y: 3 },
       }),
     );
@@ -788,7 +788,7 @@ export class Prices extends Game {
       new Label({
         text: "Prices",
         fontSize: 38,
-        fontColor: WHITE,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 160 },
       }),
     );
@@ -796,7 +796,7 @@ export class Prices extends Game {
     scene.addChild(
       new Shape({
         rect: { width: 80, height: 3 },
-        fillColor: GOLD,
+        fillColor: ACCENT,
         position: { x: 200, y: 190 },
       }),
     );
@@ -812,7 +812,7 @@ export class Prices extends Game {
           "make decisions quickly and pay\n" +
           "close attention.",
         fontSize: 17,
-        fontColor: TEXT_LIGHT,
+        fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 370 },
         preferredMaxLayoutWidth: 320,
       }),
@@ -822,7 +822,7 @@ export class Prices extends Game {
       const tutLabel = new Label({
         text: "View a Tutorial",
         fontSize: 16,
-        fontColor: GOLD,
+        fontColor: TEXT_TERTIARY,
         position: { x: 200, y: 560 },
         isUserInteractionEnabled: true,
         zPosition: 10,
@@ -836,7 +836,7 @@ export class Prices extends Game {
     const startBtnBg = new Shape({
       rect: { width: 280, height: 56 },
       cornerRadius: 28,
-      fillColor: WHITE,
+      fillColor: START_BUTTON_BG,
       position: { x: 200, y: 660 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -846,7 +846,7 @@ export class Prices extends Game {
       new Label({
         text: "BEGIN TEST",
         fontSize: 20,
-        fontColor: DARK_BG,
+        fontColor: BUTTON_TEXT,
         position: { x: 200, y: 660 },
         zPosition: 11,
       }),
@@ -859,7 +859,7 @@ export class Prices extends Game {
   // ─── Learning Scene ──────────────────────────────────────
 
   _buildLearningScene() {
-    const scene = new Scene({ name: "learning", backgroundColor: DARK_BG });
+    const scene = new Scene({ name: "learning", backgroundColor: SCENE_BG });
     this.addScene(scene);
 
     // Progress bar
@@ -877,7 +877,7 @@ export class Prices extends Game {
         name: "learnProgressFill",
         rect: { width: 0, height: 4 },
         cornerRadius: 2,
-        fillColor: PROGRESS_FILL,
+        fillColor: ACCENT,
         position: { x: 20, y: 30 },
         anchorPoint: { x: 0, y: 0.5 },
       }),
@@ -888,12 +888,12 @@ export class Prices extends Game {
         name: "learnPhaseLabel",
         text: "",
         fontSize: 14,
-        fontColor: TEXT_MUTED,
+        fontColor: TEXT_TERTIARY,
         position: { x: 200, y: 60 },
       }),
     );
 
-    // White card background
+    // Card background
     scene.addChild(
       new Shape({
         name: "learnCard",
@@ -910,7 +910,7 @@ export class Prices extends Game {
         name: "learnItemLabel",
         text: "",
         fontSize: 32,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 220 },
         preferredMaxLayoutWidth: 280,
       }),
@@ -922,7 +922,7 @@ export class Prices extends Game {
         name: "learnPriceLabel",
         text: "",
         fontSize: 42,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 290 },
       }),
     );
@@ -933,7 +933,7 @@ export class Prices extends Game {
         name: "learnQuestionLabel",
         text: "Is this a good price?",
         fontSize: 16,
-        fontColor: TEXT_MID,
+        fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 360 },
       }),
     );
@@ -943,7 +943,7 @@ export class Prices extends Game {
       name: "learnYesBtnBg",
       rect: { width: 100, height: 40 },
       cornerRadius: 20,
-      fillColor: [230, 230, 230, 1],
+      fillColor: [220, 220, 225, 1],
       position: { x: 145, y: 415 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -954,7 +954,7 @@ export class Prices extends Game {
         name: "learnYesBtnLabel",
         text: "Yes",
         fontSize: 16,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 145, y: 415 },
         zPosition: 11,
       }),
@@ -965,7 +965,7 @@ export class Prices extends Game {
       name: "learnNoBtnBg",
       rect: { width: 100, height: 40 },
       cornerRadius: 20,
-      fillColor: [230, 230, 230, 1],
+      fillColor: [220, 220, 225, 1],
       position: { x: 255, y: 415 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -976,7 +976,7 @@ export class Prices extends Game {
         name: "learnNoBtnLabel",
         text: "No",
         fontSize: 16,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 255, y: 415 },
         zPosition: 11,
       }),
@@ -988,7 +988,7 @@ export class Prices extends Game {
         name: "learnTimerBar",
         rect: { width: 320, height: 3 },
         cornerRadius: 1,
-        fillColor: GOLD,
+        fillColor: ACCENT,
         position: { x: 200, y: 490 },
       }),
     );
@@ -1004,14 +1004,14 @@ export class Prices extends Game {
   // ─── Transition Scene ────────────────────────────────────
 
   _buildTransitionScene() {
-    const scene = new Scene({ name: "transition", backgroundColor: DARK_BG });
+    const scene = new Scene({ name: "transition", backgroundColor: SCENE_BG });
     this.addScene(scene);
 
     scene.addChild(
       new Label({
         text: "Part 2: Recognition",
         fontSize: 28,
-        fontColor: WHITE,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 200 },
       }),
     );
@@ -1019,7 +1019,7 @@ export class Prices extends Game {
     scene.addChild(
       new Shape({
         rect: { width: 200, height: 3 },
-        fillColor: GOLD,
+        fillColor: ACCENT,
         position: { x: 200, y: 230 },
       }),
     );
@@ -1028,7 +1028,7 @@ export class Prices extends Game {
       new Label({
         text: "You will now see each item\nwith two prices.\n\nPlease select the price that\nwas originally paired with\nthat item.",
         fontSize: 18,
-        fontColor: TEXT_LIGHT,
+        fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 380 },
         preferredMaxLayoutWidth: 320,
       }),
@@ -1038,7 +1038,7 @@ export class Prices extends Game {
       name: "transitionBeginBtn",
       rect: { width: 240, height: 54 },
       cornerRadius: 27,
-      fillColor: GREEN,
+      fillColor: START_BUTTON_BG,
       position: { x: 200, y: 600 },
       isUserInteractionEnabled: true,
       zPosition: 10,
@@ -1050,7 +1050,7 @@ export class Prices extends Game {
         name: "transitionBeginLabel",
         text: "BEGIN",
         fontSize: 20,
-        fontColor: WHITE,
+        fontColor: BUTTON_TEXT,
         position: { x: 200, y: 600 },
         zPosition: 11,
         hidden: true,
@@ -1091,7 +1091,7 @@ export class Prices extends Game {
   _buildRecognitionScene() {
     const scene = new Scene({
       name: "recognition",
-      backgroundColor: DARK_BG,
+      backgroundColor: SCENE_BG,
     });
     this.addScene(scene);
 
@@ -1110,7 +1110,7 @@ export class Prices extends Game {
         name: "recogProgressFill",
         rect: { width: 0, height: 4 },
         cornerRadius: 2,
-        fillColor: PROGRESS_FILL,
+        fillColor: ACCENT,
         position: { x: 20, y: 30 },
         anchorPoint: { x: 0, y: 0.5 },
       }),
@@ -1121,7 +1121,7 @@ export class Prices extends Game {
         name: "recogPhaseLabel",
         text: "",
         fontSize: 14,
-        fontColor: TEXT_MUTED,
+        fontColor: TEXT_TERTIARY,
         position: { x: 200, y: 60 },
       }),
     );
@@ -1132,7 +1132,7 @@ export class Prices extends Game {
         name: "recogItemLabel",
         text: "",
         fontSize: 34,
-        fontColor: WHITE,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 200 },
         preferredMaxLayoutWidth: 360,
       }),
@@ -1144,7 +1144,7 @@ export class Prices extends Game {
         name: "recogQuestionLabel",
         text: "What was the price?",
         fontSize: 18,
-        fontColor: TEXT_MUTED,
+        fontColor: TEXT_TERTIARY,
         position: { x: 200, y: 260 },
       }),
     );
@@ -1165,7 +1165,7 @@ export class Prices extends Game {
         name: "recogBtn1Label",
         text: "",
         fontSize: 28,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 390 },
         zPosition: 11,
       }),
@@ -1187,7 +1187,7 @@ export class Prices extends Game {
         name: "recogBtn2Label",
         text: "",
         fontSize: 28,
-        fontColor: TEXT_DARK,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 500 },
         zPosition: 11,
       }),
@@ -1216,14 +1216,14 @@ export class Prices extends Game {
   // ─── End Scene ───────────────────────────────────────────
 
   _buildEndScene() {
-    const scene = new Scene({ name: "end", backgroundColor: DARK_BG });
+    const scene = new Scene({ name: "end", backgroundColor: SCENE_BG });
     this.addScene(scene);
 
     scene.addChild(
       new Label({
         text: "Test Complete",
         fontSize: 30,
-        fontColor: WHITE,
+        fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 340 },
       }),
     );
@@ -1231,7 +1231,7 @@ export class Prices extends Game {
     scene.addChild(
       new Shape({
         rect: { width: 120, height: 3 },
-        fillColor: GOLD,
+        fillColor: ACCENT,
         position: { x: 200, y: 370 },
       }),
     );
@@ -1240,7 +1240,7 @@ export class Prices extends Game {
       new Label({
         text: "Thank you for participating.",
         fontSize: 18,
-        fontColor: TEXT_LIGHT,
+        fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 420 },
       }),
     );
@@ -1344,8 +1344,8 @@ export class Prices extends Game {
     noLbl.hidden = !showQuestion;
 
     // Reset button colors
-    yesBg.fillColor = [230, 230, 230, 1];
-    noBg.fillColor = [230, 230, 230, 1];
+    yesBg.fillColor = [220, 220, 225, 1];
+    noBg.fillColor = [220, 220, 225, 1];
 
     // Reset timer bar
     const timerBar = this._getNode("learnTimerBar");
@@ -1402,9 +1402,9 @@ export class Prices extends Game {
     const yesBg = this._getNode("learnYesBtnBg");
     const noBg = this._getNode("learnNoBtnBg");
     if (response === 1) {
-      yesBg.fillColor = GOLD;
+      yesBg.fillColor = ACCENT;
     } else {
-      noBg.fillColor = GOLD;
+      noBg.fillColor = ACCENT;
     }
   }
 
@@ -1454,8 +1454,8 @@ export class Prices extends Game {
     const btn2Bg = this._getNode("recogBtn2Bg");
     btn1Bg.fillColor = CARD_BG;
     btn2Bg.fillColor = CARD_BG;
-    btn1Label.fontColor = TEXT_DARK;
-    btn2Label.fontColor = TEXT_DARK;
+    btn1Label.fontColor = TEXT_PRIMARY;
+    btn2Label.fontColor = TEXT_PRIMARY;
     btn1Bg.isUserInteractionEnabled = true;
     btn2Bg.isUserInteractionEnabled = true;
 
