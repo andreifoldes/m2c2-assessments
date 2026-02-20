@@ -121,5 +121,49 @@ session.onEnd(async () => {
   }
 });
 
+assessment.onStart(() => {
+  const skipBtn = document.createElement('div');
+  skipBtn.textContent = 'Skip tutorial';
+  Object.assign(skipBtn.style, {
+    position: 'fixed',
+    bottom: '4%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    zIndex: '9999',
+    color: 'rgba(160, 160, 160, 1)',
+    fontSize: '14px',
+    cursor: 'pointer',
+    fontFamily: 'sans-serif',
+    padding: '8px 16px',
+    userSelect: 'none',
+    webkitTapHighlightColor: 'transparent',
+  });
+  document.body.appendChild(skipBtn);
+
+  const scenes = assessment.scenes;
+  const lastInstructionIdx = scenes.reduce((acc, s, i) =>
+    s.name.startsWith('instructions-') ? i : acc, -1);
+  const targetScene = lastInstructionIdx >= 0 ? scenes[lastInstructionIdx + 1] : null;
+
+  skipBtn.addEventListener('click', () => {
+    if (targetScene) {
+      assessment.presentScene(targetScene);
+    }
+    cleanup();
+  });
+
+  function cleanup() {
+    skipBtn.remove();
+    clearInterval(interval);
+  }
+
+  const interval = setInterval(() => {
+    const cur = assessment.currentScene;
+    if (cur && !cur.name.startsWith('instructions-')) {
+      cleanup();
+    }
+  }, 200);
+});
+
 setGameParametersFromUrlParams(assessment, context.urlParams);
 session.initialize();
