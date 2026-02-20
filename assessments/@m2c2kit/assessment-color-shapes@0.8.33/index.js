@@ -140,7 +140,10 @@ assessment.onStart(() => {
   });
   document.body.appendChild(skipBtn);
 
-  const targetScene = assessment.scenes.find(s => !s.name.startsWith('instructions-'));
+  const scenes = assessment.scenes;
+  const lastInstructionIdx = scenes.reduce((acc, s, i) =>
+    s.name.startsWith('instructions-') ? i : acc, -1);
+  const targetScene = lastInstructionIdx >= 0 ? scenes[lastInstructionIdx + 1] : null;
 
   skipBtn.addEventListener('click', () => {
     if (targetScene) {
