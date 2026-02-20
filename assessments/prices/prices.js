@@ -757,7 +757,7 @@ export class Prices extends Game {
       text: "Skip tutorial",
       fontSize: 14,
       fontColor: TEXT_TERTIARY,
-      position: { x: 200, y: 740 },
+      position: { x: 200, y: 760 },
       isUserInteractionEnabled: true,
       zPosition: 20,
     });

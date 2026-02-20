@@ -126,7 +126,7 @@ assessment.onStart(() => {
   skipBtn.textContent = 'Skip tutorial';
   Object.assign(skipBtn.style, {
     position: 'fixed',
-    bottom: '7%',
+    bottom: '4%',
     left: '50%',
     transform: 'translateX(-50%)',
     zIndex: '9999',
