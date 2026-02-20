@@ -150,8 +150,8 @@ An associative memory task with a learning and recognition phase. Participants a
 | `show_good_price_question` | number | `1` | Set to `0` to hide the "Is this a good price?" question during the learning phase. |
 | `tutorial` | string | `true` | Set to `false` or `0` to skip the tutorial screens. |
 | `min_price_distance_usd` | number | `3.0` | Minimum separation between the correct price and distractor, expressed in USD. Automatically converted to the local currency equivalent using approximate exchange rates (see below). |
-| `locale` | string | `auto` | BCP 47 locale tag (e.g. `en-GB`, `fr-FR`). Detected from the browser when set to `auto`. |
-| `currency` | string | `auto` | ISO 4217 currency code (e.g. `GBP`, `EUR`). Inferred from locale when set to `auto`. |
+| `locale` | string | `en-GB` | BCP 47 locale tag (e.g. `en-GB`, `fr-FR`). Set to `auto` to detect from the browser. |
+| `currency` | string | `GBP` | ISO 4217 currency code (e.g. `GBP`, `EUR`). Set to `auto` to infer from locale. |
 | `excluded_items` | string | — | Comma-separated item names to exclude from this session. Used to enforce the within-day no-repeat rule: across up to 4 sessions per day, the 40-item pool is drawn without replacement so no item appears twice on the same day. The calling server tracks which items have been used today and passes them here. |
 | `used_item_prices` | string (JSON) | `{}` | JSON object mapping item names to arrays of prices previously paired with them, e.g. `{"Almonds":[3.27,5.82],"Cereal":[7.63]}`. Prevents the same item-price pair from being re-presented across the 28 longitudinal sessions. The calling server maintains this history and passes it here. |
 

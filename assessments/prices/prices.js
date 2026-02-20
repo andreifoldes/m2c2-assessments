@@ -307,18 +307,18 @@ export class Prices extends Game {
           "currency equivalent using approximate exchange rates.",
       },
       locale: {
-        default: "auto",
+        default: "en-GB",
         type: "string",
         description:
           "BCP 47 locale tag (e.g. 'en-GB', 'fr-FR'). " +
-          "When 'auto', detected from the browser.",
+          "Set to 'auto' to detect from the browser.",
       },
       currency: {
-        default: "auto",
+        default: "GBP",
         type: "string",
         description:
           "ISO 4217 currency code (e.g. 'GBP', 'EUR'). " +
-          "When 'auto', inferred from locale.",
+          "Set to 'auto' to infer from locale.",
       },
       excluded_items: {
         default: "",
