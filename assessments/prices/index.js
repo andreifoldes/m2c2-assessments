@@ -2,6 +2,9 @@ import { Session } from "@m2c2kit/session";
 import { Prices } from "./prices.js";
 
 const assessment = new Prices();
+assessment.setParameters({
+  show_trials_complete_scene: false,
+});
 
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");

@@ -50,7 +50,8 @@ const session = new sessionModule.Session({
 });
 assessment.setParameters({
   "number_of_trials": 12,
-  "show_quit_button": false
+  "show_quit_button": false,
+  "show_trials_complete_scene": false
 });
 
 const params = new URLSearchParams(window.location.search);
