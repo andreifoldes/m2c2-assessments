@@ -110,6 +110,39 @@ const ZERO_DECIMAL_CURRENCIES = new Set([
   "COP",
 ]);
 
+// Fallback currency symbols for mobile browsers that render the ISO code
+// (e.g. "GBP" instead of "£") when Intl.NumberFormat data is incomplete.
+const CURRENCY_SYMBOLS = {
+  GBP: "£",
+  USD: "$",
+  EUR: "€",
+  AUD: "A$",
+  CAD: "CA$",
+  NZD: "NZ$",
+  ZAR: "R",
+  INR: "₹",
+  CHF: "CHF",
+  MXN: "MX$",
+  ARS: "ARS",
+  COP: "COL$",
+  CLP: "CL$",
+  BRL: "R$",
+  JPY: "¥",
+  KRW: "₩",
+  CNY: "¥",
+  TWD: "NT$",
+  DKK: "kr",
+  SEK: "kr",
+  NOK: "kr",
+  PLN: "zł",
+  RUB: "₽",
+  TRY: "₺",
+  THB: "฿",
+  MYR: "RM",
+  IDR: "Rp",
+  SAR: "﷼",
+};
+
 // Approximate units of local currency per 1 USD.
 // Used to convert the minimum distractor distance from USD to local units.
 const USD_EXCHANGE_RATES = {
@@ -334,6 +367,13 @@ export class Prices extends Game {
           "JSON object mapping item names to arrays of previously used prices. " +
           'E.g. \'{"Almonds":[3.27,5.82],"Cereal":[7.63]}\'. ' +
           "Prevents re-presenting the same item-price pair (Rule 8).",
+      },
+      show_trials_complete_scene: {
+        default: true,
+        type: "boolean",
+        description:
+          "After the final trial, should a completion scene be shown? " +
+          "Otherwise, the game will immediately end.",
       },
     };
 
@@ -1465,7 +1505,11 @@ export class Prices extends Game {
   _showRecognitionItem(orderIndex) {
     const numItems = this.getParameter("number_of_items");
     if (orderIndex >= numItems) {
-      this.presentScene("end", Transition.none());
+      if (this.getParameter("show_trials_complete_scene")) {
+        this.presentScene("end", Transition.none());
+      } else {
+        this.end();
+      }
       return;
     }
 
@@ -1601,9 +1645,24 @@ export class Prices extends Game {
 
     this._isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(this._currencyCode);
 
+    // Use "narrowSymbol" so e.g. GBP renders as "£" not "GBP".
+    // Some older mobile browsers don't support narrowSymbol, so fall back
+    // to "symbol". _formatPrice() has an additional fallback that replaces
+    // the ISO code with the symbol from CURRENCY_SYMBOLS if needed.
+    let displayStyle = "narrowSymbol";
+    try {
+      new Intl.NumberFormat(this._locale, {
+        style: "currency",
+        currency: this._currencyCode,
+        currencyDisplay: "narrowSymbol",
+      });
+    } catch {
+      displayStyle = "symbol";
+    }
     this._priceFormatter = new Intl.NumberFormat(this._locale, {
       style: "currency",
       currency: this._currencyCode,
+      currencyDisplay: displayStyle,
       minimumFractionDigits: this._isZeroDecimal ? 0 : 2,
       maximumFractionDigits: this._isZeroDecimal ? 0 : 2,
     });
@@ -1658,7 +1717,15 @@ export class Prices extends Game {
 
   _formatPrice(value) {
     const scaled = this._isZeroDecimal ? Math.round(value * 100) : value;
-    return this._priceFormatter.format(scaled);
+    let result = this._priceFormatter.format(scaled);
+
+    // Some mobile browsers still render the ISO code (e.g. "GBP 1.50")
+    // even with currencyDisplay: "narrowSymbol". Replace with the symbol.
+    const sym = CURRENCY_SYMBOLS[this._currencyCode];
+    if (sym && result.includes(this._currencyCode)) {
+      result = result.replace(this._currencyCode, sym);
+    }
+    return result;
   }
 
   // ─── Helpers ─────────────────────────────────────────────
