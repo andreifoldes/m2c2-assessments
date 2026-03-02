@@ -559,7 +559,7 @@ export class Prices extends Game {
 
     s2.addChild(
       new Label({
-        text: "You will see an item and its price.\nEach pair is shown for 3 seconds.",
+        text: "You will see an item and its price.\nEach pair is shown for 3 seconds.\nYou'll be asked if it's a good price.",
         fontSize: 16,
         fontColor: TEXT_SECONDARY,
         position: { x: 200, y: 135 },
