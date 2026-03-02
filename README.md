@@ -13,6 +13,18 @@ Cognitive assessments hosted on GitHub Pages, built with [m2c2kit](https://githu
 | **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webcam=1) |
 | **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webcam=1) |
 
+## Common URL Parameters
+
+These parameters are supported by **all** assessments:
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `token` | string | — | Authentication token for results submission. |
+| `callback_url` | string | — | URL to POST results to when the assessment ends. |
+| `show_end_screen` | string | `true` | Set to `false` or `0` to suppress the green "Assessment Complete" screen after results are submitted. The Telegram WebView will close immediately instead of showing the confirmation. Useful when the chatbot handles its own completion flow. |
+
+---
+
 ## PVT-BA
 
 An adaptive Psychomotor Vigilance Test that measures sustained attention and reaction time. A millisecond counter appears after a random delay; the participant taps the screen as quickly as possible. A Bayesian sequential algorithm (Basner 2022, *Sleep Advances* 3(1):zpac038) classifies vigilance into HIGH, MEDIUM, or LOW, often terminating early once the posterior probability exceeds a decision threshold. The test runs for at most 3 minutes.

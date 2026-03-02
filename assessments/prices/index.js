@@ -118,15 +118,18 @@ session.onEnd(async () => {
       throw new Error(err.detail || `Server error: ${resp.status}`);
     }
 
-    document.body.innerHTML = `
+    const showEndScreen = params.get("show_end_screen") !== "false" && params.get("show_end_screen") !== "0";
+    if (showEndScreen) {
+      document.body.innerHTML = `
       <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
-        <h1 style="color:#2e7d32;">Assessment Complete</h1>
-        <p style="color:#2e7d32;">Your results have been recorded. Thank you!</p>
-        <p>You can now close this window and return to Telegram.</p>
+      <h1 style="color:#2e7d32;">Assessment Complete</h1>
+      <p style="color:#2e7d32;">Your results have been recorded. Thank you!</p>
+      <p>You can now close this window and return to Telegram.</p>
       </div>`;
+    }
 
     if (window.Telegram && window.Telegram.WebApp) {
-      setTimeout(() => window.Telegram.WebApp.close(), 2000);
+      setTimeout(() => window.Telegram.WebApp.close(), showEndScreen ? 2000 : 0);
     }
   } catch (err) {
     console.error("Failed to submit results:", err);
