@@ -1574,6 +1574,8 @@ class ColorShapes extends Game {
                 imageAboveText: false,
                 imageMarginTop: 32,
                 imageTitle: "Image #2",
+                imageCaption: "Because the shape that was black in Image #1 is now pink, the correct answer is \"Different\".",
+                imageCaptionFontSize: 16,
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,

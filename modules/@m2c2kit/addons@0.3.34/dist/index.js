@@ -2335,6 +2335,27 @@ class Instructions extends Story {
           scene.addChild(imageTitleLabel);
         }
         scene.addChild(image);
+        if (s.imageCaption) {
+          const imageCaptionFontSize = s.imageCaptionFontSize ?? 14;
+          const imageCaptionLabel = new Label({
+            name: "imageCaptionLabel",
+            text: s.imageCaption,
+            fontSize: imageCaptionFontSize,
+            preferredMaxLayoutWidth: Dimensions.MatchConstraint,
+            horizontalAlignmentMode: LabelHorizontalAlignmentMode.Center,
+            layout: {
+              marginTop: 8,
+              marginStart: textMarginStart,
+              marginEnd: textMarginEnd,
+              constraints: {
+                topToBottomOf: image,
+                startToStartOf: scene,
+                endToEndOf: scene
+              }
+            }
+          });
+          scene.addChild(imageCaptionLabel);
+        }
       }
       if (i > 0) {
         const backButton = new Button({
