@@ -1,4 +1,4 @@
-import { Game, RandomDraws, Sprite, Scene, M2Error as M2Error$1, WebColors, Transition, Shape, Label, Action, Timer, Easings, TransitionDirection } from '@m2c2kit/core';
+import { Game, RandomDraws, Sprite, Scene, M2Error as M2Error$1, WebColors, Transition, Shape, Label, Action, Timer, Easings, TransitionDirection, LabelHorizontalAlignmentMode } from '@m2c2kit/core';
 import { LocalePicker, Instructions, CountdownScene, Grid, Button } from '@m2c2kit/addons';
 
 class M2Error extends Error {
@@ -1549,6 +1549,7 @@ class ColorShapes extends Game {
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
+                textAlignmentMode: LabelHorizontalAlignmentMode.Center,
                 nextButtonText: "NEXT_BUTTON_TEXT",
                 backButtonText: "BACK_BUTTON_TEXT"
               },
@@ -1562,6 +1563,7 @@ class ColorShapes extends Game {
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
+                textAlignmentMode: LabelHorizontalAlignmentMode.Center,
                 nextButtonText: "NEXT_BUTTON_TEXT",
                 backButtonText: "BACK_BUTTON_TEXT"
               },
@@ -1575,6 +1577,7 @@ class ColorShapes extends Game {
                 textFontSize: 24,
                 titleFontSize: 30,
                 textVerticalBias: 0.2,
+                textAlignmentMode: LabelHorizontalAlignmentMode.Center,
                 nextButtonText: "START_BUTTON_TEXT",
                 nextButtonBackgroundColor: WebColors.Green,
                 backButtonText: "BACK_BUTTON_TEXT"
