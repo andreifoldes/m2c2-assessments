@@ -71,16 +71,19 @@ session.onEnd(async () => {
       trials: allTrialData,
     };
     console.log("[PVT-BA debug] all trial data:", summary);
-    document.body.innerHTML = `
-      <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
-        <h1 style="color:#4CAF50;">Assessment Complete (Debug Mode)</h1>
-        <p>No token/callback_url provided &mdash; results shown below instead of being submitted.</p>
-        <p style="color:#555;">Total trials: ${allTrialData.length} &nbsp;|&nbsp; Session duration: ${totalDurationSeconds}s</p>
-        <details open style="text-align:left;max-width:600px;margin:20px auto;">
-          <summary style="cursor:pointer;color:#c68a00;font-size:16px;">Trial Data (JSON)</summary>
-          <pre style="background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;color:#333;max-height:60vh;">${JSON.stringify(allTrialData, null, 2)}</pre>
-        </details>
-      </div>`;
+    const showEndScreen = params.get("show_end_screen") !== "false" && params.get("show_end_screen") !== "0";
+    if (showEndScreen) {
+      document.body.innerHTML = `
+        <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
+          <h1 style="color:#4CAF50;">Assessment Complete (Debug Mode)</h1>
+          <p>No token/callback_url provided &mdash; results shown below instead of being submitted.</p>
+          <p style="color:#555;">Total trials: ${allTrialData.length} &nbsp;|&nbsp; Session duration: ${totalDurationSeconds}s</p>
+          <details open style="text-align:left;max-width:600px;margin:20px auto;">
+            <summary style="cursor:pointer;color:#c68a00;font-size:16px;">Trial Data (JSON)</summary>
+            <pre style="background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;color:#333;max-height:60vh;">${JSON.stringify(allTrialData, null, 2)}</pre>
+          </details>
+        </div>`;
+    }
     return;
   }
 
