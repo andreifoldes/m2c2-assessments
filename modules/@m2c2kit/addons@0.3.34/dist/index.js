@@ -2247,6 +2247,9 @@ class Instructions extends Story {
       }
       if (s.imageName !== void 0) {
         let image;
+        let imageTitleLabel;
+        const imageTitle = s.imageTitle;
+        const imageTitleFontSize = s.imageTitleFontSize ?? 14;
         if (textLabel !== void 0) {
           if (imageAboveText) {
             image = new Sprite({
@@ -2260,18 +2263,59 @@ class Instructions extends Story {
                 }
               }
             });
-          } else {
-            image = new Sprite({
-              imageName: s.imageName,
-              layout: {
-                marginTop: imageMarginTop,
-                constraints: {
-                  topToBottomOf: textLabel,
-                  startToStartOf: scene,
-                  endToEndOf: scene
+            if (imageTitle) {
+              imageTitleLabel = new Label({
+                name: "imageTitleLabel",
+                text: imageTitle,
+                fontSize: imageTitleFontSize,
+                layout: {
+                  constraints: {
+                    bottomToTopOf: image,
+                    startToStartOf: scene,
+                    endToEndOf: scene
+                  }
                 }
-              }
-            });
+              });
+            }
+          } else {
+            if (imageTitle) {
+              imageTitleLabel = new Label({
+                name: "imageTitleLabel",
+                text: imageTitle,
+                fontSize: imageTitleFontSize,
+                layout: {
+                  marginTop: imageMarginTop,
+                  constraints: {
+                    topToBottomOf: textLabel,
+                    startToStartOf: scene,
+                    endToEndOf: scene
+                  }
+                }
+              });
+              image = new Sprite({
+                imageName: s.imageName,
+                layout: {
+                  marginTop: 4,
+                  constraints: {
+                    topToBottomOf: imageTitleLabel,
+                    startToStartOf: scene,
+                    endToEndOf: scene
+                  }
+                }
+              });
+            } else {
+              image = new Sprite({
+                imageName: s.imageName,
+                layout: {
+                  marginTop: imageMarginTop,
+                  constraints: {
+                    topToBottomOf: textLabel,
+                    startToStartOf: scene,
+                    endToEndOf: scene
+                  }
+                }
+              });
+            }
           }
         } else {
           image = new Sprite({
@@ -2286,6 +2330,9 @@ class Instructions extends Story {
               }
             }
           });
+        }
+        if (imageTitleLabel) {
+          scene.addChild(imageTitleLabel);
         }
         scene.addChild(image);
       }
