@@ -1578,7 +1578,7 @@ class ColorShapes extends Game {
                 imageCaptionFontSize: 14,
                 textFontSize: 20,
                 titleFontSize: 30,
-                textVerticalBias: 0.1,
+                textVerticalBias: 0.15,
                 textAlignmentMode: LabelHorizontalAlignmentMode.Center,
                 nextButtonText: "START_BUTTON_TEXT",
                 nextButtonBackgroundColor: WebColors.Green,
