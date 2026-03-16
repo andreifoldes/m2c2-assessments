@@ -1,3 +1,5 @@
 node_modules/
 archive/
 test-results/
+tests/
+.playwright-mcp/
