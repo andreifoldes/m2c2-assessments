@@ -8,10 +8,10 @@ Cognitive assessments hosted on GitHub Pages, built with [m2c2kit](https://githu
 |---|---|---|---|---|---|
 | **PVT-BA** | Adaptive Psychomotor Vigilance Test — measures sustained attention and reaction time | ≤180 (adaptive) | [Basner, 2022](https://doi.org/10.1093/sleepadvances/zpac038) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/pvt-ba/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/pvt-ba/?webcam=1) |
 | **Color Dots** | Measures processing speed by comparing colored dots | ~60 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-dots@0.8.33/) | — |
-| **Symbol Search** | Measures processing speed by matching symbols | ~60 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-symbol-search@0.8.33/) | — |
+| **Symbol Search** | Measures processing speed by matching symbols | ~60 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-symbol-search@0.8.33/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-symbol-search@0.8.33/?webcam=1) |
 | **Grid Memory** | Measures spatial working memory using a grid pattern | ~240 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-grid-memory@0.8.33/) | — |
-| **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/) | — |
-| **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/) | — |
+| **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webcam=1) |
+| **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webcam=1) |
 
 ## PVT-BA
 
@@ -86,6 +86,7 @@ A processing speed task from the m2c2kit library. Participants see a set of symb
 | `countdown_duration_ms` | number | `3000` | Duration of the countdown phase before trials begin (ms). |
 | `interstimulus_interval_duration_ms` | number | `500` | Duration of the slide-in animation or pause between trials (ms). |
 | `instruction_type` | string | `long` | `short` or `long` — controls length of instruction screens. |
+| `webcam` | string | — | Set to `1` or `true` to enable optional camera recording. Participants see a consent prompt; if they accept, the front camera records and the video is saved locally at session end. |
 
 \* The m2c2kit default is 20, but this deployment overrides it to 12.
 
@@ -133,6 +134,7 @@ An executive function task from the m2c2kit library. Participants see colored sh
 | `fixation_duration_ms` | number | `500` | How long the fixation scene is shown (ms). |
 | `cells_per_side` | integer | `3` | Grid dimensions — e.g. `3` gives a 3 x 3 grid, `4` gives 4 x 4. |
 | `instruction_type` | string | `long` | `short` or `long` — controls length of instruction screens. |
+| `webcam` | string | — | Set to `1` or `true` to enable optional camera recording. Participants see a consent prompt; if they accept, the front camera records and the video is saved locally at session end. |
 
 ---
 
@@ -155,6 +157,7 @@ An associative memory task with a learning and recognition phase. Participants a
 | `currency` | string | `GBP` | ISO 4217 currency code (e.g. `GBP`, `EUR`). Set to `auto` to infer from locale. |
 | `excluded_items` | string | — | Comma-separated item names to exclude from this session. Used to enforce the within-day no-repeat rule: across up to 4 sessions per day, the 40-item pool is drawn without replacement so no item appears twice on the same day. The calling server tracks which items have been used today and passes them here. |
 | `used_item_prices` | string (JSON) | `{}` | JSON object mapping item names to arrays of prices previously paired with them, e.g. `{"Almonds":[3.27,5.82],"Cereal":[7.63]}`. Prevents the same item-price pair from being re-presented across the 28 longitudinal sessions. The calling server maintains this history and passes it here. |
+| `webcam` | string | — | Set to `1` or `true` to enable optional camera recording. Participants see a consent prompt; if they accept, the front camera records and the video is saved locally at session end. |
 
 ### Price Generation Rules
 

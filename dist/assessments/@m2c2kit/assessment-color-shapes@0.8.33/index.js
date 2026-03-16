@@ -1,3 +1,11 @@
+import {
+  showWebcamConsentOverlay,
+  getWebcamStream,
+  startRecordingStream,
+  showFacePositioningGuide,
+  stopAndDownloadRecording,
+} from "../../webcam/webcam.js";
+
 const context = {
   urlParams: new URLSearchParams(window.location.search),
   assessment: {
@@ -42,6 +50,13 @@ function setGameParametersFromUrlParams(game, urlParams) {
   game.setParameters(gameParameters);
 }
 
+// webcam=1 or webcam=true enables the optional recording feature
+// Must be read and stripped before setGameParametersFromUrlParams is called,
+// otherwise the unknown param gets forwarded to the game engine.
+const webcamParam = context.urlParams.get("webcam");
+const webcamEnabled = webcamParam === "1" || webcamParam === "true";
+context.urlParams.delete("webcam");
+
 const [sessionModule, assessmentModule] = await loadModules(["@m2c2kit/session", "@m2c2kit/assessment-color-shapes"]);
 const assessmentClassName = getAssessmentClassNameFromModule(assessmentModule);
 const assessment = new assessmentModule[assessmentClassName]();
@@ -73,6 +88,10 @@ session.onActivityData((ev) => {
 });
 
 session.onEnd(async () => {
+  if (webcamRecording) {
+    await stopAndDownloadRecording(webcamRecording, "color-shapes");
+  }
+
   if (!token || !callbackUrl) {
     document.body.innerHTML = `
           <div style="text-align:center;padding:40px;font-family:sans-serif;">
@@ -165,6 +184,22 @@ assessment.onStart(() => {
     }
   }, 200);
 });
+
+// Conditionally show consent, then face positioning guide, then start recording
+let webcamRecording = null;
+
+if (webcamEnabled) {
+  const accepted = await showWebcamConsentOverlay();
+  if (accepted) {
+    try {
+      const stream = await getWebcamStream();
+      await showFacePositioningGuide(stream);
+      webcamRecording = startRecordingStream(stream);
+    } catch (_) {
+      console.warn("[Color Shapes] Webcam recording unavailable, proceeding without it.");
+    }
+  }
+}
 
 setGameParametersFromUrlParams(assessment, context.urlParams);
 session.initialize();

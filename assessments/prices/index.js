@@ -1,5 +1,12 @@
 import { Session } from "@m2c2kit/session";
 import { Prices } from "./prices.js";
+import {
+  showWebcamConsentOverlay,
+  getWebcamStream,
+  startRecordingStream,
+  showFacePositioningGuide,
+  stopAndDownloadRecording,
+} from "../webcam/webcam.js";
 
 const assessment = new Prices();
 assessment.setParameters({
@@ -43,6 +50,10 @@ if (Object.keys(paramOverrides).length > 0) {
   assessment.setParameters(paramOverrides);
 }
 
+// webcam=1 or webcam=true enables the optional recording feature
+const webcamParam = params.get("webcam");
+const webcamEnabled = webcamParam === "1" || webcamParam === "true";
+
 const allTrialData = [];
 
 const session = new Session({
@@ -57,6 +68,10 @@ session.onActivityData((ev) => {
 });
 
 session.onEnd(async () => {
+  if (webcamRecording) {
+    await stopAndDownloadRecording(webcamRecording, "prices");
+  }
+
   if (debugMode) {
     const correct = allTrialData.filter((t) => t.is_correct).length;
     const total = allTrialData.length;
@@ -122,5 +137,21 @@ session.onEnd(async () => {
       </div>`;
   }
 });
+
+// Conditionally show consent, then face positioning guide, then start recording
+let webcamRecording = null;
+
+if (webcamEnabled) {
+  const accepted = await showWebcamConsentOverlay();
+  if (accepted) {
+    try {
+      const stream = await getWebcamStream();
+      await showFacePositioningGuide(stream);
+      webcamRecording = startRecordingStream(stream);
+    } catch (_) {
+      console.warn("[Prices] Webcam recording unavailable, proceeding without it.");
+    }
+  }
+}
 
 session.initialize();
