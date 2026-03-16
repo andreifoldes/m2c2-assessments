@@ -391,26 +391,57 @@ export class PvtBa extends Game {
     });
     scene3.addChild(demoCounter);
 
+    if (isTouchDevice) {
+      const thumbIllustration3 = new Sprite({
+        imageName: "rightThumb",
+        position: { x: 310, y: 380 },
+        zPosition: 5,
+      });
+      scene3.addChild(thumbIllustration3);
+
+      const textBg1 = new Shape({
+        rect: { width: 360, height: 36 },
+        fillColor: SCENE_BG,
+        position: { x: 200, y: 360 },
+        zPosition: 6,
+      });
+      scene3.addChild(textBg1);
+
+      const textBg2 = new Shape({
+        rect: { width: 360, height: 56 },
+        fillColor: SCENE_BG,
+        position: { x: 200, y: 430 },
+        zPosition: 6,
+      });
+      scene3.addChild(textBg2);
+    }
+
     const howInstr1 = new Label({
       text: "A counter will appear in the box.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 360 },
       preferredMaxLayoutWidth: 340,
+      zPosition: 7,
     });
     scene3.addChild(howInstr1);
 
     const howInstr2 = new Label({
-      text: "Tap the screen as quickly as\npossible when the counter appears.",
+      text: isTouchDevice
+        ? "Tap the screen as quickly as\npossible when the counter appears."
+        : "Click as quickly as possible\nwhen the counter appears.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 430 },
       preferredMaxLayoutWidth: 340,
+      zPosition: 7,
     });
     scene3.addChild(howInstr2);
 
     const howInstr3 = new Label({
-      text: "Do NOT tap when the box is empty.",
+      text: isTouchDevice
+        ? "Do NOT tap when the box is empty."
+        : "Do NOT click when the box is empty.",
       fontSize: 18,
       fontColor: RED,
       position: { x: 200, y: 510 },
