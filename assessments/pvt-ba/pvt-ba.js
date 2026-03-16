@@ -4,6 +4,7 @@ import {
   Scene,
   Shape,
   Label,
+  LabelHorizontalAlignmentMode,
   Sprite,
   Timer,
   WebColors,
@@ -398,29 +399,14 @@ export class PvtBa extends Game {
         zPosition: 5,
       });
       scene3.addChild(thumbIllustration3);
-
-      const textBg1 = new Shape({
-        rect: { width: 360, height: 36 },
-        fillColor: SCENE_BG,
-        position: { x: 200, y: 360 },
-        zPosition: 6,
-      });
-      scene3.addChild(textBg1);
-
-      const textBg2 = new Shape({
-        rect: { width: 360, height: 56 },
-        fillColor: SCENE_BG,
-        position: { x: 200, y: 430 },
-        zPosition: 6,
-      });
-      scene3.addChild(textBg2);
     }
 
     const howInstr1 = new Label({
       text: "A counter will appear in the box.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
-      position: { x: 200, y: 360 },
+      position: { x: 30, y: 360 },
+      anchorPoint: { x: 0, y: 0.5 },
       preferredMaxLayoutWidth: 340,
       zPosition: 7,
     });
@@ -432,8 +418,10 @@ export class PvtBa extends Game {
         : "Click as quickly as possible\nwhen the counter appears.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
-      position: { x: 200, y: 430 },
+      position: { x: 30, y: 430 },
+      anchorPoint: { x: 0, y: 0.5 },
       preferredMaxLayoutWidth: 340,
+      horizontalAlignmentMode: LabelHorizontalAlignmentMode.Left,
       zPosition: 7,
     });
     scene3.addChild(howInstr2);
