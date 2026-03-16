@@ -222,14 +222,22 @@ export function getFacePositionFeedback(detection, videoW, videoH) {
  * Draws the oval positioning guide on the canvas.
  * A dark mask surrounds a clear oval cutout through which the live video shows.
  * The oval border turns green and thickens as the participant holds position.
+ *
+ * w and h are the LOGICAL (CSS) pixel dimensions of the overlay.
+ * The canvas context must already be scaled by devicePixelRatio before this call.
  */
 export function drawPositioningOverlay(ctx, w, h, status, progress) {
   ctx.clearRect(0, 0, w, h);
 
   const cx = w * 0.5;
   const cy = h * 0.42;
-  const rx = Math.min(w * 0.30, 130);
-  const ry = Math.min(h * 0.38, 200);
+
+  // Derive the oval from viewport fractions with no hard pixel cap.
+  // ry drives the size; rx enforces a portrait face aspect ratio (~3:4).
+  // Using the minimum of width/height fractions keeps the oval on-screen on
+  // both portrait phones and wide desktop viewports.
+  const ry = Math.min(w * 0.38, h * 0.42);
+  const rx = ry * 0.72;
 
   // Semi-transparent dark mask with oval cutout (even-odd fill rule)
   ctx.save();
@@ -339,14 +347,26 @@ export function showFacePositioningGuide(stream) {
       overlay.remove();
     }
 
+    // Returns the logical (CSS) dimensions after syncing the canvas resolution.
+    // The canvas pixel buffer is scaled by devicePixelRatio so drawing is sharp
+    // on Retina / high-DPI screens; all drawing coordinates remain in CSS pixels.
     function resizeCanvas() {
-      canvas.width = overlay.offsetWidth || window.innerWidth;
-      canvas.height = overlay.offsetHeight || window.innerHeight;
+      const dpr = window.devicePixelRatio || 1;
+      const w = overlay.offsetWidth || window.innerWidth;
+      const h = overlay.offsetHeight || window.innerHeight;
+      if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { w, h };
     }
 
     function detect(timestamp) {
       if (isCleanedUp) return;
-      resizeCanvas();
+      const { w, h } = resizeCanvas();
 
       let detection = null;
       if (detectorLoaded && video.videoWidth > 0 && video.readyState >= 2) {
@@ -368,7 +388,7 @@ export function showFacePositioningGuide(stream) {
         progress = Math.min((now - goodSince) / 1500, 1);
         if (progress >= 1) {
           statusText.textContent = "✓ Perfect!";
-          drawPositioningOverlay(ctx, canvas.width, canvas.height, "good", 1);
+          drawPositioningOverlay(ctx, w, h, "good", 1);
           setTimeout(() => { if (!isCleanedUp) { cleanup(); resolve(); } }, 400);
           return;
         }
@@ -377,7 +397,7 @@ export function showFacePositioningGuide(stream) {
       }
 
       statusText.textContent = message;
-      drawPositioningOverlay(ctx, canvas.width, canvas.height, status, progress);
+      drawPositioningOverlay(ctx, w, h, status, progress);
       animFrameId = requestAnimationFrame(detect);
     }
 
@@ -385,8 +405,8 @@ export function showFacePositioningGuide(stream) {
       if (initStarted || isCleanedUp) return;
       initStarted = true;
 
-      resizeCanvas();
-      drawPositioningOverlay(ctx, canvas.width, canvas.height, "loading", 0);
+      const { w, h } = resizeCanvas();
+      drawPositioningOverlay(ctx, w, h, "loading", 0);
       animFrameId = requestAnimationFrame(detect);
 
       try {
