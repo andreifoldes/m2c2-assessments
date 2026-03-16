@@ -4,6 +4,7 @@ import {
   Scene,
   Shape,
   Label,
+  Sprite,
   Timer,
   WebColors,
   RandomDraws,
@@ -100,7 +101,14 @@ export class PvtBa extends Game {
           url: "fonts/roboto/Roboto-Regular.ttf",
         },
       ],
-      images: [],
+      images: [
+        {
+          imageName: "rightThumb",
+          width: 165,
+          height: 198,
+          url: "images/rightthumb.svg",
+        },
+      ],
       trialSchema: {
         trial_index: { type: "integer", description: "0-based trial index" },
         rt_ms: {
@@ -266,7 +274,10 @@ export class PvtBa extends Game {
       this.presentScene("tutorial_2", Transition.none());
     });
 
-    // --- Screen 2: Thumb positioning ---
+    // --- Screen 2: Thumb/mouse positioning ---
+    const isTouchDevice =
+      ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+
     const scene2 = new Scene({
       name: "tutorial_2",
       backgroundColor: SCENE_BG,
@@ -293,7 +304,9 @@ export class PvtBa extends Game {
     scene2.addChild(thumbBox);
 
     const thumbInstr = new Label({
-      text: "Hover the thumb of your\ndominant hand over the\nscreen and watch the box.",
+      text: isTouchDevice
+        ? "Hover the thumb of your\ndominant hand over the\nscreen and watch the box."
+        : "Position your mouse cursor\nover the box and get\nready to click.",
       fontSize: 20,
       fontColor: TEXT_SECONDARY,
       position: { x: 200, y: 460 },
@@ -302,13 +315,24 @@ export class PvtBa extends Game {
     scene2.addChild(thumbInstr);
 
     const thumbHint = new Label({
-      text: "Keep your thumb close to the\nscreen so you can tap quickly.",
+      text: isTouchDevice
+        ? "Keep your thumb close to the\nscreen so you can tap quickly."
+        : "Keep your hand on the mouse\nso you can click quickly.",
       fontSize: 16,
       fontColor: TEXT_TERTIARY,
       position: { x: 200, y: 570 },
       preferredMaxLayoutWidth: 340,
     });
     scene2.addChild(thumbHint);
+
+    if (isTouchDevice) {
+      const thumbIllustration = new Sprite({
+        imageName: "rightThumb",
+        position: { x: 310, y: 440 },
+        zPosition: 5,
+      });
+      scene2.addChild(thumbIllustration);
+    }
 
     const nextBtn2 = new Shape({
       rect: { width: 200, height: 56 },
