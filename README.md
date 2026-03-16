@@ -4,14 +4,14 @@ Cognitive assessments hosted on GitHub Pages, built with [m2c2kit](https://githu
 
 ## Live Demos
 
-| Assessment | Description | Duration (s) | Source | Link |
-|---|---|---|---|---|
-| **PVT-BA** | Adaptive Psychomotor Vigilance Test — measures sustained attention and reaction time | ≤180 (adaptive) | [Basner, 2022](https://doi.org/10.1093/sleepadvances/zpac038) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/pvt-ba/) |
-| **Color Dots** | Measures processing speed by comparing colored dots | ~60 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-dots@0.8.33/) |
-| **Symbol Search** | Measures processing speed by matching symbols | ~60 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-symbol-search@0.8.33/) |
-| **Grid Memory** | Measures spatial working memory using a grid pattern | ~240 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-grid-memory@0.8.33/) |
-| **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/) |
-| **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/) |
+| Assessment | Description | Duration (s) | Source | Launch | Launch with camera recording |
+|---|---|---|---|---|---|
+| **PVT-BA** | Adaptive Psychomotor Vigilance Test — measures sustained attention and reaction time | ≤180 (adaptive) | [Basner, 2022](https://doi.org/10.1093/sleepadvances/zpac038) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/pvt-ba/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/pvt-ba/?webcam=1) |
+| **Color Dots** | Measures processing speed by comparing colored dots | ~60 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-dots@0.8.33/) | — |
+| **Symbol Search** | Measures processing speed by matching symbols | ~60 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-symbol-search@0.8.33/) | — |
+| **Grid Memory** | Measures spatial working memory using a grid pattern | ~240 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-grid-memory@0.8.33/) | — |
+| **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/) | — |
+| **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/) | — |
 
 ## PVT-BA
 
@@ -31,6 +31,7 @@ An adaptive Psychomotor Vigilance Test that measures sustained attention and rea
 | `decision_threshold` | number | `0.99619` | Posterior probability threshold to stop the test early. |
 | `feedback_duration_ms` | number | `1000` | How long feedback (RT value or error message) is displayed after each trial (ms). |
 | `tutorial` | string | `true` | Set to `false` or `0` to skip the tutorial screens. |
+| `webcam` | string | — | Set to `1` or `true` to enable the optional camera recording feature. Participants are shown a consent prompt before the task; if they accept, the front camera records and the video is saved locally to their device at the end of the session. If absent or any other value, no prompt is shown. |
 
 ### Adaptive Algorithm
 
