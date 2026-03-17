@@ -394,7 +394,7 @@ export function drawPositioningOverlay(ctx, w, h, status, progress) {
   // ry drives the size; rx enforces a portrait face aspect ratio (~3:4).
   // Using the minimum of width/height fractions keeps the oval on-screen on
   // both portrait phones and wide desktop viewports.
-  const ry = Math.min(w * 0.38, h * 0.42);
+  const ry = Math.min(w * 0.45, h * 0.42);
   const rx = ry * 0.72;
 
   // Semi-transparent dark mask with oval cutout (even-odd fill rule)
