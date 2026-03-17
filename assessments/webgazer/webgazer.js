@@ -300,12 +300,16 @@ export function runCalibration() {
     const vh = window.innerHeight;
     const dotSize = Math.max(40, Math.min(vw, vh) * 0.06);
 
-    // 5 calibration points: center first, then corners
+    // 9 calibration points: center first, then edges and corners
     const points = [
       { fx: 0.5, fy: 0.5 },
       { fx: 0.15, fy: 0.15 },
+      { fx: 0.5, fy: 0.15 },
       { fx: 0.85, fy: 0.15 },
+      { fx: 0.15, fy: 0.5 },
+      { fx: 0.85, fy: 0.5 },
       { fx: 0.15, fy: 0.85 },
+      { fx: 0.5, fy: 0.85 },
       { fx: 0.85, fy: 0.85 },
     ];
 
