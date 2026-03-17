@@ -102,8 +102,10 @@ if (numberOfTrials) {
 const allTrialData = [];
 
 session.onActivityData((ev) => {
-  if (webgazerModule) webgazerModule.markTrialEnd();
-  if (webgazerModule) webgazerModule.markTrialStart();
+  if (webgazerModule) {
+    webgazerModule.markTrialEnd();
+    webgazerModule.markTrialStart();
+  }
   allTrialData.push(ev.newData);
 });
 

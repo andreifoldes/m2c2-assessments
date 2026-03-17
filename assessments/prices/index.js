@@ -76,8 +76,10 @@ const session = new Session({
 });
 
 session.onActivityData((ev) => {
-  if (webgazerModule) webgazerModule.markTrialEnd();
-  if (webgazerModule) webgazerModule.markTrialStart();
+  if (webgazerModule) {
+    webgazerModule.markTrialEnd();
+    webgazerModule.markTrialStart();
+  }
   allTrialData.push(ev.newData);
   if (debugMode) {
     console.log("[Prices debug] trial data:", ev.newData);

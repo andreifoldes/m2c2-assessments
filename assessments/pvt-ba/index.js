@@ -64,8 +64,10 @@ const session = new Session({
 });
 
 session.onActivityData((ev) => {
-  if (webgazerModule) webgazerModule.markTrialEnd();
-  if (webgazerModule) webgazerModule.markTrialStart();
+  if (webgazerModule) {
+    webgazerModule.markTrialEnd();
+    webgazerModule.markTrialStart();
+  }
   allTrialData.push(ev.newData);
   if (debugMode) {
     console.log("[PVT-BA debug] trial data:", ev.newData);
