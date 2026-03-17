@@ -6,9 +6,43 @@
  *
  * Usage in any assessment index.js:
  *   import { showWebcamConsentOverlay, getWebcamStream,
- *            startRecordingStream, showFacePositioningGuide }
+ *            startRecordingStream, showFacePositioningGuide,
+ *            stopAndDownloadRecording, initWebcamLogger }
  *     from "../webcam/webcam.js";   // adjust relative path as needed
  */
+
+// ── Remote logging ──────────────────────────────────────────────
+// Call initWebcamLogger(token, callbackUrl) early. All subsequent
+// logWebcam() calls send events to the server for debugging.
+let _logEndpoint = null;
+let _logToken = null;
+
+export function initWebcamLogger(token, callbackUrl) {
+  _logToken = token;
+  if (callbackUrl) {
+    // Derive log endpoint from callback_url:
+    // e.g. https://host/api/v1/cognitive/complete → https://host/api/v1/webcam/log
+    try {
+      const url = new URL(callbackUrl);
+      url.pathname = url.pathname.replace(/\/cognitive\/complete$/, "/webcam/log");
+      _logEndpoint = url.toString();
+    } catch (_) {
+      _logEndpoint = null;
+    }
+  }
+}
+
+function logWebcam(event, detail) {
+  const entry = { token: _logToken, event, detail: typeof detail === "string" ? detail : JSON.stringify(detail) };
+  console.log(`[webcam] ${event}`, detail || "");
+  if (_logEndpoint) {
+    fetch(_logEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(entry),
+    }).catch(() => {}); // fire-and-forget
+  }
+}
 
 /**
  * Shows a full-screen consent overlay before the session starts.
@@ -77,13 +111,16 @@ export function showWebcamConsentOverlay() {
     `;
 
     document.body.appendChild(overlay);
+    logWebcam("consent_shown");
 
     document.getElementById("webcam-consent-accept").addEventListener("click", () => {
+      logWebcam("consent_accepted");
       overlay.remove();
       resolve(true);
     });
 
     document.getElementById("webcam-consent-decline").addEventListener("click", () => {
+      logWebcam("consent_declined");
       overlay.remove();
       resolve(false);
     });
@@ -95,10 +132,25 @@ export function showWebcamConsentOverlay() {
  * facingMode: "user" targets the selfie camera on mobile; ignored on desktop.
  */
 export async function getWebcamStream() {
-  return navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "user" },
-    audio: false,
-  });
+  logWebcam("getUserMedia_requested");
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "user" },
+      audio: false,
+    });
+    const track = stream.getVideoTracks()[0];
+    const settings = track ? track.getSettings() : {};
+    logWebcam("getUserMedia_success", {
+      label: track?.label,
+      width: settings.width,
+      height: settings.height,
+      facingMode: settings.facingMode,
+    });
+    return stream;
+  } catch (e) {
+    logWebcam("getUserMedia_error", { name: e.name, message: e.message });
+    throw e;
+  }
 }
 
 /**
@@ -121,6 +173,7 @@ export function pickMimeType() {
  */
 export function startRecordingStream(stream) {
   const mimeType = pickMimeType();
+  logWebcam("recording_start", { selectedMimeType: mimeType || "(default)" });
   const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
   const chunks = [];
   recorder.ondataavailable = (e) => {
@@ -128,7 +181,11 @@ export function startRecordingStream(stream) {
       chunks.push(e.data);
     }
   };
+  recorder.onerror = (e) => {
+    logWebcam("recorder_error", { error: e?.error?.message || e?.message || "unknown" });
+  };
   recorder.start();
+  logWebcam("recorder_started", { state: recorder.state, mimeType: recorder.mimeType });
   return { recorder, stream, chunks, mimeType: recorder.mimeType };
 }
 
@@ -144,40 +201,62 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
       const ext = mimeType.includes("mp4") ? "mp4" : "webm";
       const blob = new Blob(webcamRecording.chunks, { type: mimeType });
       const filename = `${filenamePrefix}-recording-${Date.now()}.${ext}`;
+      const file = new File([blob], filename, { type: mimeType });
 
-      // Try Web Share API first (works in Telegram WebView on mobile)
-      if (navigator.canShare) {
-        const file = new File([blob], filename, { type: mimeType });
+      logWebcam("recording_stopped", {
+        chunks: webcamRecording.chunks.length,
+        blobSize: blob.size,
+        mimeType,
+        filename,
+      });
+
+      webcamRecording.stream.getTracks().forEach((t) => t.stop());
+
+      // 1. Try Web Share API with file (works on mobile including Telegram WebView)
+      const hasShare = typeof navigator.share === "function";
+      const canShareFiles = hasShare && typeof navigator.canShare === "function"
+        ? navigator.canShare({ files: [file] })
+        : false;
+      logWebcam("download_attempt", {
+        hasShare,
+        canShareFiles,
+        inTelegram: !!(window.Telegram && window.Telegram.WebApp),
+      });
+
+      if (hasShare && canShareFiles) {
         try {
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              title: "Assessment Recording",
-            });
-            webcamRecording.stream.getTracks().forEach((t) => t.stop());
+          logWebcam("share_api_called");
+          await navigator.share({ files: [file] });
+          logWebcam("share_api_success");
+          resolve();
+          return;
+        } catch (e) {
+          logWebcam("share_api_error", { name: e.name, message: e.message });
+          if (e.name === "AbortError") {
             resolve();
             return;
-          }
-        } catch (e) {
-          // User cancelled share or API failed — fall through to <a> download
-          if (e.name !== "AbortError") {
-            console.warn("[webcam] Web Share failed, falling back to download:", e);
           }
         }
       }
 
-      // Fallback: classic <a download> click (works on desktop browsers)
+      // 2. Fallback: <a download> click (works on desktop browsers)
+      logWebcam("fallback_a_download");
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      webcamRecording.stream.getTracks().forEach((t) => t.stop());
+
+      // Keep the blob URL alive briefly so the download can start
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 3000);
+
       resolve();
     };
+    logWebcam("recorder_stop_requested");
     webcamRecording.recorder.stop();
   });
 }
@@ -346,7 +425,7 @@ export function showFacePositioningGuide(stream) {
       background: transparent; color: rgba(255,255,255,0.8); cursor: pointer;
       margin-bottom: 16px;
     `;
-    skipBtn.addEventListener("click", () => { cleanup(); resolve(); });
+    skipBtn.addEventListener("click", () => { logWebcam("face_guide_skipped"); cleanup(); resolve(); });
 
     statusBar.appendChild(statusText);
     statusBar.appendChild(skipBtn);
@@ -412,6 +491,7 @@ export function showFacePositioningGuide(stream) {
         progress = Math.min((now - goodSince) / 1500, 1);
         if (progress >= 1) {
           statusText.textContent = "✓ Perfect!";
+          logWebcam("face_position_locked");
           drawPositioningOverlay(ctx, w, h, "good", 1);
           setTimeout(() => { if (!isCleanedUp) { cleanup(); resolve(); } }, 400);
           return;
@@ -436,8 +516,9 @@ export function showFacePositioningGuide(stream) {
       try {
         detector = await loadFaceDetector();
         detectorLoaded = true;
+        logWebcam("face_detector_loaded");
       } catch (e) {
-        console.warn("[webcam] Face detector could not load — showing static guide:", e);
+        logWebcam("face_detector_error", { name: e.name, message: e.message });
         statusText.textContent = "Position your face in the oval, then tap Skip";
         setTimeout(() => { if (!isCleanedUp) { cleanup(); resolve(); } }, 8000);
       }

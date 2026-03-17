@@ -6,6 +6,7 @@ import {
   startRecordingStream,
   showFacePositioningGuide,
   stopAndDownloadRecording,
+  initWebcamLogger,
 } from "../webcam/webcam.js";
 
 const assessment = new Prices();
@@ -53,6 +54,7 @@ if (Object.keys(paramOverrides).length > 0) {
 // webcam=1 or webcam=true enables the optional recording feature
 const webcamParam = params.get("webcam");
 const webcamEnabled = webcamParam === "1" || webcamParam === "true";
+if (webcamEnabled) initWebcamLogger(token, callbackUrl);
 
 const allTrialData = [];
 
