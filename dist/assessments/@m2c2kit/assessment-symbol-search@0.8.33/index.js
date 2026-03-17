@@ -6,6 +6,8 @@ import {
   stopAndDownloadRecording,
 } from "../../webcam/webcam.js";
 
+let webgazerModule = null;
+
 const context = {
   urlParams: new URLSearchParams(window.location.search),
   assessment: {
@@ -57,6 +59,19 @@ const webcamParam = context.urlParams.get("webcam");
 const webcamEnabled = webcamParam === "1" || webcamParam === "true";
 context.urlParams.delete("webcam");
 
+// webgazer=1 or webgazer=true enables the optional eye tracking feature
+const webgazerParam = context.urlParams.get("webgazer");
+const webgazerEnabled = webgazerParam === "1" || webgazerParam === "true";
+if (webgazerEnabled) {
+  try {
+    webgazerModule = await import("../../webgazer/webgazer.js");
+    webgazerModule.initGazeLogger(context.urlParams.get("token"), context.urlParams.get("callback_url"));
+  } catch (e) {
+    console.warn("[Symbol Search] Could not load webgazer module:", e);
+  }
+}
+context.urlParams.delete("webgazer");
+
 const [sessionModule, assessmentModule] = await loadModules(["@m2c2kit/session", "@m2c2kit/assessment-symbol-search"]);
 const assessmentClassName = getAssessmentClassNameFromModule(assessmentModule);
 const assessment = new assessmentModule[assessmentClassName]();
@@ -84,10 +99,22 @@ if (numberOfTrials) {
 const allTrialData = [];
 
 session.onActivityData((ev) => {
+  if (webgazerModule) {
+    webgazerModule.markTrialEnd();
+    webgazerModule.markTrialStart();
+  }
   allTrialData.push(ev.newData);
 });
 
 session.onEnd(async () => {
+  if (webgazerModule) {
+    try {
+      await webgazerModule.stopAndExportGaze("symbol-search");
+    } catch (e) {
+      console.warn("[Symbol Search] Gaze export failed:", e);
+    }
+  }
+
   if (webcamRecording) {
     await stopAndDownloadRecording(webcamRecording, "symbol-search");
   }
@@ -197,6 +224,21 @@ if (webcamEnabled) {
       webcamRecording = startRecordingStream(stream);
     } catch (_) {
       console.warn("[Symbol Search] Webcam recording unavailable, proceeding without it.");
+    }
+  }
+}
+
+// WebGazer: consent → init → calibrate → start collection
+if (webgazerEnabled && webgazerModule) {
+  const accepted = await webgazerModule.showGazeConsentOverlay();
+  if (accepted) {
+    try {
+      await webgazerModule.initWebGazer();
+      await webgazerModule.runCalibration();
+      webgazerModule.startGazeCollection();
+      webgazerModule.markTrialStart();
+    } catch (e) {
+      console.warn("[Symbol Search] Eye tracking unavailable, proceeding without it.", e);
     }
   }
 }
