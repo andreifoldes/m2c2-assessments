@@ -1,11 +1,6 @@
-import {
-  showWebcamConsentOverlay,
-  getWebcamStream,
-  startRecordingStream,
-  showFacePositioningGuide,
-  stopAndDownloadRecording,
-  initWebcamLogger,
-} from "../../webcam/webcam.js";
+// webcam.js is loaded dynamically only when webcam=1 to avoid breaking
+// environments that don't support all APIs (e.g. Telegram Desktop WebView)
+let webcamModule = null;
 
 const context = {
   urlParams: new URLSearchParams(window.location.search),
@@ -56,7 +51,14 @@ function setGameParametersFromUrlParams(game, urlParams) {
 // otherwise the unknown param gets forwarded to the game engine.
 const webcamParam = context.urlParams.get("webcam");
 const webcamEnabled = webcamParam === "1" || webcamParam === "true";
-if (webcamEnabled) initWebcamLogger(context.urlParams.get("token"), context.urlParams.get("callback_url"));
+if (webcamEnabled) {
+  try {
+    webcamModule = await import("../../webcam/webcam.js");
+    webcamModule.initWebcamLogger(context.urlParams.get("token"), context.urlParams.get("callback_url"));
+  } catch (e) {
+    console.warn("[Color Shapes] Could not load webcam module:", e);
+  }
+}
 context.urlParams.delete("webcam");
 
 const [sessionModule, assessmentModule] = await loadModules(["@m2c2kit/session", "@m2c2kit/assessment-color-shapes"]);
@@ -90,8 +92,8 @@ session.onActivityData((ev) => {
 });
 
 session.onEnd(async () => {
-  if (webcamRecording) {
-    await stopAndDownloadRecording(webcamRecording, "color-shapes");
+  if (webcamRecording && webcamModule) {
+    await webcamModule.stopAndDownloadRecording(webcamRecording, "color-shapes");
   }
 
   if (!token || !callbackUrl) {
@@ -193,13 +195,13 @@ assessment.onStart(() => {
 // Conditionally show consent, then face positioning guide, then start recording
 let webcamRecording = null;
 
-if (webcamEnabled) {
-  const accepted = await showWebcamConsentOverlay();
+if (webcamEnabled && webcamModule) {
+  const accepted = await webcamModule.showWebcamConsentOverlay();
   if (accepted) {
     try {
-      const stream = await getWebcamStream();
-      await showFacePositioningGuide(stream);
-      webcamRecording = startRecordingStream(stream);
+      const stream = await webcamModule.getWebcamStream();
+      await webcamModule.showFacePositioningGuide(stream);
+      webcamRecording = webcamModule.startRecordingStream(stream);
     } catch (_) {
       console.warn("[Color Shapes] Webcam recording unavailable, proceeding without it.");
     }

@@ -1,13 +1,6 @@
 import { Session } from "@m2c2kit/session";
 import { Prices } from "./prices.js";
-import {
-  showWebcamConsentOverlay,
-  getWebcamStream,
-  startRecordingStream,
-  showFacePositioningGuide,
-  stopAndDownloadRecording,
-  initWebcamLogger,
-} from "../webcam/webcam.js";
+let webcamModule = null;
 
 const assessment = new Prices();
 assessment.setParameters({
@@ -54,7 +47,14 @@ if (Object.keys(paramOverrides).length > 0) {
 // webcam=1 or webcam=true enables the optional recording feature
 const webcamParam = params.get("webcam");
 const webcamEnabled = webcamParam === "1" || webcamParam === "true";
-if (webcamEnabled) initWebcamLogger(token, callbackUrl);
+if (webcamEnabled) {
+  try {
+    webcamModule = await import("../webcam/webcam.js");
+    webcamModule.initWebcamLogger(token, callbackUrl);
+  } catch (e) {
+    console.warn("[Prices] Could not load webcam module:", e);
+  }
+}
 
 const allTrialData = [];
 
@@ -70,8 +70,8 @@ session.onActivityData((ev) => {
 });
 
 session.onEnd(async () => {
-  if (webcamRecording) {
-    await stopAndDownloadRecording(webcamRecording, "prices");
+  if (webcamRecording && webcamModule) {
+    await webcamModule.stopAndDownloadRecording(webcamRecording, "prices");
   }
 
   if (debugMode) {
@@ -149,13 +149,13 @@ session.onEnd(async () => {
 // Conditionally show consent, then face positioning guide, then start recording
 let webcamRecording = null;
 
-if (webcamEnabled) {
-  const accepted = await showWebcamConsentOverlay();
+if (webcamEnabled && webcamModule) {
+  const accepted = await webcamModule.showWebcamConsentOverlay();
   if (accepted) {
     try {
-      const stream = await getWebcamStream();
-      await showFacePositioningGuide(stream);
-      webcamRecording = startRecordingStream(stream);
+      const stream = await webcamModule.getWebcamStream();
+      await webcamModule.showFacePositioningGuide(stream);
+      webcamRecording = webcamModule.startRecordingStream(stream);
     } catch (_) {
       console.warn("[Prices] Webcam recording unavailable, proceeding without it.");
     }
