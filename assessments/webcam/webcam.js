@@ -139,14 +139,38 @@ export function startRecordingStream(stream) {
  */
 export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
   return new Promise((resolve) => {
-    webcamRecording.recorder.onstop = () => {
+    webcamRecording.recorder.onstop = async () => {
       const mimeType = webcamRecording.mimeType || "video/webm";
       const ext = mimeType.includes("mp4") ? "mp4" : "webm";
       const blob = new Blob(webcamRecording.chunks, { type: mimeType });
+      const filename = `${filenamePrefix}-recording-${Date.now()}.${ext}`;
+
+      // Try Web Share API first (works in Telegram WebView on mobile)
+      if (navigator.canShare) {
+        const file = new File([blob], filename, { type: mimeType });
+        try {
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: "Assessment Recording",
+            });
+            webcamRecording.stream.getTracks().forEach((t) => t.stop());
+            resolve();
+            return;
+          }
+        } catch (e) {
+          // User cancelled share or API failed — fall through to <a> download
+          if (e.name !== "AbortError") {
+            console.warn("[webcam] Web Share failed, falling back to download:", e);
+          }
+        }
+      }
+
+      // Fallback: classic <a download> click (works on desktop browsers)
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${filenamePrefix}-recording-${Date.now()}.${ext}`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
