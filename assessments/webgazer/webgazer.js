@@ -53,6 +53,7 @@ function logGaze(event, detail) {
 const _gazeData = [];
 let _currentTrial = 0;
 let _gazeListenerActive = false;
+let _lastGazeTimestamp = null;
 let _webgazer = null;
 
 // -- Consent overlay -------------------------------------------------------
@@ -308,6 +309,7 @@ export function runCalibration() {
           viewport_height: window.innerHeight,
           trial_number: 0,
           event_type: "calibration",
+          sample_interval_ms: "",
         });
 
         // Dispatch click event at dot position to train WebGazer
@@ -345,14 +347,18 @@ export function startGazeCollection() {
   logGaze("collection_start");
 
   _webgazer.setGazeListener((data, _timestamp) => {
+    const now = Date.now();
+    const interval = _lastGazeTimestamp != null ? now - _lastGazeTimestamp : "";
+    _lastGazeTimestamp = now;
     _gazeData.push({
-      timestamp_ms: Date.now(),
+      timestamp_ms: now,
       x: data && data.x != null ? data.x.toFixed(1) : "",
       y: data && data.y != null ? data.y.toFixed(1) : "",
       viewport_width: window.innerWidth,
       viewport_height: window.innerHeight,
       trial_number: _currentTrial,
       event_type: "gaze",
+      sample_interval_ms: interval,
     });
   });
 }
@@ -372,6 +378,7 @@ export function markTrialStart() {
     viewport_height: window.innerHeight,
     trial_number: _currentTrial,
     event_type: "trial_start",
+    sample_interval_ms: "",
   });
   logGaze("trial_start", { trial: _currentTrial });
 }
@@ -388,6 +395,7 @@ export function markTrialEnd() {
     viewport_height: window.innerHeight,
     trial_number: _currentTrial,
     event_type: "trial_end",
+    sample_interval_ms: "",
   });
   logGaze("trial_end", { trial: _currentTrial });
 }
@@ -419,9 +427,9 @@ export async function stopAndExportGaze(filenamePrefix) {
   }
 
   // Build CSV
-  const header = "timestamp_ms,x,y,viewport_width,viewport_height,trial_number,event_type";
+  const header = "timestamp_ms,x,y,viewport_width,viewport_height,trial_number,event_type,sample_interval_ms";
   const rows = _gazeData.map((r) =>
-    `${r.timestamp_ms},${r.x},${r.y},${r.viewport_width},${r.viewport_height},${r.trial_number},${r.event_type}`
+    `${r.timestamp_ms},${r.x},${r.y},${r.viewport_width},${r.viewport_height},${r.trial_number},${r.event_type},${r.sample_interval_ms}`
   );
   const csv = [header, ...rows].join("\n");
 
