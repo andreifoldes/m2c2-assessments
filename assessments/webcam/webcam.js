@@ -223,6 +223,7 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
         inTelegram: !!(window.Telegram && window.Telegram.WebApp),
       });
 
+      // 1. Try Web Share API (works on mobile when not in iframe)
       if (hasShare && canShareFiles) {
         try {
           logWebcam("share_api_called");
@@ -239,7 +240,42 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
         }
       }
 
-      // Web Share unavailable or failed — recording is lost
+      // 2. Try postMessage to parent frame for share (when inside iframe)
+      if (window.parent !== window) {
+        try {
+          logWebcam("postMessage_to_parent", { blobSize: blob.size });
+          window.parent.postMessage({
+            type: "webcam-recording",
+            blob: blob,
+            filename: filename,
+            mimeType: mimeType,
+          }, "*");
+          logWebcam("postMessage_sent");
+          resolve();
+          return;
+        } catch (e) {
+          logWebcam("postMessage_error", { name: e.name, message: e.message });
+        }
+      }
+
+      // 3. Fallback: <a download> (works on desktop browsers outside Telegram)
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (!isMobile) {
+        logWebcam("fallback_a_download");
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 3000);
+        resolve();
+        return;
+      }
+
       logWebcam("download_failed", "No supported download method available");
       resolve();
     };
