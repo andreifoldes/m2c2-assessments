@@ -16,9 +16,14 @@
 // logWebcam() calls send events to the server for debugging.
 let _logEndpoint = null;
 let _logToken = null;
+let _source = null;
 
 export function initWebcamLogger(token, callbackUrl) {
   _logToken = token;
+  // Read source parameter from URL (e.g. ?source=telegram)
+  try {
+    _source = new URLSearchParams(window.location.search).get("source");
+  } catch (_) {}
   if (callbackUrl) {
     // Derive log endpoint from callback_url:
     // e.g. https://host/api/v1/cognitive/complete → https://host/api/v1/webcam/log
@@ -68,6 +73,14 @@ export function showWebcamConsentOverlay() {
       text-align: center;
     `;
 
+    const isTelegram = _source === "telegram";
+    const storageMsg = isTelegram
+      ? "If you agree, your front camera will record while you complete the task. " +
+        "<strong>The recording will be sent to you in Telegram</strong> when the task ends."
+      : "If you agree, your front camera will record while you complete the task. " +
+        "<strong>The recording is saved only on your device</strong> — it is never " +
+        "uploaded or shared. You will be prompted to download it when the task ends.";
+
     overlay.innerHTML = `
       <div style="max-width: 420px; width: 100%;">
         <div style="font-size: 48px; margin-bottom: 16px;">📷</div>
@@ -78,9 +91,7 @@ export function showWebcamConsentOverlay() {
           The researcher has enabled an optional video recording for this session.
         </p>
         <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #444;">
-          If you agree, your front camera will record while you complete the task.
-          <strong>The recording is saved only on your device</strong> — it is never
-          uploaded or shared. You will be prompted to download it when the task ends.
+          ${storageMsg}
         </p>
         <p style="margin: 0 0 28px; font-size: 14px; color: #666;">
           You can decline and still complete the task normally.
@@ -212,7 +223,7 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
 
       webcamRecording.stream.getTracks().forEach((t) => t.stop());
 
-      // 1. Try Web Share API with file (works on mobile including Telegram WebView)
+      const isTelegram = _source === "telegram";
       const hasShare = typeof navigator.share === "function";
       const canShareFiles = hasShare && typeof navigator.canShare === "function"
         ? navigator.canShare({ files: [file] })
@@ -220,10 +231,31 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
       logWebcam("download_attempt", {
         hasShare,
         canShareFiles,
-        inTelegram: !!(window.Telegram && window.Telegram.WebApp),
+        source: _source,
+        inIframe: window.parent !== window,
       });
 
-      // 1. Try Web Share API (works on mobile when not in iframe)
+      // When source=telegram, send blob to parent frame for server upload.
+      // The parent (cognitive_webapp.html) uploads it and the server sends
+      // the recording back to the user as a Telegram message.
+      if (isTelegram && window.parent !== window) {
+        try {
+          logWebcam("postMessage_to_parent", { blobSize: blob.size });
+          window.parent.postMessage({
+            type: "webcam-recording",
+            blob: blob,
+            filename: filename,
+            mimeType: mimeType,
+          }, "*");
+          logWebcam("postMessage_sent");
+          resolve();
+          return;
+        } catch (e) {
+          logWebcam("postMessage_error", { name: e.name, message: e.message });
+        }
+      }
+
+      // Non-Telegram: try Web Share API (works on mobile when not in iframe)
       if (hasShare && canShareFiles) {
         try {
           logWebcam("share_api_called");
@@ -240,7 +272,7 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
         }
       }
 
-      // 2. Try postMessage to parent frame for share (when inside iframe)
+      // Fallback: postMessage to parent frame (non-Telegram iframe contexts)
       if (window.parent !== window) {
         try {
           logWebcam("postMessage_to_parent", { blobSize: blob.size });
@@ -258,7 +290,7 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
         }
       }
 
-      // 3. Fallback: <a download> (works on desktop browsers outside Telegram)
+      // Fallback: <a download> (works on desktop browsers outside Telegram)
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       if (!isMobile) {
         logWebcam("fallback_a_download");
