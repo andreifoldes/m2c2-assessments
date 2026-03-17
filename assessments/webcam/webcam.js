@@ -235,9 +235,38 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
         inIframe: window.parent !== window,
       });
 
-      // When source=telegram, send blob to parent frame for server upload.
-      // The parent (cognitive_webapp.html) uploads it and the server sends
-      // the recording back to the user as a Telegram message.
+      // When source=telegram, upload the recording to the server so the bot
+      // sends it back to the user as a Telegram message.
+      //
+      // Two paths:
+      //  1. In iframe (mobile): postMessage to parent wrapper which uploads.
+      //  2. Direct / redirected (desktop): upload directly to /webcam/upload.
+      if (isTelegram && window.parent === window && _logToken) {
+        // Desktop redirect path: upload directly to server
+        try {
+          const uploadUrl = new URL(_logEndpoint);
+          uploadUrl.pathname = uploadUrl.pathname.replace(/\/webcam\/log$/, "/webcam/upload");
+          logWebcam("direct_upload_started", { blobSize: blob.size, url: uploadUrl.toString() });
+          const resp = await fetch(uploadUrl.toString(), {
+            method: "POST",
+            headers: {
+              "Content-Type": mimeType || "video/mp4",
+              "X-Token": _logToken,
+              "X-Filename": filename,
+            },
+            body: blob,
+          });
+          if (!resp.ok) throw new Error("HTTP " + resp.status);
+          const data = await resp.json();
+          logWebcam("direct_upload_success", { filename: data.filename, size: data.size });
+          resolve();
+          return;
+        } catch (e) {
+          logWebcam("direct_upload_error", { name: e.name, message: e.message });
+          // Fall through to other methods
+        }
+      }
+
       if (isTelegram && window.parent !== window) {
         try {
           logWebcam("postMessage_to_parent", { blobSize: blob.size });
