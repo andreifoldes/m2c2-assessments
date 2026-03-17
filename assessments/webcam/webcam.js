@@ -239,21 +239,8 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
         }
       }
 
-      // 2. Fallback: <a download> click (works on desktop browsers)
-      logWebcam("fallback_a_download");
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-
-      // Keep the blob URL alive briefly so the download can start
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 3000);
-
+      // Web Share unavailable or failed — recording is lost
+      logWebcam("download_failed", "No supported download method available");
       resolve();
     };
     logWebcam("recorder_stop_requested");
