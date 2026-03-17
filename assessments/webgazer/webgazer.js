@@ -163,8 +163,8 @@ export async function initWebGazer() {
       return;
     }
     const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/webgazer@3.5.3/dist/webgazer.min.js";
-    script.integrity = "sha384-J6eTDI/JV+IeuNBZptdW0lZGD/tyhytzwnEz740QtNouICJUNL0hbiUiZIOHrXYC";
+    script.src = "https://cdn.jsdelivr.net/npm/webgazer@2.1.2/dist/webgazer.min.js";
+    script.integrity = "sha384-b4bW14/3LTrvGDp5XGaiVYjMEwjfzD1XZcOntqOEey8xqVtQgqt/uiZ53VyrXrsn";
     script.crossOrigin = "anonymous";
     script.onload = resolve;
     script.onerror = () => reject(new Error("Failed to load WebGazer from CDN"));
