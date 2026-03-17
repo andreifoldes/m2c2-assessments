@@ -156,15 +156,61 @@ export function showGazeConsentOverlay() {
 export async function initWebGazer() {
   logGaze("webgazer_loading");
 
+  // WebGazer 3.x loads MediaPipe face_mesh files relative to the page URL.
+  // Intercept script/fetch creation to redirect these to the jsDelivr CDN.
+  const MEDIAPIPE_CDN = "https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/";
+  const MEDIAPIPE_FILES = [
+    "face_mesh_solution_simd_wasm_bin.js",
+    "face_mesh_solution_packed_assets_loader.js",
+    "face_mesh_solution_wasm_bin.js",
+    "face_mesh.binarypb",
+  ];
+
+  // Patch document.createElement to rewrite mediapipe script src attributes
+  const _origCreateElement = document.createElement.bind(document);
+  document.createElement = function (tag, options) {
+    const el = _origCreateElement(tag, options);
+    if (tag.toLowerCase() === "script") {
+      const origSetSrc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, "src").set;
+      Object.defineProperty(el, "src", {
+        set(val) {
+          const filename = val.split("/").pop();
+          if (MEDIAPIPE_FILES.includes(filename)) {
+            logGaze("mediapipe_redirect", { from: val, to: MEDIAPIPE_CDN + filename });
+            origSetSrc.call(this, MEDIAPIPE_CDN + filename);
+          } else {
+            origSetSrc.call(this, val);
+          }
+        },
+        get() {
+          return el.getAttribute("src") || "";
+        },
+        configurable: true,
+      });
+    }
+    return el;
+  };
+
+  // Patch fetch to redirect mediapipe .binarypb requests
+  const _origFetch = window.fetch;
+  window.fetch = function (input, init) {
+    const url = typeof input === "string" ? input : input.url;
+    const filename = url.split("/").pop().split("?")[0];
+    if (MEDIAPIPE_FILES.includes(filename)) {
+      logGaze("mediapipe_fetch_redirect", { from: url, to: MEDIAPIPE_CDN + filename });
+      return _origFetch.call(this, MEDIAPIPE_CDN + filename, init);
+    }
+    return _origFetch.call(this, input, init);
+  };
+
   // Load WebGazer from CDN via script tag
   await new Promise((resolve, reject) => {
     if (window.webgazer) {
       resolve();
       return;
     }
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/webgazer@2.1.2/dist/webgazer.min.js";
-    script.integrity = "sha384-b4bW14/3LTrvGDp5XGaiVYjMEwjfzD1XZcOntqOEey8xqVtQgqt/uiZ53VyrXrsn";
+    const script = _origCreateElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/webgazer@3.5.3/dist/webgazer.min.js";
     script.crossOrigin = "anonymous";
     script.onload = resolve;
     script.onerror = () => reject(new Error("Failed to load WebGazer from CDN"));
@@ -186,6 +232,10 @@ export async function initWebGazer() {
     .applyKalmanFilter(true);
 
   await _webgazer.begin();
+
+  // Restore original createElement and fetch
+  document.createElement = _origCreateElement;
+  window.fetch = _origFetch;
 
   // begin() creates DOM elements; hide them again
   _webgazer.showVideo(false);
