@@ -393,23 +393,29 @@ export function runCalibration() {
 
 // -- Gaze data collection --------------------------------------------------
 
+// Sampling interval in ms (~29 Hz). The listener fires on every prediction
+// but we only record a sample when at least this many ms have elapsed.
+const SAMPLING_INTERVAL_MS = 34;
+
 /**
  * Begins recording gaze data via WebGazer's setGazeListener.
- * Each gaze sample is pushed to the _gazeData array.
+ * Predictions are rounded to whole pixels and throttled to ~29 Hz.
  */
 export function startGazeCollection() {
   if (_gazeListenerActive) return;
   _gazeListenerActive = true;
-  logGaze("collection_start");
+  logGaze("collection_start", { sampling_interval_ms: SAMPLING_INTERVAL_MS });
 
   _webgazer.setGazeListener((data, _timestamp) => {
     const now = Date.now();
+    // Throttle: skip this sample if less than SAMPLING_INTERVAL_MS since last
+    if (_lastGazeTimestamp != null && (now - _lastGazeTimestamp) < SAMPLING_INTERVAL_MS) return;
     const interval = _lastGazeTimestamp != null ? now - _lastGazeTimestamp : "";
     _lastGazeTimestamp = now;
     _gazeData.push({
       timestamp_ms: now,
-      x: data && data.x != null ? data.x.toFixed(1) : "",
-      y: data && data.y != null ? data.y.toFixed(1) : "",
+      x: data && data.x != null ? Math.round(data.x) : "",
+      y: data && data.y != null ? Math.round(data.y) : "",
       viewport_width: window.innerWidth,
       viewport_height: window.innerHeight,
       trial_number: _currentTrial,
