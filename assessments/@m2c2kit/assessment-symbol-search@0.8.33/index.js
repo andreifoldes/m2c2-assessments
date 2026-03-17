@@ -56,7 +56,7 @@ function setGameParametersFromUrlParams(game, urlParams) {
 // otherwise the unknown param gets forwarded to the game engine.
 const webcamParam = context.urlParams.get("webcam");
 const webcamEnabled = webcamParam === "1" || webcamParam === "true";
-if (webcamEnabled) initWebcamLogger(params.get("token"), params.get("callback_url"));
+if (webcamEnabled) initWebcamLogger(context.urlParams.get("token"), context.urlParams.get("callback_url"));
 context.urlParams.delete("webcam");
 
 const [sessionModule, assessmentModule] = await loadModules(["@m2c2kit/session", "@m2c2kit/assessment-symbol-search"]);
