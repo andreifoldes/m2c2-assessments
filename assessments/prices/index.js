@@ -1,6 +1,7 @@
 import { Session } from "@m2c2kit/session";
 import { Prices } from "./prices.js";
 let webcamModule = null;
+let webgazerModule = null;
 
 const assessment = new Prices();
 assessment.setParameters({
@@ -56,6 +57,18 @@ if (webcamEnabled) {
   }
 }
 
+// webgazer=1 or webgazer=true enables the optional eye tracking feature
+const webgazerParam = params.get("webgazer");
+const webgazerEnabled = webgazerParam === "1" || webgazerParam === "true";
+if (webgazerEnabled) {
+  try {
+    webgazerModule = await import("../webgazer/webgazer.js");
+    webgazerModule.initGazeLogger(token, callbackUrl);
+  } catch (e) {
+    console.warn("[Prices] Could not load webgazer module:", e);
+  }
+}
+
 const allTrialData = [];
 
 const session = new Session({
@@ -63,6 +76,8 @@ const session = new Session({
 });
 
 session.onActivityData((ev) => {
+  if (webgazerModule) webgazerModule.markTrialEnd();
+  if (webgazerModule) webgazerModule.markTrialStart();
   allTrialData.push(ev.newData);
   if (debugMode) {
     console.log("[Prices debug] trial data:", ev.newData);
@@ -70,6 +85,14 @@ session.onActivityData((ev) => {
 });
 
 session.onEnd(async () => {
+  if (webgazerModule) {
+    try {
+      await webgazerModule.stopAndExportGaze("prices");
+    } catch (e) {
+      console.warn("[Prices] Gaze export failed:", e);
+    }
+  }
+
   if (webcamRecording && webcamModule) {
     await webcamModule.stopAndDownloadRecording(webcamRecording, "prices");
   }
@@ -158,6 +181,21 @@ if (webcamEnabled && webcamModule) {
       webcamRecording = webcamModule.startRecordingStream(stream);
     } catch (_) {
       console.warn("[Prices] Webcam recording unavailable, proceeding without it.");
+    }
+  }
+}
+
+// WebGazer: consent → init → calibrate → start collection
+if (webgazerEnabled && webgazerModule) {
+  const accepted = await webgazerModule.showGazeConsentOverlay();
+  if (accepted) {
+    try {
+      await webgazerModule.initWebGazer();
+      await webgazerModule.runCalibration();
+      webgazerModule.startGazeCollection();
+      webgazerModule.markTrialStart();
+    } catch (e) {
+      console.warn("[Prices] Eye tracking unavailable, proceeding without it.", e);
     }
   }
 }

@@ -1,6 +1,7 @@
 // webcam.js is loaded dynamically only when webcam=1 to avoid breaking
 // environments that don't support all APIs (e.g. Telegram Desktop WebView)
 let webcamModule = null;
+let webgazerModule = null;
 
 const context = {
   urlParams: new URLSearchParams(window.location.search),
@@ -61,6 +62,19 @@ if (webcamEnabled) {
 }
 context.urlParams.delete("webcam");
 
+// webgazer=1 or webgazer=true enables the optional eye tracking feature
+const webgazerParam = context.urlParams.get("webgazer");
+const webgazerEnabled = webgazerParam === "1" || webgazerParam === "true";
+if (webgazerEnabled) {
+  try {
+    webgazerModule = await import("../../webgazer/webgazer.js");
+    webgazerModule.initGazeLogger(context.urlParams.get("token"), context.urlParams.get("callback_url"));
+  } catch (e) {
+    console.warn("[Color Shapes] Could not load webgazer module:", e);
+  }
+}
+context.urlParams.delete("webgazer");
+
 const [sessionModule, assessmentModule] = await loadModules(["@m2c2kit/session", "@m2c2kit/assessment-color-shapes"]);
 const assessmentClassName = getAssessmentClassNameFromModule(assessmentModule);
 const assessment = new assessmentModule[assessmentClassName]();
@@ -88,10 +102,20 @@ if (numberOfTrials) {
 const allTrialData = [];
 
 session.onActivityData((ev) => {
+  if (webgazerModule) webgazerModule.markTrialEnd();
+  if (webgazerModule) webgazerModule.markTrialStart();
   allTrialData.push(ev.newData);
 });
 
 session.onEnd(async () => {
+  if (webgazerModule) {
+    try {
+      await webgazerModule.stopAndExportGaze("color-shapes");
+    } catch (e) {
+      console.warn("[Color Shapes] Gaze export failed:", e);
+    }
+  }
+
   if (webcamRecording && webcamModule) {
     await webcamModule.stopAndDownloadRecording(webcamRecording, "color-shapes");
   }
@@ -204,6 +228,21 @@ if (webcamEnabled && webcamModule) {
       webcamRecording = webcamModule.startRecordingStream(stream);
     } catch (_) {
       console.warn("[Color Shapes] Webcam recording unavailable, proceeding without it.");
+    }
+  }
+}
+
+// WebGazer: consent → init → calibrate → start collection
+if (webgazerEnabled && webgazerModule) {
+  const accepted = await webgazerModule.showGazeConsentOverlay();
+  if (accepted) {
+    try {
+      await webgazerModule.initWebGazer();
+      await webgazerModule.runCalibration();
+      webgazerModule.startGazeCollection();
+      webgazerModule.markTrialStart();
+    } catch (e) {
+      console.warn("[Color Shapes] Eye tracking unavailable, proceeding without it.", e);
     }
   }
 }
