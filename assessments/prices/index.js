@@ -76,10 +76,9 @@ const lightEnabled = lightParam === "1" || lightParam === "true";
 if (lightEnabled) {
   try {
     ambientLightModule = await import("../ambient-light/ambient-light.js");
-    if (ambientLightModule.isAmbientLightSupported()) {
+    if (ambientLightModule.isAmbientLightSupported(true)) {
       ambientLightModule.initLightLogger(token, callbackUrl);
     } else {
-      console.warn("[Prices] AmbientLightSensor not supported by this browser.");
       ambientLightModule = null;
     }
   } catch (e) {

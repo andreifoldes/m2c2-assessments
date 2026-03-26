@@ -56,12 +56,47 @@ function logLight(event, detail) {
   }
 }
 
+// -- Status toast ----------------------------------------------------------
+
+function _showToast(message, type) {
+  const toast = document.createElement("div");
+  const isSuccess = type === "success";
+  toast.style.cssText = `
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    background: ${isSuccess ? "rgba(46, 125, 50, 0.92)" : "rgba(198, 40, 40, 0.92)"};
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    text-align: center;
+    max-width: 90vw;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => { toast.style.opacity = "1"; });
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
 // -- Light data storage ----------------------------------------------------
 const _lightData = [];
 let _currentTrial = 0;
 let _sensor = null;
 let _collecting = false;
 let _lastSampleTimestamp = null;
+let _firstReadingShown = false;
 
 // Sampling interval in ms (~10 Hz is sufficient for ambient light changes)
 const SAMPLING_INTERVAL_MS = 100;
@@ -70,9 +105,17 @@ const SAMPLING_INTERVAL_MS = 100;
 
 /**
  * Checks whether the AmbientLightSensor API is available in this browser.
+ * If not supported and showFeedback is true, displays a toast notification.
  */
-export function isAmbientLightSupported() {
-  return "AmbientLightSensor" in window;
+export function isAmbientLightSupported(showFeedback = false) {
+  const supported = "AmbientLightSensor" in window;
+  if (!supported && showFeedback) {
+    _showToast(
+      "\u26A0 Light sensor not available on this browser",
+      "error"
+    );
+  }
+  return supported;
 }
 
 // -- Consent overlay -------------------------------------------------------
@@ -191,10 +234,27 @@ export function startLightCollection() {
       name: err.name,
       message: err.message,
     });
+    _showToast(
+      "\u26A0 Light sensor unavailable \u2014 " + (err.message || "not supported on this device"),
+      "error"
+    );
     throw err;
   }
 
+  _firstReadingShown = false;
+
   _sensor.addEventListener("reading", () => {
+    // Show success toast on first reading
+    if (!_firstReadingShown) {
+      _firstReadingShown = true;
+      const lux = _sensor.illuminance;
+      _showToast(
+        "\u2600\uFE0F Light sensor active \u2014 " + Math.round(lux) + " lux",
+        "success"
+      );
+      logLight("first_reading", { illuminance_lux: lux });
+    }
+
     const now = Date.now();
     // Throttle: skip if less than SAMPLING_INTERVAL_MS since last sample
     if (
@@ -221,6 +281,13 @@ export function startLightCollection() {
       name: event.error.name,
       message: event.error.message,
     });
+    if (!_firstReadingShown) {
+      _firstReadingShown = true;
+      _showToast(
+        "\u26A0 Light sensor error \u2014 " + (event.error.message || event.error.name),
+        "error"
+      );
+    }
   });
 
   _sensor.start();
