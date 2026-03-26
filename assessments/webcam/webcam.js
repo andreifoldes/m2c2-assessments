@@ -76,7 +76,7 @@ export function showWebcamConsentOverlay() {
     const isTelegram = _source === "telegram";
     const storageMsg = isTelegram
       ? "If you agree, your front camera will record while you complete the task. " +
-        "<strong>The recording will be sent to you in Telegram</strong> when the task ends."
+        "<strong>The recording will be sent to you in the chat</strong> when the task ends."
       : "If you agree, your front camera will record while you complete the task. " +
         "<strong>The recording is saved only on your device</strong> — it is never " +
         "uploaded or shared. You will be prompted to download it when the task ends.";
