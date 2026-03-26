@@ -73,8 +73,8 @@ export function showWebcamConsentOverlay() {
       text-align: center;
     `;
 
-    const isTelegram = _source === "telegram";
-    const storageMsg = isTelegram
+    const isServerBacked = _source === "telegram" || _source === "pwa";
+    const storageMsg = isServerBacked
       ? "If you agree, your front camera will record while you complete the task. " +
         "<strong>The recording will be sent to you in the chat</strong> when the task ends."
       : "If you agree, your front camera will record while you complete the task. " +
@@ -223,7 +223,7 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
 
       webcamRecording.stream.getTracks().forEach((t) => t.stop());
 
-      const isTelegram = _source === "telegram";
+      const isServerBacked = _source === "telegram" || _source === "pwa";
       const hasShare = typeof navigator.share === "function";
       const canShareFiles = hasShare && typeof navigator.canShare === "function"
         ? navigator.canShare({ files: [file] })
@@ -235,13 +235,13 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
         inIframe: window.parent !== window,
       });
 
-      // When source=telegram, upload the recording to the server so the bot
-      // sends it back to the user as a Telegram message.
+      // When source=telegram or source=pwa, upload the recording to the server
+      // so the bot sends it back to the user in the chat.
       //
       // Two paths:
       //  1. In iframe (mobile): postMessage to parent wrapper which uploads.
       //  2. Direct / redirected (desktop): upload directly to /webcam/upload.
-      if (isTelegram && window.parent === window && _logToken) {
+      if (isServerBacked && window.parent === window && _logToken) {
         // Desktop redirect path: upload directly to server
         try {
           const uploadUrl = new URL(_logEndpoint);
@@ -267,7 +267,7 @@ export function stopAndDownloadRecording(webcamRecording, filenamePrefix) {
         }
       }
 
-      if (isTelegram && window.parent !== window) {
+      if (isServerBacked && window.parent !== window) {
         try {
           logWebcam("postMessage_to_parent", { blobSize: blob.size });
           window.parent.postMessage({
