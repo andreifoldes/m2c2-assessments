@@ -2,6 +2,7 @@ import { Session } from "@m2c2kit/session";
 import { Prices } from "./prices.js";
 let webcamModule = null;
 let webgazerModule = null;
+let ambientLightModule = null;
 
 const assessment = new Prices();
 assessment.setParameters({
@@ -69,6 +70,23 @@ if (webgazerEnabled) {
   }
 }
 
+// light=1 or light=true enables the optional ambient light sensor feature
+const lightParam = params.get("light");
+const lightEnabled = lightParam === "1" || lightParam === "true";
+if (lightEnabled) {
+  try {
+    ambientLightModule = await import("../ambient-light/ambient-light.js");
+    if (ambientLightModule.isAmbientLightSupported()) {
+      ambientLightModule.initLightLogger(token, callbackUrl);
+    } else {
+      console.warn("[Prices] AmbientLightSensor not supported by this browser.");
+      ambientLightModule = null;
+    }
+  } catch (e) {
+    console.warn("[Prices] Could not load ambient light module:", e);
+  }
+}
+
 const allTrialData = [];
 
 const session = new Session({
@@ -79,6 +97,10 @@ session.onActivityData((ev) => {
   if (webgazerModule) {
     webgazerModule.markTrialEnd();
     webgazerModule.markTrialStart();
+  }
+  if (ambientLightModule) {
+    ambientLightModule.markTrialEnd();
+    ambientLightModule.markTrialStart();
   }
   allTrialData.push(ev.newData);
   if (debugMode) {
@@ -92,6 +114,14 @@ session.onEnd(async () => {
       await webgazerModule.stopAndExportGaze("prices");
     } catch (e) {
       console.warn("[Prices] Gaze export failed:", e);
+    }
+  }
+
+  if (ambientLightModule) {
+    try {
+      await ambientLightModule.stopAndExportLight("prices");
+    } catch (e) {
+      console.warn("[Prices] Light export failed:", e);
     }
   }
 
@@ -184,6 +214,22 @@ if (webcamEnabled && webcamModule) {
     } catch (_) {
       console.warn("[Prices] Webcam recording unavailable, proceeding without it.");
     }
+  }
+}
+
+// Ambient Light: consent → start collection
+if (lightEnabled && ambientLightModule) {
+  const accepted = await ambientLightModule.showLightConsentOverlay();
+  if (accepted) {
+    try {
+      ambientLightModule.startLightCollection();
+      ambientLightModule.markTrialStart();
+    } catch (e) {
+      console.warn("[Prices] Ambient light sensing unavailable, proceeding without it.", e);
+      ambientLightModule = null;
+    }
+  } else {
+    ambientLightModule = null;
   }
 }
 
