@@ -2,6 +2,7 @@
 // environments that don't support all APIs (e.g. Telegram Desktop WebView)
 let webcamModule = null;
 let webgazerModule = null;
+let ambientLightModule = null;
 
 const context = {
   urlParams: new URLSearchParams(window.location.search),
@@ -75,6 +76,24 @@ if (webgazerEnabled) {
 }
 context.urlParams.delete("webgazer");
 
+// light=1 or light=true enables the optional ambient light sensor feature
+const lightParam = context.urlParams.get("light");
+const lightEnabled = lightParam === "1" || lightParam === "true";
+if (lightEnabled) {
+  try {
+    ambientLightModule = await import("../../ambient-light/ambient-light.js");
+    if (ambientLightModule.isAmbientLightSupported()) {
+      ambientLightModule.initLightLogger(context.urlParams.get("token"), context.urlParams.get("callback_url"));
+    } else {
+      console.warn("[Color Shapes] AmbientLightSensor not supported by this browser.");
+      ambientLightModule = null;
+    }
+  } catch (e) {
+    console.warn("[Color Shapes] Could not load ambient light module:", e);
+  }
+}
+context.urlParams.delete("light");
+
 const [sessionModule, assessmentModule] = await loadModules(["@m2c2kit/session", "@m2c2kit/assessment-color-shapes"]);
 const assessmentClassName = getAssessmentClassNameFromModule(assessmentModule);
 const assessment = new assessmentModule[assessmentClassName]();
@@ -106,6 +125,10 @@ session.onActivityData((ev) => {
     webgazerModule.markTrialEnd();
     webgazerModule.markTrialStart();
   }
+  if (ambientLightModule) {
+    ambientLightModule.markTrialEnd();
+    ambientLightModule.markTrialStart();
+  }
   allTrialData.push(ev.newData);
 });
 
@@ -115,6 +138,14 @@ session.onEnd(async () => {
       await webgazerModule.stopAndExportGaze("color-shapes");
     } catch (e) {
       console.warn("[Color Shapes] Gaze export failed:", e);
+    }
+  }
+
+  if (ambientLightModule) {
+    try {
+      await ambientLightModule.stopAndExportLight("color-shapes");
+    } catch (e) {
+      console.warn("[Color Shapes] Light export failed:", e);
     }
   }
 
@@ -231,6 +262,22 @@ if (webcamEnabled && webcamModule) {
     } catch (_) {
       console.warn("[Color Shapes] Webcam recording unavailable, proceeding without it.");
     }
+  }
+}
+
+// Ambient Light: consent → start collection
+if (lightEnabled && ambientLightModule) {
+  const accepted = await ambientLightModule.showLightConsentOverlay();
+  if (accepted) {
+    try {
+      ambientLightModule.startLightCollection();
+      ambientLightModule.markTrialStart();
+    } catch (e) {
+      console.warn("[Color Shapes] Ambient light sensing unavailable, proceeding without it.", e);
+      ambientLightModule = null;
+    }
+  } else {
+    ambientLightModule = null;
   }
 }
 
