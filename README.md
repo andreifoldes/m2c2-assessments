@@ -13,6 +13,7 @@ Cognitive assessments hosted on GitHub Pages, built with [m2c2kit](https://githu
 | **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webgazer=1&show_end_screen=false) |
 | **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webgazer=1&show_end_screen=false) |
 | **FNAME** | Face-Name-Occupation associative memory — learn face–name and face–occupation pairs, infer name↔occupation, then recognize after delay | ~180 | [Rentz et al., 2011](https://doi.org/10.1016/j.neuropsychologia.2011.09.004) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webgazer=1&show_end_screen=false) |
+| **mVLT** | Mobile Verbal Learning Test — study 12 words, then YES/NO recognition with 3-trial learning curve | ~300 | [Moore et al., 2020](https://doi.org/10.1002/mpr.1859) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/?webcam=1) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/?webgazer=1) |
 
 ## Common URL Parameters
 
@@ -259,3 +260,59 @@ A modified Face-Name Associative Memory Exam that tests face–name and face–o
 ### Face Stimulus Database
 
 The assessment ships with 100 curated face images with demographic metadata (age, gender, skin tone). Faces are selected to balance gender (50/50) and maximize diversity across age bins and skin tones. The face pool can be expanded using the curation tools in `assessments/fname/tools/`.
+
+---
+
+## mVLT (Mobile Verbal Learning Test)
+
+An open-source touch-based verbal learning and memory test, inspired by the mVLT paradigm (Moore et al., 2020). Participants study a list of 12 words for 30 seconds, then perform a YES/NO recognition test on 24 words (12 targets + 12 distractors). This study-recognition cycle repeats 3 times to measure a within-person learning curve. Signal detection metrics (d-prime) are computed automatically.
+
+Word lists are generated from [SUBTLEX-UK](https://doi.org/10.1080/17470218.2013.850521) frequency norms (van Heuven et al., 2014), with 14 pre-built lists of frequency-matched nouns for longitudinal use (one list per day over 14 days).
+
+### URL Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `token` | string | — | Authentication token. When absent (along with `callback_url`), the assessment runs in debug mode and displays results on-screen. |
+| `callback_url` | string | — | URL to POST results to when the assessment ends. |
+| `word_list_index` | number | `0` | Which of the 14 pre-built word lists to use (0–13). Wraps via modulo for indices > 13. |
+| `number_of_trials` | number | `3` | Number of study-recognition cycles. |
+| `study_duration_ms` | number | `30000` | How long the word list is displayed in the study phase (ms). |
+| `number_of_distractors` | number | `12` | Number of lure words in the recognition phase. |
+| `show_feedback` | string | `false` | Set to `true` or `1` to show correct/incorrect feedback after each recognition response. |
+| `recognition_timeout_ms` | number | `0` | Maximum time per recognition item in ms. `0` = unlimited. |
+| `inter_trial_delay_ms` | number | `3000` | Pause duration between trials (ms). |
+| `tutorial` | string | `true` | Set to `false` or `0` to skip the tutorial screens. |
+| `webcam` | string | — | Set to `1` or `true` to enable optional camera recording. |
+| `webgazer` | string | — | Set to `1` or `true` to enable browser-based eye tracking. |
+
+### Trial Data Fields
+
+Each recognition item emits: `trial_number` (1–3), `trial_index` (global 0-based), `item_index` (position in recognition sequence), `word`, `word_type` (`target`/`distractor`), `response` (`yes`/`no`/`none`), `is_correct`, `response_time_ms`, `word_display_timestamp`, `response_timestamp`, `study_display_timestamp`, `list_index`, `timed_out`.
+
+### Summary Statistics
+
+On session end, the following summary is computed and included in the POST body (or shown in debug mode):
+
+- **Per trial:** hits, false alarms, misses, correct rejections, total correct, d-prime (Hautus log-linear correction)
+- **Learning curve:** array of total correct per trial (e.g. `[18, 21, 23]`)
+- **Mean total correct** across all trials
+
+### Word List Construction
+
+The 14 word lists (336 unique nouns) were generated from SUBTLEX-UK using `assessments/mvlt/scripts/generate_word_lists.py`:
+
+- **Source:** SUBTLEX-UK frequency norms (201M words of British English subtitles)
+- **POS filter:** Only words with dominant POS = noun
+- **Proper noun exclusion:** Words capitalized >50% of the time are excluded
+- **Length:** 3–8 characters, alphabetic only
+- **Frequency band:** log10(freq/million) between 0.8 and 2.5
+- **Exclusions:** Plurals (-s/-ae), past tense (-ed), gerunds (-ing), offensive words
+- **Balancing:** Round-robin assignment by frequency rank across 14 lists
+- **Result:** Grand mean log10(freq/million) = 1.31, max deviation from grand mean = 0.006
+
+To regenerate with different criteria, download [SUBTLEX-UK.xlsx](https://psychology.nottingham.ac.uk/subtlex-uk/SUBTLEX-UK.xlsx.zip) into `assessments/mvlt/scripts/` and run:
+
+```bash
+uv run --with openpyxl python3 assessments/mvlt/scripts/generate_word_lists.py
+```
