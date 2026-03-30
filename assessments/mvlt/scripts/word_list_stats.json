@@ -1,0 +1,534 @@
+[
+  {
+    "list_index": 0,
+    "targets": [
+      "peak",
+      "guitar",
+      "division",
+      "tape",
+      "bail",
+      "oak",
+      "failure",
+      "summit",
+      "cue",
+      "context",
+      "desert",
+      "glory"
+    ],
+    "distractors": [
+      "grade",
+      "snake",
+      "wing",
+      "punch",
+      "opera",
+      "flood",
+      "balloon",
+      "aspect",
+      "attitude",
+      "fee",
+      "phrase",
+      "toast"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3054,
+      "mean_log_freq_targets": 1.3096,
+      "mean_log_freq_distractors": 1.3013,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 1,
+    "targets": [
+      "flow",
+      "element",
+      "toy",
+      "scratch",
+      "mill",
+      "circle",
+      "suicide",
+      "tiger",
+      "onion",
+      "nail",
+      "print",
+      "lad"
+    ],
+    "distractors": [
+      "code",
+      "dancer",
+      "kit",
+      "motion",
+      "concept",
+      "carpet",
+      "tank",
+      "stroke",
+      "fence",
+      "medium",
+      "multi",
+      "pipe"
+    ],
+    "stats": {
+      "mean_log_freq": 1.306,
+      "mean_log_freq_targets": 1.3271,
+      "mean_log_freq_distractors": 1.285,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 2,
+    "targets": [
+      "keeper",
+      "pet",
+      "spin",
+      "storage",
+      "mini",
+      "trap",
+      "suite",
+      "yard",
+      "piano",
+      "hop",
+      "counter",
+      "theory"
+    ],
+    "distractors": [
+      "survival",
+      "actress",
+      "legend",
+      "vet",
+      "religion",
+      "sausage",
+      "cousin",
+      "cycle",
+      "rainbow",
+      "worker",
+      "trophy",
+      "bunch"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3069,
+      "mean_log_freq_targets": 1.3313,
+      "mean_log_freq_distractors": 1.2824,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 3,
+    "targets": [
+      "tale",
+      "entrance",
+      "lesson",
+      "medicine",
+      "cafe",
+      "platform",
+      "plastic",
+      "finance",
+      "session",
+      "chip",
+      "bow",
+      "extent"
+    ],
+    "distractors": [
+      "currency",
+      "carbon",
+      "dawn",
+      "bite",
+      "survey",
+      "teenager",
+      "barn",
+      "weapon",
+      "petrol",
+      "pen",
+      "launch",
+      "hunter"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3077,
+      "mean_log_freq_targets": 1.3147,
+      "mean_log_freq_distractors": 1.3007,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 4,
+    "targets": [
+      "belt",
+      "agenda",
+      "grave",
+      "tragedy",
+      "coverage",
+      "spoon",
+      "comment",
+      "fraud",
+      "coat",
+      "tribute",
+      "universe",
+      "spider"
+    ],
+    "distractors": [
+      "mortgage",
+      "library",
+      "sofa",
+      "creation",
+      "tail",
+      "nonsense",
+      "gang",
+      "rail",
+      "heir",
+      "treasure",
+      "creature",
+      "tennis"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3086,
+      "mean_log_freq_targets": 1.2941,
+      "mean_log_freq_distractors": 1.323,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 5,
+    "targets": [
+      "charm",
+      "exchange",
+      "bat",
+      "madam",
+      "deer",
+      "bacon",
+      "content",
+      "mouse",
+      "coal",
+      "prank",
+      "clay",
+      "enemy"
+    ],
+    "distractors": [
+      "desk",
+      "buzz",
+      "torch",
+      "lemon",
+      "offence",
+      "angle",
+      "witness",
+      "era",
+      "tongue",
+      "consumer",
+      "judgment",
+      "shift"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3094,
+      "mean_log_freq_targets": 1.2887,
+      "mean_log_freq_distractors": 1.3301,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 6,
+    "targets": [
+      "pile",
+      "affair",
+      "jungle",
+      "lounge",
+      "chilli",
+      "brush",
+      "aunt",
+      "sentence",
+      "menu",
+      "pork",
+      "sink",
+      "pit"
+    ],
+    "distractors": [
+      "soup",
+      "desire",
+      "genius",
+      "tension",
+      "canal",
+      "athlete",
+      "command",
+      "potato",
+      "soil",
+      "core",
+      "height",
+      "exercise"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3105,
+      "mean_log_freq_targets": 1.2936,
+      "mean_log_freq_distractors": 1.3273,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 7,
+    "targets": [
+      "mirror",
+      "proposal",
+      "bounce",
+      "seed",
+      "document",
+      "trail",
+      "pond",
+      "steel",
+      "snooker",
+      "transfer",
+      "aircraft",
+      "behalf"
+    ],
+    "distractors": [
+      "bucket",
+      "comfort",
+      "scandal",
+      "minimum",
+      "chairman",
+      "babe",
+      "shoulder",
+      "customer",
+      "rocket",
+      "lifetime",
+      "text",
+      "protest"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3113,
+      "mean_log_freq_targets": 1.2909,
+      "mean_log_freq_distractors": 1.3316,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 8,
+    "targets": [
+      "flag",
+      "belief",
+      "heritage",
+      "monster",
+      "conflict",
+      "fame",
+      "silence",
+      "source",
+      "runner",
+      "author",
+      "presence",
+      "devil"
+    ],
+    "distractors": [
+      "jazz",
+      "tent",
+      "ginger",
+      "diamond",
+      "licence",
+      "metre",
+      "nest",
+      "dip",
+      "stamp",
+      "monkey",
+      "garage",
+      "ward"
+    ],
+    "stats": {
+      "mean_log_freq": 1.312,
+      "mean_log_freq_targets": 1.3227,
+      "mean_log_freq_distractors": 1.3012,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 9,
+    "targets": [
+      "crab",
+      "surgery",
+      "pepper",
+      "breeze",
+      "soldier",
+      "diet",
+      "magazine",
+      "lawyer",
+      "twist",
+      "rice",
+      "idiot",
+      "cattle"
+    ],
+    "distractors": [
+      "lap",
+      "venue",
+      "rush",
+      "signal",
+      "guard",
+      "cricket",
+      "purchase",
+      "innit",
+      "tone",
+      "identity",
+      "cinema",
+      "squad"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3128,
+      "mean_log_freq_targets": 1.3161,
+      "mean_log_freq_distractors": 1.3096,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 10,
+    "targets": [
+      "chap",
+      "victim",
+      "alarm",
+      "relation",
+      "ban",
+      "banana",
+      "pasta",
+      "tunnel",
+      "sandwich",
+      "rat",
+      "length",
+      "elephant"
+    ],
+    "distractors": [
+      "copper",
+      "ham",
+      "gear",
+      "footage",
+      "ambition",
+      "juice",
+      "climate",
+      "chamber",
+      "spell",
+      "portrait",
+      "status",
+      "adult"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3138,
+      "mean_log_freq_targets": 1.2873,
+      "mean_log_freq_distractors": 1.3403,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 11,
+    "targets": [
+      "lock",
+      "abuse",
+      "concert",
+      "maker",
+      "episode",
+      "dragon",
+      "nerve",
+      "feature",
+      "prospect",
+      "delivery",
+      "bronze",
+      "proof"
+    ],
+    "distractors": [
+      "instance",
+      "mayor",
+      "jacket",
+      "dive",
+      "rope",
+      "cave",
+      "stretch",
+      "bee",
+      "package",
+      "hook",
+      "vase",
+      "telly"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3148,
+      "mean_log_freq_targets": 1.3407,
+      "mean_log_freq_distractors": 1.2888,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 12,
+    "targets": [
+      "panic",
+      "occasion",
+      "clip",
+      "lion",
+      "wealth",
+      "regard",
+      "plot",
+      "wire",
+      "capacity",
+      "applause",
+      "slice",
+      "legacy"
+    ],
+    "distractors": [
+      "killer",
+      "boot",
+      "designer",
+      "ghost",
+      "anger",
+      "cupboard",
+      "jam",
+      "cushion",
+      "poverty",
+      "truck",
+      "bloke",
+      "arrest"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3158,
+      "mean_log_freq_targets": 1.3096,
+      "mean_log_freq_distractors": 1.322,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  },
+  {
+    "list_index": 13,
+    "targets": [
+      "fella",
+      "shirt",
+      "ceremony",
+      "regime",
+      "beef",
+      "editor",
+      "calendar",
+      "breast",
+      "farmer",
+      "gate",
+      "hip",
+      "marathon"
+    ],
+    "distractors": [
+      "angel",
+      "reminder",
+      "tomato",
+      "forecast",
+      "ash",
+      "writer",
+      "gallery",
+      "den",
+      "knee",
+      "activity",
+      "flour",
+      "profile"
+    ],
+    "stats": {
+      "mean_log_freq": 1.3167,
+      "mean_log_freq_targets": 1.3425,
+      "mean_log_freq_distractors": 1.2909,
+      "n_targets": 12,
+      "n_distractors": 12
+    }
+  }
+]
