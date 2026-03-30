@@ -3,172 +3,189 @@ import { RandomDraws } from "@m2c2kit/core";
 /**
  * Word pools for the Mobile Verbal Learning Test (mVLT).
  *
- * Generated from SUBTLEX-UK frequency norms (van Heuven et al., 2014).
- * Selection criteria (matching Moore et al., 2020):
- * - Concrete, common English nouns, 3-8 letters
- * - Medium frequency band (log10 freq/million ~0.8-2.5)
- * - No proper nouns, curse words, plural forms, or past tense forms
- * - Frequency-matched across lists (round-robin assignment by frequency rank)
- * - Each word appears in exactly one list across all 14 lists
+ * Generated using the De Vent et al. (2022) framework for constructing
+ * parallel RAVLT-type word lists, matching on 13 psycholinguistic criteria.
  *
- * Grand mean log10(freq/million): 1.3108
- * Max deviation from grand mean: 0.0059
- * 14 lists x 24 words = 336 unique words
+ * Data sources:
+ *   - SUBTLEX-UK (van Heuven et al., 2014): word frequency, POS
+ *   - Glasgow Norms (Scott et al., 2019): concreteness, imageability,
+ *     familiarity, AoA, valence, arousal, dominance
+ *   - Brysbaert et al. (2014): concreteness ratings (fallback)
+ *
+ * Selection criteria:
+ *   - Nouns only (SUBTLEX-UK DomPoS), no proper nouns
+ *   - 3-8 letters, no plurals/past tense/gerunds
+ *   - Medium frequency (log10 freq/million 0.8-2.5)
+ *   - Concrete words (Glasgow CNC >= 3.0)
+ *   - Neutral valence (Glasgow VAL 2.5-7.5)
+ *   - Full Glasgow norms coverage required
+ *
+ * Balancing results:
+ *   Grand mean log10(freq/million): 1.3486 (max dev: 0.0022)
+ *   concreteness: mean=5.50, max dev=0.381
+ *   imageability: mean=5.55, max dev=0.480
+ *   familiarity: mean=5.72, max dev=0.280
+ *   aoa: mean=3.40, max dev=0.299
+ *   valence: mean=5.35, max dev=0.406
+ *   arousal: mean=4.47, max dev=0.342
+ *   length: mean=5.27, max dev=0.649
+ *   syllables: mean=1.57, max dev=0.342
+ *   336 unique words across 14 lists
  */
 
 export const WORD_LISTS = [
-  // ── List 0 (mean log freq: 1.305) ──
+  // ── List 0 (freq=1.348, conc=5.42, img=5.53, aoa=3.46) ──
   {
     targets: [
-      "peak", "guitar", "division", "tape", "bail", "oak",
-      "failure", "summit", "cue", "context", "desert", "glory",
+      "status", "fence", "comment", "mass", "piano", "silence",
+      "carpet", "shadow", "mouse", "pet", "document", "library",
     ],
     distractors: [
-      "grade", "snake", "wing", "punch", "opera", "flood",
-      "balloon", "aspect", "attitude", "fee", "phrase", "toast",
+      "patrol", "relation", "gallery", "stadium", "crab", "rival",
+      "oak", "ticket", "steam", "bell", "activity", "sandwich",
     ],
   },
-  // ── List 1 (mean log freq: 1.306) ──
+  // ── List 1 (freq=1.349, conc=5.12, img=5.07, aoa=3.54) ──
   {
     targets: [
-      "flow", "element", "toy", "scratch", "mill", "circle",
-      "suicide", "tiger", "onion", "nail", "print", "lad",
+      "bounce", "comfort", "feature", "metre", "session", "alcohol",
+      "angle", "jet", "tape", "texture", "pie", "chain",
     ],
     distractors: [
-      "code", "dancer", "kit", "motion", "concept", "carpet",
-      "tank", "stroke", "fence", "medium", "multi", "pipe",
+      "aid", "soldier", "oxygen", "flour", "tune", "bee",
+      "content", "code", "toast", "pile", "outcome", "shell",
     ],
   },
-  // ── List 2 (mean log freq: 1.307) ──
+  // ── List 2 (freq=1.349, conc=5.39, img=5.37, aoa=3.64) ──
   {
     targets: [
-      "keeper", "pet", "spin", "storage", "mini", "trap",
-      "suite", "yard", "piano", "hop", "counter", "theory",
+      "crown", "choir", "finance", "nurse", "sentence", "cricket",
+      "jam", "comedy", "coach", "stroke", "boot", "manner",
     ],
     distractors: [
-      "survival", "actress", "legend", "vet", "religion", "sausage",
-      "cousin", "cycle", "rainbow", "worker", "trophy", "bunch",
+      "torch", "storage", "editor", "core", "zoo", "jacket",
+      "jungle", "boost", "stake", "heir", "text", "chest",
     ],
   },
-  // ── List 3 (mean log freq: 1.308) ──
+  // ── List 3 (freq=1.348, conc=5.77, img=5.79, aoa=3.22) ──
   {
     targets: [
-      "tale", "entrance", "lesson", "medicine", "cafe", "platform",
-      "plastic", "finance", "session", "chip", "bow", "extent",
+      "fridge", "photo", "brush", "squad", "bloke", "mirror",
+      "ham", "wheel", "load", "counter", "cattle", "tale",
     ],
     distractors: [
-      "currency", "carbon", "dawn", "bite", "survey", "teenager",
-      "barn", "weapon", "petrol", "pen", "launch", "hunter",
+      "cafe", "maximum", "dust", "gear", "straw", "episode",
+      "sofa", "elephant", "oven", "scrum", "gym", "finger",
     ],
   },
-  // ── List 4 (mean log freq: 1.309) ──
+  // ── List 4 (freq=1.351, conc=5.17, img=5.21, aoa=3.45) ──
   {
     targets: [
-      "belt", "agenda", "grave", "tragedy", "coverage", "spoon",
-      "comment", "fraud", "coat", "tribute", "universe", "spider",
+      "breast", "farmer", "potato", "offence", "patch", "pound",
+      "phrase", "bail", "toilet", "tension", "lock", "flow",
     ],
     distractors: [
-      "mortgage", "library", "sofa", "creation", "tail", "nonsense",
-      "gang", "rail", "heir", "treasure", "creature", "tennis",
+      "profile", "defeat", "runner", "medicine", "pepper", "diamond",
+      "nail", "theme", "ear", "reminder", "wing", "drama",
     ],
   },
-  // ── List 5 (mean log freq: 1.309) ──
+  // ── List 5 (freq=1.350, conc=5.43, img=5.47, aoa=3.42) ──
   {
     targets: [
-      "charm", "exchange", "bat", "madam", "deer", "bacon",
-      "content", "mouse", "coal", "prank", "clay", "enemy",
+      "ward", "calendar", "welfare", "device", "spell", "pool",
+      "guitar", "pilot", "regime", "bone", "swing", "adult",
     ],
     distractors: [
-      "desk", "buzz", "torch", "lemon", "offence", "angle",
-      "witness", "era", "tongue", "consumer", "judgment", "shift",
+      "concert", "chip", "medium", "creature", "coat", "jazz",
+      "youth", "cushion", "bass", "bacon", "shirt", "dancer",
     ],
   },
-  // ── List 6 (mean log freq: 1.310) ──
+  // ── List 6 (freq=1.348, conc=5.60, img=5.56, aoa=3.70) ──
   {
     targets: [
-      "pile", "affair", "jungle", "lounge", "chilli", "brush",
-      "aunt", "sentence", "menu", "pork", "sink", "pit",
+      "bungalow", "print", "pole", "tribute", "deer", "guard",
+      "universe", "tail", "poll", "portrait", "vase", "parade",
     ],
     distractors: [
-      "soup", "desire", "genius", "tension", "canal", "athlete",
-      "command", "potato", "soil", "core", "height", "exercise",
+      "bow", "path", "soil", "rent", "cap", "struggle",
+      "lemon", "builder", "agent", "motor", "tower", "incident",
     ],
   },
-  // ── List 7 (mean log freq: 1.311) ──
+  // ── List 7 (freq=1.347, conc=5.71, img=5.77, aoa=3.25) ──
   {
     targets: [
-      "mirror", "proposal", "bounce", "seed", "document", "trail",
-      "pond", "steel", "snooker", "transfer", "aircraft", "behalf",
+      "onion", "taxi", "stretch", "source", "signal", "punch",
+      "page", "contract", "flood", "truck", "traffic", "dessert",
     ],
     distractors: [
-      "bucket", "comfort", "scandal", "minimum", "chairman", "babe",
-      "shoulder", "customer", "rocket", "lifetime", "text", "protest",
+      "breeze", "circle", "rail", "slide", "actress", "gate",
+      "rice", "brass", "yard", "measure", "engine", "lion",
     ],
   },
-  // ── List 8 (mean log freq: 1.312) ──
+  // ── List 8 (freq=1.349, conc=5.68, img=5.90, aoa=3.13) ──
   {
     targets: [
-      "flag", "belief", "heritage", "monster", "conflict", "fame",
-      "silence", "source", "runner", "author", "presence", "devil",
+      "aunt", "vehicle", "wire", "occasion", "snake", "mill",
+      "pond", "spider", "storm", "spin", "pipe", "skill",
     ],
     distractors: [
-      "jazz", "tent", "ginger", "diamond", "licence", "metre",
-      "nest", "dip", "stamp", "monkey", "garage", "ward",
+      "wave", "vet", "pork", "shark", "tennis", "anger",
+      "golf", "rat", "motion", "ocean", "cycle", "pastry",
     ],
   },
-  // ── List 9 (mean log freq: 1.313) ──
+  // ── List 9 (freq=1.347, conc=5.61, img=5.77, aoa=3.46) ──
   {
     targets: [
-      "crab", "surgery", "pepper", "breeze", "soldier", "diet",
-      "magazine", "lawyer", "twist", "rice", "idiot", "cattle",
+      "stamp", "tank", "cottage", "launch", "grey", "lesson",
+      "web", "airport", "desk", "climate", "host", "soup",
     ],
     distractors: [
-      "lap", "venue", "rush", "signal", "guard", "cricket",
-      "purchase", "innit", "tone", "identity", "cinema", "squad",
+      "lad", "cinema", "lawyer", "hurry", "dragon", "pizza",
+      "carbon", "currency", "spoon", "seed", "tent", "tube",
     ],
   },
-  // ── List 10 (mean log freq: 1.314) ──
+  // ── List 10 (freq=1.349, conc=5.58, img=5.49, aoa=3.20) ──
   {
     targets: [
-      "chap", "victim", "alarm", "relation", "ban", "banana",
-      "pasta", "tunnel", "sandwich", "rat", "length", "elephant",
+      "tone", "knife", "rabbit", "sausage", "trap", "tomato",
+      "dive", "proof", "steel", "costume", "petrol", "copy",
     ],
     distractors: [
-      "copper", "ham", "gear", "footage", "ambition", "juice",
-      "climate", "chamber", "spell", "portrait", "status", "adult",
+      "pension", "bull", "cow", "firm", "grade", "monster",
+      "bat", "package", "net", "beer", "iron", "barn",
     ],
   },
-  // ── List 11 (mean log freq: 1.315) ──
+  // ── List 11 (freq=1.347, conc=5.43, img=5.43, aoa=3.54) ──
   {
     targets: [
-      "lock", "abuse", "concert", "maker", "episode", "dragon",
-      "nerve", "feature", "prospect", "delivery", "bronze", "proof",
+      "data", "sink", "pen", "ban", "symbol", "folk",
+      "length", "novel", "cell", "duck", "leaf", "cave",
     ],
     distractors: [
-      "instance", "mayor", "jacket", "dive", "rope", "cave",
-      "stretch", "bee", "package", "hook", "vase", "telly",
+      "dawn", "loan", "canal", "wealth", "album", "error",
+      "liquid", "salad", "penny", "pig", "singer", "bronze",
     ],
   },
-  // ── List 12 (mean log freq: 1.316) ──
+  // ── List 12 (freq=1.350, conc=5.45, img=5.51, aoa=3.44) ──
   {
     targets: [
-      "panic", "occasion", "clip", "lion", "wealth", "regard",
-      "plot", "wire", "capacity", "applause", "slice", "legacy",
+      "network", "designer", "minimum", "object", "belt", "bench",
+      "festival", "autumn", "beef", "sail", "author", "magazine",
     ],
     distractors: [
-      "killer", "boot", "designer", "ghost", "anger", "cupboard",
-      "jam", "cushion", "poverty", "truck", "bloke", "arrest",
+      "rhythm", "fool", "banana", "lake", "protest", "nest",
+      "reporter", "pasta", "tongue", "video", "freeze", "smoke",
     ],
   },
-  // ── List 13 (mean log freq: 1.317) ──
+  // ── List 13 (freq=1.350, conc=5.67, img=5.89, aoa=3.18) ──
   {
     targets: [
-      "fella", "shirt", "ceremony", "regime", "beef", "editor",
-      "calendar", "breast", "farmer", "gate", "hip", "marathon",
+      "writer", "actor", "boom", "ghost", "rocket", "monkey",
+      "exercise", "surgery", "button", "seal", "stomach", "hook",
     ],
     distractors: [
-      "angel", "reminder", "tomato", "forecast", "ash", "writer",
-      "gallery", "den", "knee", "activity", "flour", "profile",
+      "plot", "desert", "port", "bride", "pin", "tiger",
+      "salmon", "jury", "inch", "toy", "section", "balloon",
     ],
   },
 ];
