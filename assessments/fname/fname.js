@@ -10,7 +10,6 @@ import {
 } from "@m2c2kit/core";
 
 import {
-  NAME_POOL,
   OCCUPATION_POOL,
   shuffleArray,
   generateTriplets,
