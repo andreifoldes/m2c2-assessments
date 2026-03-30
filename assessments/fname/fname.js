@@ -61,6 +61,12 @@ export class FaceNameOccupation extends Game {
         type: "boolean",
         description: "Show instruction screens before each phase",
       },
+      grayscale_faces: {
+        default: true,
+        type: "boolean",
+        description:
+          "Display face images in grayscale to reduce skin tone bias",
+      },
       face_image_pool: {
         default: "[]",
         type: "string",
@@ -192,6 +198,7 @@ export class FaceNameOccupation extends Game {
 
     const img = document.createElement("img");
     img.id = "fname-face-overlay";
+    const useGrayscale = this.getParameter("grayscale_faces");
     img.style.cssText = `
       position: absolute;
       top: 0; left: 0;
@@ -202,6 +209,7 @@ export class FaceNameOccupation extends Game {
       pointer-events: none;
       display: none;
       z-index: 100;
+      ${useGrayscale ? "filter: grayscale(100%);" : ""}
     `;
     container.style.position = "relative";
     container.appendChild(img);

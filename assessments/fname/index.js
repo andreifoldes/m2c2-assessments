@@ -166,6 +166,11 @@ for (const key of [
     paramOverrides[key] = parseFloat(val);
   }
 }
+const grayscaleParam = params.get("grayscale_faces");
+if (grayscaleParam !== null) {
+  paramOverrides.grayscale_faces =
+    grayscaleParam !== "false" && grayscaleParam !== "0";
+}
 const tutorialParam = params.get("show_tutorial");
 if (tutorialParam !== null) {
   paramOverrides.show_tutorial =
