@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FNAME Face Database Browser</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f7; color: #1d1d1f; }
+
+  header { background: #fff; border-bottom: 1px solid #d2d2d7; padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; align-items: center; }
+  .controls label { font-size: 13px; color: #6e6e73; }
+  .controls select, .controls input { font-size: 13px; padding: 4px 8px; border: 1px solid #d2d2d7; border-radius: 6px; background: #fff; }
+  .controls input[type=range] { width: 100px; }
+
+  .stats { display: flex; gap: 24px; margin-top: 10px; font-size: 13px; color: #6e6e73; flex-wrap: wrap; }
+  .stat-chip { background: #e8e8ed; padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+
+  .pool-toggle { display: flex; gap: 8px; margin-top: 10px; }
+  .pool-toggle button { font-size: 12px; padding: 4px 12px; border: 1px solid #d2d2d7; border-radius: 6px; background: #fff; cursor: pointer; }
+  .pool-toggle button.active { background: #0071e3; color: #fff; border-color: #0071e3; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; padding: 24px; }
+
+  .card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+  .card.selected-face { border: 3px solid #34c759; }
+  .card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .card-body { padding: 10px 12px; }
+  .card-body .id { font-size: 11px; color: #8e8e93; font-family: monospace; }
+  .card-body .meta { font-size: 13px; margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+  .tag-male { background: #d1e8ff; color: #0055b3; }
+  .tag-female { background: #ffd6e7; color: #b3004d; }
+  .tag-age { background: #f0f0f5; color: #3a3a3c; }
+  .tag-light { background: #faf0e6; color: #8b6914; }
+  .tag-medium { background: #d2b48c; color: #4a3520; }
+  .tag-dark { background: #5c4033; color: #f5deb3; }
+  .tag-unknown { background: #e8e8ed; color: #6e6e73; }
+  .tag-selected { background: #d4edda; color: #155724; }
+
+  .detail-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; }
+  .detail-overlay.show { display: flex; }
+  .detail-panel { background: #fff; border-radius: 16px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+  .detail-panel img { width: 100%; max-height: 400px; object-fit: contain; background: #f5f5f7; }
+  .detail-info { padding: 20px; }
+  .detail-info h2 { font-size: 18px; margin-bottom: 12px; }
+  .detail-info table { width: 100%; font-size: 14px; }
+  .detail-info td { padding: 4px 0; }
+  .detail-info td:first-child { color: #6e6e73; width: 140px; }
+  .detail-close { position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.5); color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 18px; cursor: pointer; }
+
+  .empty { text-align: center; padding: 80px 24px; color: #8e8e93; }
+  .empty p { margin-top: 8px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FNAME Face Database Browser</h1>
+  <div class="controls">
+    <div>
+      <label>Gender:</label>
+      <select id="filterGender">
+        <option value="all">All</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
+    <div>
+      <label>Skin tone:</label>
+      <select id="filterSkin">
+        <option value="all">All</option>
+        <option value="light">Light</option>
+        <option value="medium">Medium</option>
+        <option value="dark">Dark</option>
+        <option value="unknown">Unknown</option>
+      </select>
+    </div>
+    <div>
+      <label>Age: <span id="ageLabel">18 - 75</span></label><br>
+      <input type="range" id="ageMin" min="0" max="80" value="18">
+      <input type="range" id="ageMax" min="0" max="80" value="75">
+    </div>
+    <div>
+      <label>Sort:</label>
+      <select id="sortBy">
+        <option value="id">ID</option>
+        <option value="age">Age</option>
+        <option value="gender">Gender</option>
+        <option value="skin">Skin tone</option>
+      </select>
+    </div>
+  </div>
+  <div class="pool-toggle">
+    <button id="btnSelected" class="active" onclick="setPool('selected')">Selected (0)</button>
+    <button id="btnAll" onclick="setPool('all')">Full Pool (0)</button>
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+  <div class="detail-panel" onclick="event.stopPropagation()">
+    <button class="detail-close" onclick="closeDetail()">&times;</button>
+    <img id="detailImg" src="">
+    <div class="detail-info">
+      <h2 id="detailTitle"></h2>
+      <table id="detailTable"></table>
+    </div>
+  </div>
+</div>
+
+<div class="empty" id="empty" style="display:none">
+  <h2>No faces match filters</h2>
+  <p>Try adjusting the filters above.</p>
+</div>
+
+<script>
+let allFaces = [];
+let selectedFaces = [];
+let selectedIds = new Set();
+let currentPool = 'selected';
+
+const basePath = '../assets/fname/images/';
+
+async function loadData() {
+  try {
+    const [selResp, allResp] = await Promise.allSettled([
+      fetch(basePath + 'selected-faces.json').then(r => r.json()),
+      fetch(basePath + 'all-faces-metadata.json').then(r => r.json()),
+    ]);
+
+    if (selResp.status === 'fulfilled') {
+      selectedFaces = selResp.value;
+      selectedIds = new Set(selectedFaces.map(f => f.id));
+    }
+    if (allResp.status === 'fulfilled') {
+      allFaces = allResp.value;
+    }
+
+    if (allFaces.length === 0 && selectedFaces.length > 0) {
+      allFaces = selectedFaces;
+    }
+
+    document.getElementById('btnSelected').textContent = `Selected (${selectedFaces.length})`;
+    document.getElementById('btnAll').textContent = `Full Pool (${allFaces.length})`;
+
+    render();
+  } catch (e) {
+    document.getElementById('grid').innerHTML = `<div class="empty"><h2>Error loading data</h2><p>${e.message}</p></div>`;
+  }
+}
+
+function setPool(pool) {
+  currentPool = pool;
+  document.getElementById('btnSelected').classList.toggle('active', pool === 'selected');
+  document.getElementById('btnAll').classList.toggle('active', pool === 'all');
+  render();
+}
+
+function getFiltered() {
+  const pool = currentPool === 'selected' ? selectedFaces : allFaces;
+  const gender = document.getElementById('filterGender').value;
+  const skin = document.getElementById('filterSkin').value;
+  const ageMinVal = parseInt(document.getElementById('ageMin').value);
+  const ageMaxVal = parseInt(document.getElementById('ageMax').value);
+  const sortBy = document.getElementById('sortBy').value;
+
+  let filtered = pool.filter(f => {
+    if (gender !== 'all' && f.gender !== gender) return false;
+    if (skin !== 'all' && (f.skin_tone_group || 'unknown') !== skin) return false;
+    if (f.age < ageMinVal || f.age > ageMaxVal) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => {
+    if (sortBy === 'age') return a.age - b.age;
+    if (sortBy === 'gender') return a.gender.localeCompare(b.gender);
+    if (sortBy === 'skin') return (a.skin_tone_group || 'z').localeCompare(b.skin_tone_group || 'z');
+    return a.id.localeCompare(b.id);
+  });
+
+  return filtered;
+}
+
+function render() {
+  const filtered = getFiltered();
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+
+  // Stats
+  const genders = {}, skins = {}, ages = [];
+  filtered.forEach(f => {
+    genders[f.gender] = (genders[f.gender] || 0) + 1;
+    const sg = f.skin_tone_group || 'unknown';
+    skins[sg] = (skins[sg] || 0) + 1;
+    ages.push(f.age);
+  });
+  const meanAge = ages.length ? (ages.reduce((a,b) => a+b, 0) / ages.length).toFixed(1) : '-';
+  let statsHtml = `<span>Showing <span class="stat-chip">${filtered.length}</span></span>`;
+  for (const [g, c] of Object.entries(genders)) statsHtml += `<span>${g}: <span class="stat-chip">${c}</span></span>`;
+  for (const [s, c] of Object.entries(skins)) statsHtml += `<span>${s}: <span class="stat-chip">${c}</span></span>`;
+  statsHtml += `<span>Mean age: <span class="stat-chip">${meanAge}</span></span>`;
+  document.getElementById('stats').innerHTML = statsHtml;
+
+  // Age label
+  document.getElementById('ageLabel').textContent = `${document.getElementById('ageMin').value} - ${document.getElementById('ageMax').value}`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = filtered.map(f => {
+    const isSelected = selectedIds.has(f.id);
+    const skinClass = f.skin_tone_group || 'unknown';
+    const genderClass = f.gender === 'Male' ? 'male' : 'female';
+    return `
+      <div class="card ${isSelected ? 'selected-face' : ''}" onclick="showDetail('${f.id}')">
+        <img src="${basePath}${f.filename}" alt="Face ${f.id}" loading="lazy">
+        <div class="card-body">
+          <div class="id">${f.id} ${isSelected ? '<span class="tag tag-selected">selected</span>' : ''}</div>
+          <div class="meta">
+            <span class="tag tag-${genderClass}">${f.gender}</span>
+            <span class="tag tag-age">${f.age}y</span>
+            <span class="tag tag-${skinClass}">${skinClass}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function showDetail(id) {
+  const face = allFaces.find(f => f.id === id) || selectedFaces.find(f => f.id === id);
+  if (!face) return;
+
+  document.getElementById('detailImg').src = basePath + face.filename;
+  document.getElementById('detailTitle').textContent = `Face ${face.id}`;
+
+  const rows = [
+    ['Age', face.age],
+    ['Gender', face.gender],
+    ['Skin Tone Group', face.skin_tone_group || 'unknown'],
+    ['Skin Tone Hex', face.skin_tone_hex || '-'],
+    ['Skin Tone Label', face.skin_tone_label || '-'],
+    ['Accuracy', face.skin_tone_accuracy ? face.skin_tone_accuracy.toFixed(1) + '%' : '-'],
+    ['Dominant Color', face.dominant_color || '-'],
+    ['In Selected Set', selectedIds.has(face.id) ? 'Yes' : 'No'],
+    ['Filename', face.filename],
+  ];
+
+  document.getElementById('detailTable').innerHTML = rows.map(([k, v]) => {
+    let extra = '';
+    if (k === 'Skin Tone Hex' && v && v.startsWith('#')) {
+      extra = `<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${v};vertical-align:middle;margin-left:6px;border:1px solid #ccc;"></span>`;
+    }
+    if (k === 'Dominant Color' && v && v.startsWith('#')) {
+      extra = `<span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:${v};vertical-align:middle;margin-left:6px;border:1px solid #ccc;"></span>`;
+    }
+    return `<tr><td>${k}</td><td>${v}${extra}</td></tr>`;
+  }).join('');
+
+  document.getElementById('detailOverlay').classList.add('show');
+}
+
+function closeDetail(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('detailOverlay').classList.remove('show');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+// Bind filter events
+['filterGender', 'filterSkin', 'ageMin', 'ageMax', 'sortBy'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+});
+
+loadData();
+</script>
+</body>
+</html>

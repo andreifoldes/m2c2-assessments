@@ -12,7 +12,7 @@ Cognitive assessments hosted on GitHub Pages, built with [m2c2kit](https://githu
 | **Grid Memory** | Measures spatial working memory using a grid pattern | ~240 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-grid-memory@0.8.33/?show_end_screen=false) | — | — |
 | **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webgazer=1&show_end_screen=false) |
 | **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webgazer=1&show_end_screen=false) |
-| **FNAME** | Face-Name-Occupation associative memory — learn face–name and face–occupation pairs, infer name↔occupation, then recognize after delay | ~180 | [Rentz et al., 2011](https://doi.org/10.1016/j.neuropsychologia.2011.09.004) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webgazer=1&show_end_screen=false) |
+| **FNAME** | Face–Name–Occupation Task — learn face–name and face–occupation pairs, infer name↔occupation, then recognize after delay | ~180 | [Papp et al., 2021](https://doi.org/10.1002/dad2.12243) · [Rentz et al., 2010](https://doi.org/10.1002/ana.21904) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webgazer=1&show_end_screen=false) |
 | **mVLT** | Mobile Verbal Learning Test — study 12 words, then YES/NO recognition with 3-trial learning curve | ~300 | [Moore et al., 2020](https://doi.org/10.1002/mpr.1859) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/?webcam=1) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/?webgazer=1) |
 
 ## Common URL Parameters
@@ -225,9 +225,9 @@ The pool contains common food and household items. 10 items are drawn per sessio
 
 ---
 
-## FNAME (Face-Name-Occupation Test)
+## FNAME (Face–Name–Occupation Task)
 
-A modified Face-Name Associative Memory Exam that tests face–name and face–occupation associative memory, plus relational inference. Participants learn face–name and face–occupation pairs, then must infer name↔occupation associations without seeing faces, and finally recognize correct pairings after a configurable delay. Based on the FNAME paradigm (Rentz et al., 2011).
+A Face–Name–Occupation associative memory task that tests face–name and face–occupation associative memory, plus relational inference. Participants learn face–name and face–occupation pairs, then must infer name↔occupation associations without seeing faces, and finally recognize correct pairings after a configurable delay. Based on the FNAME paradigm (Papp et al., 2021; Rentz et al., 2010).
 
 ### Phases
 

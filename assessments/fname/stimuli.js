@@ -1,11 +1,15 @@
 import { RandomDraws } from "@m2c2kit/core";
 
-export const NAME_POOL = [
-  "Ruth", "James", "Maria", "Wei", "Aisha", "David", "Priya", "Michael",
-  "Fatima", "Carlos", "Sarah", "Kenji", "Elena", "Omar", "Linda", "Raj",
-  "Sophie", "Yuki", "Amara", "Daniel", "Lucia", "Hassan", "Grace", "Mateo",
-  "Nadia", "Robert", "Zara", "Ivan", "Leila", "Thomas", "Clara", "Ahmed",
-  "Rose", "Dmitri", "Maya", "Patrick", "Ingrid", "Kofi", "Helen", "Marco",
+export const MALE_NAMES = [
+  "James", "David", "Michael", "Carlos", "Kenji", "Omar", "Raj",
+  "Daniel", "Hassan", "Mateo", "Robert", "Ivan", "Thomas", "Ahmed",
+  "Dmitri", "Patrick", "Kofi", "Marco", "Samuel", "Victor",
+];
+
+export const FEMALE_NAMES = [
+  "Ruth", "Maria", "Aisha", "Priya", "Fatima", "Sarah", "Elena",
+  "Linda", "Sophie", "Yuki", "Amara", "Lucia", "Grace", "Nadia",
+  "Zara", "Leila", "Clara", "Rose", "Maya", "Ingrid",
 ];
 
 export const OCCUPATION_POOL = [
@@ -29,15 +33,37 @@ export function shuffleArray(arr) {
 
 export function generateTriplets(facePool, numPairs) {
   const faces = shuffleArray(facePool).slice(0, numPairs);
-  const names = shuffleArray(NAME_POOL).slice(0, numPairs);
   const occupations = shuffleArray(OCCUPATION_POOL).slice(0, numPairs);
 
-  return faces.map((face, i) => ({
-    faceId: face.id,
-    faceDataUrl: face.dataUrl,
-    name: names[i],
-    occupation: occupations[i],
-  }));
+  // Gender-match names to faces
+  const maleNames = shuffleArray(MALE_NAMES);
+  const femaleNames = shuffleArray(FEMALE_NAMES);
+  let maleIdx = 0;
+  let femaleIdx = 0;
+
+  return faces.map((face, i) => {
+    const gender = face.demographics?.gender;
+    let name;
+    if (gender === "Male" && maleIdx < maleNames.length) {
+      name = maleNames[maleIdx++];
+    } else if (gender === "Female" && femaleIdx < femaleNames.length) {
+      name = femaleNames[femaleIdx++];
+    } else {
+      // Fallback: pick from whichever pool has remaining names
+      if (maleIdx < maleNames.length) {
+        name = maleNames[maleIdx++];
+      } else {
+        name = femaleNames[femaleIdx++];
+      }
+    }
+
+    return {
+      faceId: face.id,
+      faceDataUrl: face.dataUrl,
+      name,
+      occupation: occupations[i],
+    };
+  });
 }
 
 export function pickDistractors(correctAnswer, allOptions, count) {
