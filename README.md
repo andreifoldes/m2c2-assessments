@@ -298,20 +298,54 @@ On session end, the following summary is computed and included in the POST body 
 - **Learning curve:** array of total correct per trial (e.g. `[18, 21, 23]`)
 - **Mean total correct** across all trials
 
-### Word List Construction
+### Word List Construction (De Vent Framework)
 
-The 14 word lists (336 unique nouns) were generated from SUBTLEX-UK using `assessments/mvlt/scripts/generate_word_lists.py`:
+The 14 word lists (336 unique nouns) were generated using the [De Vent et al. (2022)](https://doi.org/10.1080/13803395.2023.2166904) framework for constructing parallel RAVLT-type word lists, matching on 10 of their 13 psycholinguistic criteria:
 
-- **Source:** SUBTLEX-UK frequency norms (201M words of British English subtitles)
-- **POS filter:** Only words with dominant POS = noun
-- **Proper noun exclusion:** Words capitalized >50% of the time are excluded
-- **Length:** 3–8 characters, alphabetic only
-- **Frequency band:** log10(freq/million) between 0.8 and 2.5
-- **Exclusions:** Plurals (-s/-ae), past tense (-ed), gerunds (-ing), offensive words
-- **Balancing:** Round-robin assignment by frequency rank across 14 lists
-- **Result:** Grand mean log10(freq/million) = 1.31, max deviation from grand mean = 0.006
+| # | Criterion | Source | Method |
+|---|---|---|---|
+| 1 | Word frequency | SUBTLEX-UK | log10(freq/million) 0.8–2.5, round-robin balanced |
+| 2 | Word length | Computed | 3–8 letters |
+| 3 | Syllables | Estimated | Heuristic syllable counter |
+| 4 | Phonemes | Estimated | Orthography-based approximation |
+| 5 | Concreteness | Glasgow Norms | ≥ 3.0 filter, balanced across lists |
+| 6 | Imageability | Glasgow Norms | Balanced across lists |
+| 7 | Familiarity | Glasgow Norms | Balanced across lists |
+| 8 | Age of acquisition | Glasgow Norms | Balanced across lists |
+| 9 | Valence | Glasgow Norms | Neutral range 2.5–7.5, balanced |
+| 10 | Arousal | Glasgow Norms | Balanced across lists |
+| 11 | Semantic relatedness | — | Enforced by noun-only selection + no clustering |
+| 12 | Orthographic N-size | — | Not yet implemented |
+| 13 | Phonological N-density | — | Not yet implemented |
 
-To regenerate with different criteria, download [SUBTLEX-UK.xlsx](https://psychology.nottingham.ac.uk/subtlex-uk/SUBTLEX-UK.xlsx.zip) into `assessments/mvlt/scripts/` and run:
+**Data sources:**
+- [SUBTLEX-UK](https://doi.org/10.1080/17470218.2013.850521) (van Heuven et al., 2014): word frequency, POS, capitalization frequency
+- [Glasgow Norms](https://doi.org/10.3758/s13428-018-1099-3) (Scott et al., 2019): concreteness, imageability, familiarity, AoA, valence, arousal, dominance
+- [Brysbaert et al. (2014)](https://doi.org/10.3758/s13428-013-0403-5): concreteness ratings for 40k words (fallback)
+
+**Additional filters:** nouns only (SUBTLEX-UK DomPoS), proper nouns excluded (>50% capitalized), no plurals/past tense/gerunds, no offensive words. After filtering: **1,074 candidate nouns** with full psycholinguistic norms.
+
+### Maximum Balanced Lists
+
+The candidate pool of 1,074 nouns supports up to 44 non-overlapping, De Vent-balanced lists. Balance quality degrades gracefully as more of the pool is used:
+
+| Lists | Words | Days of testing | Freq dev | Conc dev | Img dev | AoA dev | Val dev | Quality |
+|---|---|---|---|---|---|---|---|---|
+| **14** | 336 | 2 weeks | 0.002 | 0.38 | 0.48 | 0.30 | 0.41 | Excellent |
+| **28** | 672 | 4 weeks | 0.011 | 0.41 | 0.45 | 0.47 | 0.49 | Very good |
+| **36** | 864 | ~5 weeks | 0.024 | 0.52 | 0.53 | 0.42 | 0.44 | Good |
+| **44** | 1,056 | ~6 weeks | 0.037 | 0.65 | 0.67 | 0.69 | 0.43 | Acceptable |
+
+The default deployment ships 14 lists (matching Moore et al.'s 14-day protocol). To generate more lists, edit the `num_lists` parameter in the generation script.
+
+### Regenerating Word Lists
+
+Download the required norm databases into `assessments/mvlt/scripts/`:
+- [SUBTLEX-UK.xlsx](https://psychology.nottingham.ac.uk/subtlex-uk/SUBTLEX-UK.xlsx.zip) (required)
+- [Glasgow Norms CSV](https://doi.org/10.3758/s13428-018-1099-3) — Supplementary Material 2 (required)
+- [Brysbaert concreteness](https://github.com/ArtsEngine/concreteness) (optional fallback)
+
+Then run:
 
 ```bash
 uv run --with openpyxl python3 assessments/mvlt/scripts/generate_word_lists.py
