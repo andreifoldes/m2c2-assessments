@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script type="importmap"> {
+    "imports": {
+  "@m2c2kit/core": "../../modules/@m2c2kit/core@0.3.35/dist/index.min.js",
+  "@m2c2kit/session": "../../modules/@m2c2kit/session@0.3.17/dist/index.min.js",
+  "@m2c2kit/addons": "../../modules/@m2c2kit/addons@0.3.34/dist/index.min.js"
+}
+    }
+  </script>
+  <script type="module" src="index.js" defer></script>
+  <style>
+    #loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      z-index: 9999;
+    }
+    #loading-overlay.hidden { display: none; }
+    #loading-bar-bg {
+      width: 240px; height: 8px;
+      background: #e0e0e0; border-radius: 4px;
+      margin-top: 16px; overflow: hidden;
+    }
+    #loading-bar-fill {
+      height: 100%; width: 0%;
+      background: #3F51B5; border-radius: 4px;
+      transition: width 0.2s;
+    }
+    #loading-text {
+      margin-top: 12px; color: #666; font-size: 14px;
+    }
+  </style>
+</head>
+
+<body class="m2c2kit-background-color m2c2kit-no-margin">
+  <div id="loading-overlay">
+    <div style="font-size: 18px; font-weight: 600; color: #333;">Loading Face Images...</div>
+    <div id="loading-bar-bg"><div id="loading-bar-fill"></div></div>
+    <div id="loading-text">0 / 100</div>
+  </div>
+  <div id="m2c2kit"></div>
+</body>
+
+</html>

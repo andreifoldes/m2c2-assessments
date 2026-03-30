@@ -12,6 +12,7 @@ Cognitive assessments hosted on GitHub Pages, built with [m2c2kit](https://githu
 | **Grid Memory** | Measures spatial working memory using a grid pattern | ~240 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-grid-memory@0.8.33/?show_end_screen=false) | — | — |
 | **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webgazer=1&show_end_screen=false) |
 | **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webgazer=1&show_end_screen=false) |
+| **FNAME** | Face-Name-Occupation associative memory — learn face–name and face–occupation pairs, infer name↔occupation, then recognize after delay | ~180 | [Rentz et al., 2011](https://doi.org/10.1016/j.neuropsychologia.2011.09.004) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webgazer=1&show_end_screen=false) |
 
 ## Common URL Parameters
 
@@ -220,3 +221,41 @@ The pool contains common food and household items. 10 items are drawn per sessio
 **Food:** Almonds, Applesauce, Blueberries, Cashews, Celery, Cereal, Cheeseburger, Cooking Spray, Cucumber, Limes, Noodles, Pineapple, Ramen, Rolls, Salad, Salsa, Sandwich, Spinach, Tortillas, Vegetable Oil, Waffles, Zucchini
 
 **Household & Personal Care:** Aluminum Foil, Batteries, Bleach, Detergent, Dish Soap, Dryer Sheets, Light Bulbs, Napkins, Paper Towels, Pencils, Plastic Wrap, Sponge, Toilet Paper, Trash Bags, Aspirin, Conditioner, Floss, Lotion
+
+---
+
+## FNAME (Face-Name-Occupation Test)
+
+A modified Face-Name Associative Memory Exam that tests face–name and face–occupation associative memory, plus relational inference. Participants learn face–name and face–occupation pairs, then must infer name↔occupation associations without seeing faces, and finally recognize correct pairings after a configurable delay. Based on the FNAME paradigm (Rentz et al., 2011).
+
+### Phases
+
+1. **Learn Names** — Each face is shown with a name; auto-advances after `learning_duration_ms`.
+2. **Learn Occupations** — Same faces, now paired with occupations.
+3. **Associative Inference** — "[Name]'s job is: ___?" with distractors drawn from the session's occupation pool. No faces shown.
+4. **Delayed Recognition** — After a configurable delay, face + name/occupation pairs are shown; participant judges YES/NO if the pairing is correct. Includes both correct and distractor pairings, counterbalanced.
+
+### URL Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `token` | string | — | Authentication token. When absent (along with `callback_url`), the assessment runs in debug mode and displays results on-screen. |
+| `callback_url` | string | — | URL to POST results to when the assessment ends. |
+| `number_of_pairs` | number | `6` | Number of face–name–occupation triplets to learn. |
+| `number_of_distractors` | number | `2` | Number of wrong options in the inference and recognition phases. |
+| `learning_duration_ms` | number | `5000` | Display duration per learning card (ms). Auto-advances; tap to advance early. |
+| `delay_seconds` | number | `10` | Countdown delay between inference and recognition phases (s). Set to `0` to skip. |
+| `show_tutorial` | string | `true` | Set to `false` or `0` to skip instruction screens before each phase. |
+| `face_source` | string | `bundled` | Set to `api` to fetch random faces from 100k-faces instead of using the bundled curated set. |
+| `webcam` | string | — | Set to `1` or `true` to enable optional camera recording. |
+| `webgazer` | string | — | Set to `1` or `true` to enable browser-based eye tracking. |
+
+### Trial Data Fields
+
+**Inference trials:** `phase`, `trial_index`, `pair_index`, `face_id`, `correct_answer`, `user_response`, `is_correct`, `response_time_ms`, `distractor_options` (JSON array), `stimulus_type` (`name_to_occupation`).
+
+**Recognition trials:** `phase`, `trial_index`, `pair_index`, `face_id`, `correct_answer` (`YES`/`NO`), `user_response`, `is_correct`, `response_time_ms`, `stimulus_type` (`face_name` or `face_occupation`).
+
+### Face Stimulus Database
+
+The assessment ships with 100 curated face images with demographic metadata (age, gender, skin tone). Faces are selected to balance gender (50/50) and maximize diversity across age bins and skin tones. The face pool can be expanded using the curation tools in `assessments/fname/tools/`.

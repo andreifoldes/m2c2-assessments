@@ -3,3 +3,6 @@ archive/
 test-results/
 tests/
 .playwright-mcp/
+temp/
+.superpowers/
+.claude/
