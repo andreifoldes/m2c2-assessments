@@ -66,6 +66,12 @@ export class FaceNameOccupation extends Game {
         description:
           "Display face images in grayscale to reduce skin tone bias",
       },
+      line_drawing_faces: {
+        default: false,
+        type: "boolean",
+        description:
+          "Apply a line-drawing filter to face images for a more abstract appearance",
+      },
       face_image_pool: {
         default: "[]",
         type: "string",
@@ -195,9 +201,49 @@ export class FaceNameOccupation extends Game {
     const container = document.getElementById("m2c2kit");
     if (!container) return;
 
+    const useGrayscale = this.getParameter("grayscale_faces");
+    const useLineDrawing = this.getParameter("line_drawing_faces");
+
+    // Inject SVG filter for line-drawing effect if needed
+    if (useLineDrawing && !document.getElementById("fname-line-drawing-svg")) {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.id = "fname-line-drawing-svg";
+      svg.setAttribute("width", "0");
+      svg.setAttribute("height", "0");
+      svg.style.position = "absolute";
+      svg.innerHTML = `
+        <filter id="fname-line-drawing-filter">
+          <!-- Convert to grayscale -->
+          <feColorMatrix type="saturate" values="0" result="gray"/>
+          <!-- Edge detection via Laplacian convolution -->
+          <feConvolveMatrix in="gray" order="3"
+            kernelMatrix="-1 -1 -1  -1 8 -1  -1 -1 -1"
+            divisor="1" bias="0" preserveAlpha="true" result="edges"/>
+          <!-- Boost contrast and invert so edges are dark on white -->
+          <feComponentTransfer in="edges" result="boosted">
+            <feFuncR type="linear" slope="-3" intercept="1"/>
+            <feFuncG type="linear" slope="-3" intercept="1"/>
+            <feFuncB type="linear" slope="-3" intercept="1"/>
+          </feComponentTransfer>
+          <!-- Threshold to clean up the lines -->
+          <feComponentTransfer in="boosted">
+            <feFuncR type="discrete" tableValues="0 0 0.15 0.4 0.6 0.85 1 1"/>
+            <feFuncG type="discrete" tableValues="0 0 0.15 0.4 0.6 0.85 1 1"/>
+            <feFuncB type="discrete" tableValues="0 0 0.15 0.4 0.6 0.85 1 1"/>
+          </feComponentTransfer>
+        </filter>
+      `;
+      document.body.appendChild(svg);
+    }
+
+    const filters = [];
+    if (useGrayscale && !useLineDrawing) filters.push("grayscale(100%)");
+    if (useLineDrawing) filters.push("url(#fname-line-drawing-filter)");
+    const filterStr = filters.length > 0 ? `filter: ${filters.join(" ")};` : "";
+
     const img = document.createElement("img");
     img.id = "fname-face-overlay";
-    const useGrayscale = this.getParameter("grayscale_faces");
     img.style.cssText = `
       position: absolute;
       top: 0; left: 0;
@@ -208,7 +254,7 @@ export class FaceNameOccupation extends Game {
       pointer-events: none;
       display: none;
       z-index: 100;
-      ${useGrayscale ? "filter: grayscale(100%);" : ""}
+      ${filterStr}
     `;
     container.style.position = "relative";
     container.appendChild(img);

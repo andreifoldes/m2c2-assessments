@@ -48,6 +48,7 @@ No new npm dependencies. No build step — directly served like Prices and PVT-B
 | `delay_seconds` | 300 | number | Countdown between inference and recognition |
 | `show_tutorial` | true | boolean | Show instruction screens before each phase |
 | `number_of_faces_to_prefetch` | 100 | number | Faces to pre-load from API |
+| `line_drawing_faces` | false | boolean | Apply line-drawing filter to faces for abstract appearance |
 | `show_trials_complete_scene` | true | boolean | Show completion screen at end |
 | `token` | — | string | Auth token for result submission |
 | `callback_url` | — | string | Endpoint to POST results |

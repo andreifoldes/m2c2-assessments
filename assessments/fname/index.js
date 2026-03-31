@@ -171,6 +171,11 @@ if (grayscaleParam !== null) {
   paramOverrides.grayscale_faces =
     grayscaleParam !== "false" && grayscaleParam !== "0";
 }
+const lineDrawingParam = params.get("line_drawing_faces");
+if (lineDrawingParam !== null) {
+  paramOverrides.line_drawing_faces =
+    lineDrawingParam !== "false" && lineDrawingParam !== "0";
+}
 const tutorialParam = params.get("show_tutorial");
 if (tutorialParam !== null) {
   paramOverrides.show_tutorial =
