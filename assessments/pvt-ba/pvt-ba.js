@@ -29,8 +29,16 @@ const GREEN = [76, 175, 80, 1];
 const YELLOW = [200, 160, 0, 1];
 const RED = [244, 67, 54, 1];
 
+const GAME_WIDTH = 400;
+
 export class PvtBa extends Game {
   constructor() {
+    const viewportAspect =
+      window.innerHeight && window.innerWidth
+        ? window.innerHeight / window.innerWidth
+        : 2;
+    const gameHeight = Math.max(400, Math.round(GAME_WIDTH * viewportAspect));
+
     const defaultParameters = {
       max_duration_seconds: {
         default: 180,
@@ -93,8 +101,8 @@ export class PvtBa extends Game {
       version: "1.0.0",
       shortDescription:
         "Adaptive Psychomotor Vigilance Test measuring sustained attention and reaction time",
-      width: 400,
-      height: 800,
+      width: GAME_WIDTH,
+      height: gameHeight,
       stretch: true,
       fonts: [
         {
@@ -168,6 +176,13 @@ export class PvtBa extends Game {
       },
       parameters: defaultParameters,
     });
+
+    this._H = gameHeight;
+  }
+
+  // Scale a Y coordinate from the 800px reference design to the actual height.
+  _py(y800) {
+    return Math.round((this._H * y800) / 800);
   }
 
   async initialize() {
@@ -205,7 +220,7 @@ export class PvtBa extends Game {
       text: "Skip tutorial",
       fontSize: 14,
       fontColor: TEXT_TERTIARY,
-      position: { x: 200, y: 760 },
+      position: { x: 200, y: this._py(760) },
       isUserInteractionEnabled: true,
       zPosition: zPos,
     });
@@ -229,7 +244,7 @@ export class PvtBa extends Game {
       text: "Psychomotor\nVigilance Test",
       fontSize: 32,
       fontColor: TEXT_PRIMARY,
-      position: { x: 200, y: 200 },
+      position: { x: 200, y: this._py(200) },
       preferredMaxLayoutWidth: 340,
     });
     scene1.addChild(welcome);
@@ -238,7 +253,7 @@ export class PvtBa extends Game {
       text: "This is a brief test of your\nreaction time and attention.",
       fontSize: 20,
       fontColor: TEXT_SECONDARY,
-      position: { x: 200, y: 340 },
+      position: { x: 200, y: this._py(340) },
       preferredMaxLayoutWidth: 340,
     });
     scene1.addChild(desc);
@@ -247,7 +262,7 @@ export class PvtBa extends Game {
       text: "It will take about 3 minutes\nor less.",
       fontSize: 18,
       fontColor: TEXT_TERTIARY,
-      position: { x: 200, y: 430 },
+      position: { x: 200, y: this._py(430) },
       preferredMaxLayoutWidth: 340,
     });
     scene1.addChild(desc2);
@@ -256,7 +271,7 @@ export class PvtBa extends Game {
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
       fillColor: BUTTON_BG,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
       isUserInteractionEnabled: true,
       zPosition: 10,
     });
@@ -266,7 +281,7 @@ export class PvtBa extends Game {
       text: "NEXT",
       fontSize: 22,
       fontColor: BUTTON_TEXT,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
       zPosition: 11,
     });
     scene1.addChild(nextLabel1);
@@ -290,7 +305,7 @@ export class PvtBa extends Game {
       text: "Get Ready",
       fontSize: 28,
       fontColor: TEXT_PRIMARY,
-      position: { x: 200, y: 120 },
+      position: { x: 200, y: this._py(120) },
     });
     scene2.addChild(thumbTitle);
 
@@ -300,7 +315,7 @@ export class PvtBa extends Game {
       fillColor: STIMULUS_BOX_BG,
       strokeColor: STIMULUS_BOX_BORDER,
       lineWidth: 2,
-      position: { x: 200, y: 300 },
+      position: { x: 200, y: this._py(300) },
     });
     scene2.addChild(thumbBox);
 
@@ -310,7 +325,7 @@ export class PvtBa extends Game {
         : "Position your mouse cursor\nover the box and get\nready to click.",
       fontSize: 20,
       fontColor: TEXT_SECONDARY,
-      position: { x: 200, y: 460 },
+      position: { x: 200, y: this._py(460) },
       preferredMaxLayoutWidth: 340,
     });
     scene2.addChild(thumbInstr);
@@ -321,7 +336,7 @@ export class PvtBa extends Game {
         : "Keep your hand on the mouse\nso you can click quickly.",
       fontSize: 16,
       fontColor: TEXT_TERTIARY,
-      position: { x: 200, y: 570 },
+      position: { x: 200, y: this._py(570) },
       preferredMaxLayoutWidth: 340,
     });
     scene2.addChild(thumbHint);
@@ -329,7 +344,7 @@ export class PvtBa extends Game {
     if (isTouchDevice) {
       const thumbIllustration = new Sprite({
         imageName: "rightThumb",
-        position: { x: 310, y: 440 },
+        position: { x: 310, y: this._py(440) },
         zPosition: 5,
       });
       scene2.addChild(thumbIllustration);
@@ -339,7 +354,7 @@ export class PvtBa extends Game {
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
       fillColor: BUTTON_BG,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
       isUserInteractionEnabled: true,
       zPosition: 10,
     });
@@ -349,7 +364,7 @@ export class PvtBa extends Game {
       text: "NEXT",
       fontSize: 22,
       fontColor: BUTTON_TEXT,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
       zPosition: 11,
     });
     scene2.addChild(nextLabel2);
@@ -370,7 +385,7 @@ export class PvtBa extends Game {
       text: "How It Works",
       fontSize: 28,
       fontColor: TEXT_PRIMARY,
-      position: { x: 200, y: 100 },
+      position: { x: 200, y: this._py(100) },
     });
     scene3.addChild(howTitle);
 
@@ -380,7 +395,7 @@ export class PvtBa extends Game {
       fillColor: STIMULUS_BOX_BG,
       strokeColor: STIMULUS_BOX_BORDER,
       lineWidth: 2,
-      position: { x: 200, y: 240 },
+      position: { x: 200, y: this._py(240) },
     });
     scene3.addChild(demoBox);
 
@@ -388,14 +403,14 @@ export class PvtBa extends Game {
       text: "325",
       fontSize: 48,
       fontColor: GREEN,
-      position: { x: 200, y: 240 },
+      position: { x: 200, y: this._py(240) },
     });
     scene3.addChild(demoCounter);
 
     if (isTouchDevice) {
       const thumbIllustration3 = new Sprite({
         imageName: "rightThumb",
-        position: { x: 310, y: 380 },
+        position: { x: 310, y: this._py(380) },
         zPosition: 5,
       });
       scene3.addChild(thumbIllustration3);
@@ -405,7 +420,7 @@ export class PvtBa extends Game {
       text: "A counter will appear in the box.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
-      position: { x: 30, y: 360 },
+      position: { x: 30, y: this._py(360) },
       anchorPoint: { x: 0, y: 0.5 },
       preferredMaxLayoutWidth: 340,
       zPosition: 7,
@@ -418,7 +433,7 @@ export class PvtBa extends Game {
         : "Click as quickly as possible\nwhen the counter appears.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
-      position: { x: 30, y: 430 },
+      position: { x: 30, y: this._py(430) },
       anchorPoint: { x: 0, y: 0.5 },
       preferredMaxLayoutWidth: 340,
       horizontalAlignmentMode: LabelHorizontalAlignmentMode.Left,
@@ -432,7 +447,7 @@ export class PvtBa extends Game {
         : "Do NOT click when the box is empty.",
       fontSize: 18,
       fontColor: RED,
-      position: { x: 200, y: 510 },
+      position: { x: 200, y: this._py(510) },
       preferredMaxLayoutWidth: 340,
     });
     scene3.addChild(howInstr3);
@@ -441,7 +456,7 @@ export class PvtBa extends Game {
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
       fillColor: START_BUTTON_BG,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
       isUserInteractionEnabled: true,
       zPosition: 10,
     });
@@ -451,7 +466,7 @@ export class PvtBa extends Game {
       text: "BEGIN",
       fontSize: 22,
       fontColor: BUTTON_TEXT,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
       zPosition: 11,
     });
     scene3.addChild(beginLabel);
@@ -469,7 +484,7 @@ export class PvtBa extends Game {
       text: "Psychomotor Vigilance Test",
       fontSize: 28,
       fontColor: TEXT_PRIMARY,
-      position: { x: 200, y: 140 },
+      position: { x: 200, y: this._py(140) },
     });
     scene.addChild(title);
 
@@ -479,7 +494,7 @@ export class PvtBa extends Game {
       fillColor: STIMULUS_BOX_BG,
       strokeColor: STIMULUS_BOX_BORDER,
       lineWidth: 2,
-      position: { x: 200, y: 300 },
+      position: { x: 200, y: this._py(300) },
     });
     scene.addChild(box);
 
@@ -487,7 +502,7 @@ export class PvtBa extends Game {
       text: "325",
       fontSize: 48,
       fontColor: GREEN,
-      position: { x: 200, y: 300 },
+      position: { x: 200, y: this._py(300) },
     });
     scene.addChild(exampleCounter);
 
@@ -495,7 +510,7 @@ export class PvtBa extends Game {
       text: "A counter will appear in the box above.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
-      position: { x: 200, y: 420 },
+      position: { x: 200, y: this._py(420) },
       preferredMaxLayoutWidth: 340,
     });
     scene.addChild(instr1);
@@ -504,7 +519,7 @@ export class PvtBa extends Game {
       text: "Tap the screen as quickly as possible\nwhen the counter appears.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
-      position: { x: 200, y: 490 },
+      position: { x: 200, y: this._py(490) },
       preferredMaxLayoutWidth: 340,
     });
     scene.addChild(instr2);
@@ -513,7 +528,7 @@ export class PvtBa extends Game {
       text: "Do NOT tap when the box is empty.",
       fontSize: 18,
       fontColor: RED,
-      position: { x: 200, y: 560 },
+      position: { x: 200, y: this._py(560) },
       preferredMaxLayoutWidth: 340,
     });
     scene.addChild(instr3);
@@ -522,7 +537,7 @@ export class PvtBa extends Game {
       text: "Tap anywhere to begin",
       fontSize: 14,
       fontColor: TEXT_TERTIARY,
-      position: { x: 200, y: 720 },
+      position: { x: 200, y: this._py(720) },
     });
     scene.addChild(tapHint);
 
@@ -530,7 +545,7 @@ export class PvtBa extends Game {
       rect: { width: 200, height: 56 },
       cornerRadius: 28,
       fillColor: START_BUTTON_BG,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
     });
     scene.addChild(startBtn);
 
@@ -538,17 +553,14 @@ export class PvtBa extends Game {
       text: "START",
       fontSize: 22,
       fontColor: BUTTON_TEXT,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
     });
     scene.addChild(startLabel);
 
-    // Full-screen overlay for cross-browser reliable tap detection.
-    // Firefox computes offsetX/offsetY differently on stretched canvases,
-    // so a small hit area can miss. A full-screen overlay avoids this.
     const tapOverlay = new Shape({
-      rect: { width: 400, height: 800 },
+      rect: { width: GAME_WIDTH, height: this._H },
       fillColor: [0, 0, 0, 0.01],
-      position: { x: 200, y: 400 },
+      position: { x: GAME_WIDTH / 2, y: this._H / 2 },
       isUserInteractionEnabled: true,
       zPosition: 10,
     });
@@ -569,7 +581,7 @@ export class PvtBa extends Game {
     const circle = new Shape({
       circleOfRadius: 80,
       fillColor: WebColors.RoyalBlue,
-      position: { x: 200, y: 340 },
+      position: { x: 200, y: this._py(340) },
     });
     scene.addChild(circle);
 
@@ -578,7 +590,7 @@ export class PvtBa extends Game {
       text: "",
       fontSize: 50,
       fontColor: WebColors.White,
-      position: { x: 200, y: 340 },
+      position: { x: 200, y: this._py(340) },
     });
     scene.addChild(numberLabel);
 
@@ -587,7 +599,7 @@ export class PvtBa extends Game {
         text: "GET READY",
         fontSize: 32,
         fontColor: TEXT_PRIMARY,
-        position: { x: 200, y: 470 },
+        position: { x: 200, y: this._py(470) },
       }),
     );
 
@@ -622,7 +634,7 @@ export class PvtBa extends Game {
       fillColor: STIMULUS_BOX_BG,
       strokeColor: STIMULUS_BOX_BORDER,
       lineWidth: 2,
-      position: { x: 200, y: 350 },
+      position: { x: 200, y: this._py(350) },
     });
     scene.addChild(stimulusBox);
 
@@ -631,7 +643,7 @@ export class PvtBa extends Game {
       text: "",
       fontSize: 56,
       fontColor: GREEN,
-      position: { x: 200, y: 350 },
+      position: { x: 200, y: this._py(350) },
     });
     scene.addChild(counterLabel);
 
@@ -640,7 +652,7 @@ export class PvtBa extends Game {
       text: "",
       fontSize: 20,
       fontColor: TEXT_SECONDARY,
-      position: { x: 200, y: 450 },
+      position: { x: 200, y: this._py(450) },
     });
     scene.addChild(feedbackLabel);
 
@@ -649,16 +661,15 @@ export class PvtBa extends Game {
       text: "",
       fontSize: 14,
       fontColor: TEXT_TERTIARY,
-      position: { x: 200, y: 750 },
+      position: { x: 200, y: this._py(750) },
     });
     scene.addChild(statusLabel);
 
-    // Full-screen tap area (invisible, on top)
     const tapArea = new Shape({
       name: "tapArea",
-      rect: { width: 400, height: 800 },
+      rect: { width: GAME_WIDTH, height: this._H },
       fillColor: [0, 0, 0, 0.01],
-      position: { x: 200, y: 400 },
+      position: { x: GAME_WIDTH / 2, y: this._H / 2 },
       isUserInteractionEnabled: true,
       zPosition: 10,
     });
@@ -683,7 +694,7 @@ export class PvtBa extends Game {
       text: "Test Complete",
       fontSize: 28,
       fontColor: TEXT_PRIMARY,
-      position: { x: 200, y: 340 },
+      position: { x: 200, y: this._py(340) },
     });
     scene.addChild(title);
 
@@ -691,7 +702,7 @@ export class PvtBa extends Game {
       text: "Thank you for participating.",
       fontSize: 18,
       fontColor: TEXT_SECONDARY,
-      position: { x: 200, y: 400 },
+      position: { x: 200, y: this._py(400) },
       preferredMaxLayoutWidth: 340,
     });
     scene.addChild(subtitle);
@@ -720,7 +731,7 @@ export class PvtBa extends Game {
       text: "Test Complete",
       fontSize: 28,
       fontColor: TEXT_PRIMARY,
-      position: { x: 200, y: 120 },
+      position: { x: 200, y: this._py(120) },
     });
     scene.addChild(resultTitle);
 
@@ -729,7 +740,7 @@ export class PvtBa extends Game {
       name: "lightGreen",
       circleOfRadius: 40,
       fillColor: [60, 60, 60, 1],
-      position: { x: 200, y: 280 },
+      position: { x: 200, y: this._py(280) },
     });
     scene.addChild(lightGreen);
 
@@ -737,7 +748,7 @@ export class PvtBa extends Game {
       name: "lightYellow",
       circleOfRadius: 40,
       fillColor: [60, 60, 60, 1],
-      position: { x: 200, y: 390 },
+      position: { x: 200, y: this._py(390) },
     });
     scene.addChild(lightYellow);
 
@@ -745,7 +756,7 @@ export class PvtBa extends Game {
       name: "lightRed",
       circleOfRadius: 40,
       fillColor: [60, 60, 60, 1],
-      position: { x: 200, y: 500 },
+      position: { x: 200, y: this._py(500) },
     });
     scene.addChild(lightRed);
 
@@ -753,7 +764,7 @@ export class PvtBa extends Game {
       text: "HIGH",
       fontSize: 16,
       fontColor: TEXT_TERTIARY,
-      position: { x: 300, y: 280 },
+      position: { x: 300, y: this._py(280) },
     });
     scene.addChild(lightLabelGreen);
 
@@ -761,7 +772,7 @@ export class PvtBa extends Game {
       text: "MEDIUM",
       fontSize: 16,
       fontColor: TEXT_TERTIARY,
-      position: { x: 300, y: 390 },
+      position: { x: 300, y: this._py(390) },
     });
     scene.addChild(lightLabelYellow);
 
@@ -769,7 +780,7 @@ export class PvtBa extends Game {
       text: "LOW",
       fontSize: 16,
       fontColor: TEXT_TERTIARY,
-      position: { x: 300, y: 500 },
+      position: { x: 300, y: this._py(500) },
     });
     scene.addChild(lightLabelRed);
 
@@ -778,7 +789,7 @@ export class PvtBa extends Game {
       text: "",
       fontSize: 24,
       fontColor: TEXT_PRIMARY,
-      position: { x: 200, y: 600 },
+      position: { x: 200, y: this._py(600) },
     });
     scene.addChild(classLabel);
 
@@ -787,7 +798,7 @@ export class PvtBa extends Game {
       text: "",
       fontSize: 16,
       fontColor: TEXT_TERTIARY,
-      position: { x: 200, y: 670 },
+      position: { x: 200, y: this._py(670) },
       preferredMaxLayoutWidth: 340,
     });
     scene.addChild(statsLabel);
