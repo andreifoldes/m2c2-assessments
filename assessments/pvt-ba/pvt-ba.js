@@ -33,11 +33,7 @@ const GAME_WIDTH = 400;
 
 export class PvtBa extends Game {
   constructor() {
-    const viewportAspect =
-      window.innerHeight && window.innerWidth
-        ? window.innerHeight / window.innerWidth
-        : 2;
-    const gameHeight = Math.max(400, Math.round(GAME_WIDTH * viewportAspect));
+    const gameHeight = 800;
 
     const defaultParameters = {
       max_duration_seconds: {
