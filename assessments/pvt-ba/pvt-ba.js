@@ -682,6 +682,7 @@ export class PvtBa extends Game {
     scene.onAppear(() => {
       console.log("[pvt-ba] trial:started");
       this._testStartTime = Timer.now();
+      this._attachDivTapListener();
       this._beginTrial();
     });
   }
@@ -1128,9 +1129,28 @@ export class PvtBa extends Game {
     );
   }
 
+  _attachDivTapListener() {
+    this._divTapHandler = () => this._handleTap();
+    const div = document.getElementById("m2c2kit-canvas-div");
+    if (div) {
+      div.addEventListener("pointerdown", this._divTapHandler);
+    }
+  }
+
+  _detachDivTapListener() {
+    if (this._divTapHandler) {
+      const div = document.getElementById("m2c2kit-canvas-div");
+      if (div) {
+        div.removeEventListener("pointerdown", this._divTapHandler);
+      }
+      this._divTapHandler = null;
+    }
+  }
+
   _endTest() {
     if (this._testEnded) return;
     this._testEnded = true;
+    this._detachDivTapListener();
 
     if (this._counterInterval) {
       clearInterval(this._counterInterval);
