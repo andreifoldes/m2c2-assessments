@@ -116,6 +116,27 @@ session.onEnd(async () => {
     await webcamModule.stopAndDownloadRecording(webcamRecording, "pvt-ba");
   }
 
+  // Embedded mode (e.g. ESMira PWA iframe): post results to the parent window
+  // so the host app can capture them and close the overlay. No HTTP callback.
+  if (new URLSearchParams(window.location.search).get("embed") === "1") {
+    const __t = allTrialData || [];
+    const __last = __t[__t.length - 1];
+    try {
+      if (window.parent && window.parent !== window)
+        window.parent.postMessage({
+          type: "m2c2:complete",
+          assessment: "pvt-ba",
+          summary: {
+            n_trials: __t.length,
+            duration_s: __last && typeof __last.elapsed_test_time_ms === "number"
+              ? +(__last.elapsed_test_time_ms / 1000).toFixed(1) : null,
+          },
+          data: { trials: __t },
+        }, "*");
+    } catch (e) { console.warn("[m2c2] parent postMessage failed", e); }
+    return;
+  }
+
   if (debugMode) {
     const lastTrial = allTrialData[allTrialData.length - 1];
     const totalDurationSeconds = lastTrial

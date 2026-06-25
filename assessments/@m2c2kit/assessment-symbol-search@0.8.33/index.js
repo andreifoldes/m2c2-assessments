@@ -152,6 +152,23 @@ session.onEnd(async () => {
     await webcamModule.stopAndDownloadRecording(webcamRecording, "symbol-search");
   }
 
+  // Embedded mode (e.g. ESMira PWA iframe): post results to the parent window
+  // so the host app can capture them and close the overlay. No HTTP callback.
+  if (new URLSearchParams(window.location.search).get("embed") === "1") {
+    const __t = allTrialData || [];
+    const __correct = __t.filter((t) => t && t.is_correct).length;
+    try {
+      if (window.parent && window.parent !== window)
+        window.parent.postMessage({
+          type: "m2c2:complete",
+          assessment: "symbol-search",
+          summary: { n_trials: __t.length, correct_count: __correct },
+          data: { trials: __t },
+        }, "*");
+    } catch (e) { console.warn("[m2c2] parent postMessage failed", e); }
+    return;
+  }
+
   if (!token || !callbackUrl) {
     document.body.innerHTML = `
           <div style="text-align:center;padding:40px;font-family:sans-serif;">

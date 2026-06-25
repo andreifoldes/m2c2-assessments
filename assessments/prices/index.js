@@ -128,6 +128,27 @@ session.onEnd(async () => {
     await webcamModule.stopAndDownloadRecording(webcamRecording, "prices");
   }
 
+  // Embedded mode (e.g. ESMira PWA iframe): post results to the parent window
+  // so the host app can capture them and close the overlay. No HTTP callback.
+  if (new URLSearchParams(window.location.search).get("embed") === "1") {
+    const __t = allTrialData || [];
+    const __correct = __t.filter((t) => t && t.is_correct).length;
+    try {
+      if (window.parent && window.parent !== window)
+        window.parent.postMessage({
+          type: "m2c2:complete",
+          assessment: "prices",
+          summary: {
+            n_trials: __t.length,
+            correct_count: __correct,
+            error_rate: __t.length > 0 ? +(((__t.length - __correct) / __t.length)).toFixed(3) : null,
+          },
+          data: { trials: __t },
+        }, "*");
+    } catch (e) { console.warn("[m2c2] parent postMessage failed", e); }
+    return;
+  }
+
   if (debugMode) {
     const correct = allTrialData.filter((t) => t.is_correct).length;
     const total = allTrialData.length;
