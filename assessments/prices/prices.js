@@ -578,7 +578,7 @@ export class Prices extends Game {
 
     s2.addChild(
       new Label({
-        text: "Soup",
+        text: TUTORIAL_ITEMS[0].item,
         fontSize: 30,
         fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 260 },
@@ -586,7 +586,7 @@ export class Prices extends Game {
     );
     s2.addChild(
       new Label({
-        text: this._formatPrice(TUTORIAL_ITEMS[1].price),
+        text: this._formatPrice(TUTORIAL_ITEMS[0].price),
         fontSize: 38,
         fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 310 },
@@ -701,7 +701,7 @@ export class Prices extends Game {
 
     s3.addChild(
       new Label({
-        text: "Bananas",
+        text: TUTORIAL_ITEMS[0].item,
         fontSize: 30,
         fontColor: TEXT_PRIMARY,
         position: { x: 200, y: 230 },
