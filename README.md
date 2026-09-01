@@ -15,6 +15,7 @@ Cognitive assessments hosted on GitHub Pages, built with [m2c2kit](https://githu
 | **Color Shapes** | Measures executive function with color and shape matching | ~90 | [m2c2kit](https://m2c2-project.github.io/m2c2kit/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/dist/assessments/@m2c2kit/assessment-color-shapes@0.8.33/?webgazer=1&show_end_screen=false) |
 | **Prices** | Associative memory — learn item-price pairs and recognize them | ~120 | [ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/prices/?webgazer=1&show_end_screen=false) |
 | **FNAME** | Face–Name–Occupation Task — learn face–name and face–occupation pairs, infer name↔occupation, then recognize after delay | ~180 | [Papp et al., 2021](https://doi.org/10.1002/dad2.12243) · [Rentz et al., 2010](https://doi.org/10.1002/ana.21904) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname/?webgazer=1&show_end_screen=false) |
+| **FNAME-Pairs** | Face–name paired-associate memory for sleep-dependent consolidation — learn 20 CFD face–name pairs, immediate cued recall, delayed cued recall of a seeded subset | ~300 learning / ~120 delayed | [Ma, Correll & Wittenbrink, 2015](https://doi.org/10.3758/s13428-014-0532-5) (stimuli) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname-pairs/?show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname-pairs/?webcam=1&show_end_screen=false) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/fname-pairs/?webgazer=1&show_end_screen=false) |
 | **mVLT** | Mobile Verbal Learning Test — study 12 words, then YES/NO recognition with 3-trial learning curve | ~300 | [Moore et al., 2020](https://doi.org/10.1002/mpr.1859) — custom implementation | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/?webcam=1) | [Launch](https://andreifoldes.github.io/m2c2-assessments/assessments/mvlt/?webgazer=1) |
 
 ## Common URL Parameters
@@ -262,6 +263,94 @@ A Face–Name–Occupation associative memory task that tests face–name and fa
 ### Face Stimulus Database
 
 The assessment ships with 100 curated face images with demographic metadata (age, gender, skin tone). Faces are selected to balance gender (50/50) and maximize diversity across age bins and skin tones. The face pool can be expanded using the curation tools in `assessments/fname/tools/`.
+
+---
+
+## FNAME-Pairs (Face–Name Paired-Associate Recall)
+
+A face–name paired-associate memory task designed for sleep-dependent memory consolidation studies. Participants study 20 face–name pairs, take an immediate cued-recall test, and — in a **separate session launched hours later** — a delayed cued-recall test on a deterministic subset of the pairs. Everything (pair identity, subset, lure sets, presentation orders) is reproducible from URL parameters plus the committed `lists.json`, so no client-side state needs to survive between sessions.
+
+Stimuli are drawn from the [Chicago Face Database](https://www.chicagofaces.org/) (Ma, Correll, & Wittenbrink, 2015): neutral-expression targets with rated age 18–40 from the main CFD set.
+
+### Phases
+
+1. **Learning** (`phase=learning`, default) — Each of the 20 faces is shown with its name for `learning_duration_ms`, with a blank `isi_ms` between pairs, followed by an immediate cued-recall test (face shown, name recalled). Set `immediate_test=false` to end after study.
+2. **Delayed recall** (`phase=delayed`) — Launched as a fresh session. Cued recall only, on the seeded-random subset defined by `subset_size` + `subset_seed` (defaults to all 20 pairs).
+
+Response mode is `typed` (free recall via keyboard; scored strictly and with an edit-distance-1 leniency) or `choice` (4-alternative forced choice; the correct name plus 3 gender-matched lures from the same list — the lure set is fixed per pair across sessions, but the option order is re-randomized).
+
+### URL Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `token` | string | — | Authentication token. When absent (along with `callback_url`), runs in debug mode and shows results on-screen. |
+| `callback_url` | string | — | URL to POST results to when the assessment ends. |
+| `phase` | string | `learning` | `learning` (study + immediate recall) or `delayed` (recall only). |
+| `list` | number | `1` | Which of the 4 pre-constructed balanced lists (1–4). Must match across a participant's sessions. |
+| `response_mode` | string | `typed` | `typed` (free recall) or `choice` (4-AFC). |
+| `subset_size` | number | `20` | Number of pairs tested in the delayed phase. |
+| `subset_seed` | number | `0` | Seed for the deterministic delayed subset. Must match across a participant's sessions. |
+| `immediate_test` | string | `true` | Set to `false`/`0` to skip the immediate recall test (avoids retrieval practice). |
+| `learning_duration_ms` | number | `5000` | Display duration per pair during study (ms). |
+| `isi_ms` | number | `500` | Blank interval between study items (ms). |
+| `allow_tap_advance` | string | `false` | Allow tapping to advance study items early (off = fixed encoding time). |
+| `feedback_enabled` | string | `false` | Show correctness feedback at test (off by default — a delayed retest follows). |
+| `typed_lenient_distance` | number | `1` | Max Levenshtein distance counted as lenient-correct in typed mode. |
+| `tutorial` | string | `true` | Set to `false`/`0` to skip instruction screens. |
+| `stimuli_base_url` | string | `assets/fname-pairs/images/` | Base URL for the face images (see *Private image hosting*). |
+| `embed` | string | — | Set to `1` for ESMira/iframe embed mode: results are posted to the parent window via `postMessage` instead of an HTTP callback. |
+| `webcam` / `webgazer` / `light` | string | — | Set to `1`/`true` to enable optional camera recording, eye tracking, or ambient-light logging. |
+
+### Sleep-study example
+
+```text
+# Evening (learning + immediate recall, list 2, typed):
+.../assessments/fname-pairs/?phase=learning&list=2&response_mode=typed&stimuli_base_url=https://myhost.example/r4nd0mSecret/
+
+# Morning (delayed recall of 10 of the 20 pairs):
+.../assessments/fname-pairs/?phase=delayed&list=2&response_mode=typed&subset_size=10&subset_seed=42&stimuli_base_url=https://myhost.example/r4nd0mSecret/
+```
+
+`list`, `subset_size`, and `subset_seed` must be identical across a participant's two sessions. The scheduler owns counterbalancing of `list` across participants/nights and the secret stimulus URL.
+
+### Trial Data Fields
+
+Every presentation is a row, discriminated by `trial_type` (`study` | `test`); fields not applicable to a row type are `null`.
+
+`trial_type`, `phase`, `list_id`, `trial_index`, `pair_id`, `cfd_target`, `name_target`, `face_race`, `face_gender`, `face_age_rated`, `face_attractive`, `response_mode`, `subset_size`, `subset_seed`, `study_position`, `test_position`, `display_timestamp`, `display_duration_ms`, `response_raw`, `response_normalized`, `options_json`, `selected_index`, `edit_distance`, `is_correct_strict`, `is_correct_lenient`, `rt_ms`, `response_timestamp`.
+
+**Summary** (POSTed alongside trials, and in the `m2c2:complete` postMessage): `phase`, `list_id`, `response_mode`, `subset_size`, `subset_seed`, `n_study_trials`, `n_test_trials`, `n_correct_strict`, `n_correct_lenient`, `prop_correct_strict`, `prop_correct_lenient`, `mean_rt_ms`, `median_rt_ms`.
+
+### Stimulus Construction
+
+The 4 lists of 20 pairs are fixed in `assessments/fname-pairs/assets/fname-pairs/images/lists.json`, generated by `assessments/fname-pairs/tools/build_stimuli.py`:
+
+- 80 CFD targets (neutral expression, rated age 18–40): 20 per race (Asian/Black/Latino/White), 10 male / 10 female per race.
+- Each list: exactly 5 per race and 10M/10F, with list means equalized on rated age and attractiveness (snake-draft + swap optimization; one-way ANOVAs across lists reported in `tools/stimulus_report.md`).
+- Names: 80 unique high-frequency US first names, gender-matched, balanced for length across lists, with within-list pairwise Levenshtein distance ≥ 3 (so lenient typed scoring can never confuse two names in a list).
+
+Regenerate with:
+
+```bash
+curl -L -o /tmp/cfd.zip https://cfd-website-downloads.s3.us-east-2.amazonaws.com/cfd.zip  # ~1.6 GB, requires CFD access agreement
+uv run assessments/fname-pairs/tools/build_stimuli.py --cfd-zip /tmp/cfd.zip --inspect     # sanity-check workbook detection
+uv run assessments/fname-pairs/tools/build_stimuli.py --cfd-zip /tmp/cfd.zip
+```
+
+### Private Image Hosting
+
+CFD terms of use do not permit redistribution, so the processed face images are **gitignored** and not served from this public repo. Deploy `assets/fname-pairs/images/*.jpg` to a host you control at an unguessable path and pass it at launch via `stimuli_base_url` (the host must allow cross-origin GET, or serve the task from the same origin). `lists.json` (names + demographics, no images) stays committed.
+
+The provided deploy script publishes the images to a Netlify site with a random name and a random path segment, with CORS enabled and indexing disabled (`_headers`: `Access-Control-Allow-Origin: *`, `X-Robots-Tag: noindex`; `robots.txt`: disallow all). Access control is URL secrecy — the base URL lives only in the launch links your scheduler sends and in the gitignored config:
+
+```bash
+# one-time: create assessments/fname-pairs/tools/netlify.local.env (gitignored) with
+#   NETLIFY_SITE_NAME=<random site name>   NETLIFY_ACCOUNT_SLUG=<team slug>   SECRET_PATH=<random hex>
+assessments/fname-pairs/tools/deploy_stimuli.sh   # requires `netlify login`
+# prints: stimuli_base_url: https://<site>.netlify.app/<secret>/
+```
+
+Re-run the script after regenerating stimuli; the same URL keeps working (images are content-hashed by Netlify on each deploy).
 
 ---
 
