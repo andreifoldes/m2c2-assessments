@@ -67,29 +67,37 @@ export function levenshtein(a, b) {
  * Deterministic subset of a list's pairs for delayed recall.
  * Same (subsetSize, subsetSeed) always yields the same pair_ids.
  * Returns all pairs (sorted by pair_id) when size covers the whole list.
+ * With complement=true, returns the pairs NOT in that subset — so two
+ * delayed sessions with identical size/seed and complement 0/1 split the
+ * list into disjoint halves.
  */
-export function selectSubset(pairs, subsetSize, subsetSeed) {
+export function selectSubset(pairs, subsetSize, subsetSeed, complement = false) {
   const sorted = [...pairs].sort((a, b) => a.pair_id - b.pair_id);
   const n = Math.floor(subsetSize);
   if (!(n > 0) || n >= sorted.length) {
-    return sorted;
+    return complement ? [] : sorted;
   }
   const rng = mulberry32(hashSeed("subset", subsetSeed));
-  return seededShuffle(sorted, rng).slice(0, n);
+  const chosen = seededShuffle(sorted, rng).slice(0, n);
+  if (!complement) {
+    return chosen;
+  }
+  const chosenIds = new Set(chosen.map((p) => p.pair_id));
+  return sorted.filter((p) => !chosenIds.has(p.pair_id));
 }
 
 /**
- * Deterministic test presentation order. Salted by phase so the order
- * differs between immediate and delayed tests while both stay reproducible.
+ * Deterministic test presentation order. Salted by phase (so immediate and
+ * delayed orders differ) and by learning round (criterion-mode retests).
  */
-export function testOrder(pairs, listId, subsetSeed, phase) {
-  const rng = mulberry32(hashSeed("testorder", listId, subsetSeed, phase));
+export function testOrder(pairs, listId, subsetSeed, phase, round = 1) {
+  const rng = mulberry32(hashSeed("testorder", listId, subsetSeed, phase, round));
   return seededShuffle(pairs, rng);
 }
 
-/** Deterministic study presentation order for the learning phase. */
-export function studyOrder(pairs, listId, subsetSeed) {
-  const rng = mulberry32(hashSeed("studyorder", listId, subsetSeed));
+/** Deterministic study presentation order, salted by learning round. */
+export function studyOrder(pairs, listId, subsetSeed, round = 1) {
+  const rng = mulberry32(hashSeed("studyorder", listId, subsetSeed, round));
   return seededShuffle(pairs, rng);
 }
 

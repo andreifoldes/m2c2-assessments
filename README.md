@@ -279,6 +279,8 @@ Stimuli are drawn from the [Chicago Face Database](https://www.chicagofaces.org/
 
 Response mode is `typed` (free recall via keyboard; scored strictly and with an edit-distance-1 leniency) or `choice` (4-alternative forced choice; the correct name plus 3 gender-matched lures from the same list — the lure set is fixed per pair across sessions, but the option order is re-randomized).
 
+**Learning-to-criterion mode** (`criterion_prop > 0`, e.g. `criterion_prop=0.6`): if the immediate test's lenient accuracy is below the criterion, the participant sees a feedback screen and completes another study–test round — restudying either only the missed pairs (`restudy_scope=missed`, default) or all pairs (`restudy_scope=all`), then retaking the full 20-pair test — until the criterion is met or `max_learning_rounds` is reached. Every trial row carries a `learning_round` field (1-based); presentation orders are re-randomized (deterministically) each round. This equates encoding strength across participants before a sleep/wake retention interval.
+
 ### URL Parameters
 
 | Parameter | Type | Default | Description |
@@ -290,7 +292,12 @@ Response mode is `typed` (free recall via keyboard; scored strictly and with an 
 | `response_mode` | string | `typed` | `typed` (free recall) or `choice` (4-AFC). |
 | `subset_size` | number | `20` | Number of pairs tested in the delayed phase. |
 | `subset_seed` | number | `0` | Seed for the deterministic delayed subset. Must match across a participant's sessions. |
+| `subset_complement` | string | `0` | Set to `1` to test the pairs NOT in the seeded subset — two delayed sessions with the same size/seed and complement `0`/`1` cover disjoint halves of the list. |
+| `allow_skip` | string | `true` | Typed mode: show an "I don't know" button so participants can pass without guessing (recorded as `skipped=true`, scored incorrect). Empty submits are ignored while skip is available. |
 | `immediate_test` | string | `true` | Set to `false`/`0` to skip the immediate recall test (avoids retrieval practice). |
+| `criterion_prop` | number | `0` | Learning-to-criterion mode: minimum proportion correct (lenient) on the immediate test. Below it, another study–test round runs. `0` disables. |
+| `max_learning_rounds` | number | `3` | Safety cap on study–test rounds in criterion mode; the task proceeds after this many rounds even below criterion. |
+| `restudy_scope` | string | `missed` | Pairs restudied in rounds after the first: `missed` (only lenient-incorrect pairs) or `all`. The retest always covers all 20 pairs. |
 | `learning_duration_ms` | number | `5000` | Display duration per pair during study (ms). |
 | `isi_ms` | number | `500` | Blank interval between study items (ms). |
 | `allow_tap_advance` | string | `false` | Allow tapping to advance study items early (off = fixed encoding time). |
@@ -317,9 +324,9 @@ Response mode is `typed` (free recall via keyboard; scored strictly and with an 
 
 Every presentation is a row, discriminated by `trial_type` (`study` | `test`); fields not applicable to a row type are `null`.
 
-`trial_type`, `phase`, `list_id`, `trial_index`, `pair_id`, `cfd_target`, `name_target`, `face_race`, `face_gender`, `face_age_rated`, `face_attractive`, `response_mode`, `subset_size`, `subset_seed`, `study_position`, `test_position`, `display_timestamp`, `display_duration_ms`, `response_raw`, `response_normalized`, `options_json`, `selected_index`, `edit_distance`, `is_correct_strict`, `is_correct_lenient`, `rt_ms`, `response_timestamp`.
+`trial_type`, `phase`, `list_id`, `trial_index`, `pair_id`, `cfd_target`, `name_target`, `face_race`, `face_gender`, `face_age_rated`, `face_attractive`, `response_mode`, `subset_size`, `subset_seed`, `learning_round`, `study_position`, `test_position`, `display_timestamp`, `display_duration_ms`, `response_raw`, `response_normalized`, `options_json`, `selected_index`, `edit_distance`, `is_correct_strict`, `is_correct_lenient`, `rt_ms`, `response_timestamp`.
 
-**Summary** (POSTed alongside trials, and in the `m2c2:complete` postMessage): `phase`, `list_id`, `response_mode`, `subset_size`, `subset_seed`, `n_study_trials`, `n_test_trials`, `n_correct_strict`, `n_correct_lenient`, `prop_correct_strict`, `prop_correct_lenient`, `mean_rt_ms`, `median_rt_ms`.
+**Summary** (POSTed alongside trials, and in the `m2c2:complete` postMessage): `phase`, `list_id`, `response_mode`, `subset_size`, `subset_seed`, `n_study_trials`, `n_test_trials` (final round), `n_test_trials_total`, `n_learning_rounds`, `round_prop_correct_lenient` (per-round array), `criterion_prop`, `criterion_met`, `n_correct_strict`, `n_correct_lenient`, `prop_correct_strict`, `prop_correct_lenient` (accuracy and RTs refer to the **final** round), `mean_rt_ms`, `median_rt_ms`.
 
 ### Stimulus Construction
 
