@@ -1,0 +1,25 @@
+:root {
+  --ifm-color-primary: #2e7d32;
+  --ifm-color-primary-dark: #29712d;
+  --ifm-color-primary-darker: #276a2a;
+  --ifm-color-primary-darkest: #205823;
+  --ifm-color-primary-light: #338937;
+  --ifm-color-primary-lighter: #35903a;
+  --ifm-color-primary-lightest: #3ca241;
+  --ifm-code-font-size: 90%;
+}
+
+[data-theme="dark"] {
+  --ifm-color-primary: #66bb6a;
+  --ifm-color-primary-dark: #4caf50;
+  --ifm-color-primary-darker: #43a047;
+  --ifm-color-primary-darkest: #388e3c;
+  --ifm-color-primary-light: #81c784;
+  --ifm-color-primary-lighter: #a5d6a7;
+  --ifm-color-primary-lightest: #c8e6c9;
+}
+
+/* Parameter tables can be wide; keep them readable */
+table code {
+  white-space: nowrap;
+}

@@ -2,6 +2,8 @@
 
 Cognitive assessments hosted on GitHub Pages, built with [m2c2kit](https://github.com/m2c2-project/m2c2kit).
 
+> 📖 **[URL parameter reference](https://andreifoldes.github.io/m2c2-assessments/docs/)** — auto-generated from the task source code on every change (see `website/` and `.github/workflows/docs.yml`).
+
 ## Live Demos
 
 | Assessment | Description | Duration (s) | Source | Launch | Launch with camera recording | Launch with eye tracking |

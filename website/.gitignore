@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+
+# Build artifacts
+build/
+.docusaurus/
+.cache-loader/
+
+# Generated docs pages (created by scripts/generate-docs.mjs)
+docs/
