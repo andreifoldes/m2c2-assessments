@@ -459,6 +459,20 @@ function renderCommonPage(tasks) {
 // Main
 // --------------------------------------------------------------------------
 
+// Remind maintainers when a new task folder exists but is not documented yet.
+const NON_TASK_DIRS = new Set(["webcam", "webgazer", "ambient-light", "@m2c2kit"]);
+const documentedDirs = new Set(
+  TASKS.filter((t) => t.kind === "custom").map((t) => path.basename(path.dirname(t.wrapperFile))),
+);
+for (const dir of fs.readdirSync(path.join(REPO_ROOT, "assessments"), { withFileTypes: true })) {
+  if (!dir.isDirectory() || NON_TASK_DIRS.has(dir.name) || documentedDirs.has(dir.name)) continue;
+  if (fs.existsSync(path.join(REPO_ROOT, "assessments", dir.name, "index.html"))) {
+    warn(
+      `assessments/${dir.name}/ looks like a task but has no entry in website/tasks.config.mjs — add one so it gets documented`,
+    );
+  }
+}
+
 const tasks = TASKS.map(resolveTask);
 
 fs.rmSync(DOCS_DIR, { recursive: true, force: true });
