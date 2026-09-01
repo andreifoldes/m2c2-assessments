@@ -159,6 +159,32 @@ export const TASKS = [
       "A face–name paired-associate memory task designed for sleep-dependent memory consolidation studies. Participants study 20 face–name pairs from the Chicago Face Database, take an immediate cued-recall test, and — in a separate session launched hours later — a delayed cued-recall test on a deterministic seeded subset of the pairs. Pair identity, subsets, lure sets, and presentation orders are all reproducible from URL parameters.",
     reference:
       "[Ma, Correll & Wittenbrink, 2015](https://doi.org/10.3758/s13428-014-0532-5) (stimuli) — custom implementation",
+    extraExamples: [
+      {
+        comment:
+          "Sleep study 1/3 — evening: initial learning + immediate recall (list 1, typed)",
+        query:
+          "phase=learning&list=1&response_mode=typed&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+      {
+        comment:
+          "Sleep study 2/3 — morning: delayed recall of half the list (10 of 20 pairs; same list/size/seed as the evening session)",
+        query:
+          "phase=delayed&list=1&response_mode=typed&subset_size=10&subset_seed=42&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+      {
+        comment:
+          "Sleep study 3/3 — later timepoint: delayed recall of the OTHER half (complement of the same seeded subset)",
+        query:
+          "phase=delayed&list=1&response_mode=typed&subset_size=10&subset_seed=42&subset_complement=1&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+      {
+        comment:
+          "Learning-to-criterion: repeat study-test rounds until 60% immediate recall (max 3 rounds)",
+        query:
+          "phase=learning&list=1&criterion_prop=0.6&max_learning_rounds=3&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+    ],
   },
   {
     id: "mvlt",

@@ -262,6 +262,11 @@ function exampleUrls(task, gameParams) {
     lines.push(`${task.launchUrl}?${custom.join("&")}`);
   }
 
+  // Task-specific worked examples from tasks.config.mjs (extraExamples).
+  for (const ex of task.extraExamples ?? []) {
+    lines.push("", `# ${ex.comment}`, `${task.launchUrl}?${ex.query}`);
+  }
+
   lines.push(
     "",
     "# Production: submit results to your server",
