@@ -1,0 +1,826 @@
+{
+  "version": 1,
+  "generated_note": "build_stimuli.py seed=42 on 2026-09-01; Chicago Face Database neutral images, rated age 18-40 (Ma, Correll, & Wittenbrink, 2015)",
+  "lists": [
+    {
+      "list_id": 1,
+      "pairs": [
+        {
+          "pair_id": 0,
+          "face_file": "CFD-WF-252-N.jpg",
+          "cfd_target": "CFD-WF-252",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 26.46,
+          "attractive": 3.79,
+          "name": "Linda"
+        },
+        {
+          "pair_id": 1,
+          "face_file": "CFD-BF-023-N.jpg",
+          "cfd_target": "CFD-BF-023",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 30.75,
+          "attractive": 2.86,
+          "name": "Amanda"
+        },
+        {
+          "pair_id": 2,
+          "face_file": "CFD-AF-232-N.jpg",
+          "cfd_target": "CFD-AF-232",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 29.69,
+          "attractive": 2.85,
+          "name": "Amy"
+        },
+        {
+          "pair_id": 3,
+          "face_file": "CFD-BM-038-N.jpg",
+          "cfd_target": "CFD-BM-038",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 35.37,
+          "attractive": 2.49,
+          "name": "William"
+        },
+        {
+          "pair_id": 4,
+          "face_file": "CFD-AM-238-N.jpg",
+          "cfd_target": "CFD-AM-238",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 27.42,
+          "attractive": 3.12,
+          "name": "Tyler"
+        },
+        {
+          "pair_id": 5,
+          "face_file": "CFD-LF-230-N.jpg",
+          "cfd_target": "CFD-LF-230",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 24.7,
+          "attractive": 3.81,
+          "name": "Laura"
+        },
+        {
+          "pair_id": 6,
+          "face_file": "CFD-WM-233-N.jpg",
+          "cfd_target": "CFD-WM-233",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 33.33,
+          "attractive": 2.12,
+          "name": "Brian"
+        },
+        {
+          "pair_id": 7,
+          "face_file": "CFD-AM-234-N.jpg",
+          "cfd_target": "CFD-AM-234",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 27.27,
+          "attractive": 2.69,
+          "name": "Aaron"
+        },
+        {
+          "pair_id": 8,
+          "face_file": "CFD-WM-238-N.jpg",
+          "cfd_target": "CFD-WM-238",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 24.82,
+          "attractive": 3.27,
+          "name": "Richard"
+        },
+        {
+          "pair_id": 9,
+          "face_file": "CFD-BF-009-N.jpg",
+          "cfd_target": "CFD-BF-009",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 30.07,
+          "attractive": 2.77,
+          "name": "Melissa"
+        },
+        {
+          "pair_id": 10,
+          "face_file": "CFD-BF-239-N.jpg",
+          "cfd_target": "CFD-BF-239",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 29.76,
+          "attractive": 3.1,
+          "name": "Jessica"
+        },
+        {
+          "pair_id": 11,
+          "face_file": "CFD-AM-228-N.jpg",
+          "cfd_target": "CFD-AM-228",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 25.32,
+          "attractive": 3.43,
+          "name": "Jerry"
+        },
+        {
+          "pair_id": 12,
+          "face_file": "CFD-AF-214-N.jpg",
+          "cfd_target": "CFD-AF-214",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 26.85,
+          "attractive": 3.73,
+          "name": "Emily"
+        },
+        {
+          "pair_id": 13,
+          "face_file": "CFD-WF-235-N.jpg",
+          "cfd_target": "CFD-WF-235",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 29.62,
+          "attractive": 2.96,
+          "name": "Nancy"
+        },
+        {
+          "pair_id": 14,
+          "face_file": "CFD-BM-002-N.jpg",
+          "cfd_target": "CFD-BM-002",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 25.11,
+          "attractive": 3.67,
+          "name": "Jeffrey"
+        },
+        {
+          "pair_id": 15,
+          "face_file": "CFD-WF-022-N.jpg",
+          "cfd_target": "CFD-WF-022",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 19.91,
+          "attractive": 5.09,
+          "name": "Kathleen"
+        },
+        {
+          "pair_id": 16,
+          "face_file": "CFD-LM-231-N.jpg",
+          "cfd_target": "CFD-LM-231",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 27.92,
+          "attractive": 3.24,
+          "name": "Andrew"
+        },
+        {
+          "pair_id": 17,
+          "face_file": "CFD-LM-244-N.jpg",
+          "cfd_target": "CFD-LM-244",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 24.18,
+          "attractive": 3.33,
+          "name": "James"
+        },
+        {
+          "pair_id": 18,
+          "face_file": "CFD-LM-242-N.jpg",
+          "cfd_target": "CFD-LM-242",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 21.42,
+          "attractive": 4.28,
+          "name": "Ronald"
+        },
+        {
+          "pair_id": 19,
+          "face_file": "CFD-LF-201-N.jpg",
+          "cfd_target": "CFD-LF-201",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 27.2,
+          "attractive": 3.48,
+          "name": "Brenda"
+        }
+      ]
+    },
+    {
+      "list_id": 2,
+      "pairs": [
+        {
+          "pair_id": 0,
+          "face_file": "CFD-WF-021-N.jpg",
+          "cfd_target": "CFD-WF-021",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 25.69,
+          "attractive": 3.93,
+          "name": "Anna"
+        },
+        {
+          "pair_id": 1,
+          "face_file": "CFD-LM-252-N.jpg",
+          "cfd_target": "CFD-LM-252",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 28.67,
+          "attractive": 2.79,
+          "name": "Brandon"
+        },
+        {
+          "pair_id": 2,
+          "face_file": "CFD-LM-202-N.jpg",
+          "cfd_target": "CFD-LM-202",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 35.19,
+          "attractive": 2.19,
+          "name": "Jacob"
+        },
+        {
+          "pair_id": 3,
+          "face_file": "CFD-LF-232-N.jpg",
+          "cfd_target": "CFD-LF-232",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 25.23,
+          "attractive": 3.73,
+          "name": "Helen"
+        },
+        {
+          "pair_id": 4,
+          "face_file": "CFD-BM-253-N.jpg",
+          "cfd_target": "CFD-BM-253",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 31.88,
+          "attractive": 2.96,
+          "name": "Joseph"
+        },
+        {
+          "pair_id": 5,
+          "face_file": "CFD-BF-025-N.jpg",
+          "cfd_target": "CFD-BF-025",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 25.28,
+          "attractive": 3.7,
+          "name": "Karen"
+        },
+        {
+          "pair_id": 6,
+          "face_file": "CFD-WF-211-N.jpg",
+          "cfd_target": "CFD-WF-211",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 21.55,
+          "attractive": 4.62,
+          "name": "Carol"
+        },
+        {
+          "pair_id": 7,
+          "face_file": "CFD-WM-214-N.jpg",
+          "cfd_target": "CFD-WM-214",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 25.12,
+          "attractive": 3.12,
+          "name": "Kevin"
+        },
+        {
+          "pair_id": 8,
+          "face_file": "CFD-AF-252-N.jpg",
+          "cfd_target": "CFD-AF-252",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 22.34,
+          "attractive": 4.21,
+          "name": "Shirley"
+        },
+        {
+          "pair_id": 9,
+          "face_file": "CFD-BM-235-N.jpg",
+          "cfd_target": "CFD-BM-235",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 28.69,
+          "attractive": 3.21,
+          "name": "Steven"
+        },
+        {
+          "pair_id": 10,
+          "face_file": "CFD-BM-246-N.jpg",
+          "cfd_target": "CFD-BM-246",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 27.21,
+          "attractive": 3.5,
+          "name": "Scott"
+        },
+        {
+          "pair_id": 11,
+          "face_file": "CFD-BF-006-N.jpg",
+          "cfd_target": "CFD-BF-006",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 27.93,
+          "attractive": 3.38,
+          "name": "Barbara"
+        },
+        {
+          "pair_id": 12,
+          "face_file": "CFD-LF-229-N.jpg",
+          "cfd_target": "CFD-LF-229",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 25.87,
+          "attractive": 3.74,
+          "name": "Sharon"
+        },
+        {
+          "pair_id": 13,
+          "face_file": "CFD-WM-222-N.jpg",
+          "cfd_target": "CFD-WM-222",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 33.03,
+          "attractive": 2.34,
+          "name": "David"
+        },
+        {
+          "pair_id": 14,
+          "face_file": "CFD-AF-204-N.jpg",
+          "cfd_target": "CFD-AF-204",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 30.14,
+          "attractive": 3.17,
+          "name": "Heather"
+        },
+        {
+          "pair_id": 15,
+          "face_file": "CFD-LF-231-N.jpg",
+          "cfd_target": "CFD-LF-231",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 30.35,
+          "attractive": 2.81,
+          "name": "Ashley"
+        },
+        {
+          "pair_id": 16,
+          "face_file": "CFD-WM-028-N.jpg",
+          "cfd_target": "CFD-WM-028",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 24.93,
+          "attractive": 3.2,
+          "name": "Frank"
+        },
+        {
+          "pair_id": 17,
+          "face_file": "CFD-AM-229-N.jpg",
+          "cfd_target": "CFD-AM-229",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 24.77,
+          "attractive": 3.48,
+          "name": "Patrick"
+        },
+        {
+          "pair_id": 18,
+          "face_file": "CFD-AF-240-N.jpg",
+          "cfd_target": "CFD-AF-240",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 27.28,
+          "attractive": 3.59,
+          "name": "Alice"
+        },
+        {
+          "pair_id": 19,
+          "face_file": "CFD-AM-207-N.jpg",
+          "cfd_target": "CFD-AM-207",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 25.92,
+          "attractive": 2.96,
+          "name": "Thomas"
+        }
+      ]
+    },
+    {
+      "list_id": 3,
+      "pairs": [
+        {
+          "pair_id": 0,
+          "face_file": "CFD-AM-225-N.jpg",
+          "cfd_target": "CFD-AM-225",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 24.68,
+          "attractive": 3.52,
+          "name": "Robert"
+        },
+        {
+          "pair_id": 1,
+          "face_file": "CFD-BF-242-N.jpg",
+          "cfd_target": "CFD-BF-242",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 27.62,
+          "attractive": 3.69,
+          "name": "Emma"
+        },
+        {
+          "pair_id": 2,
+          "face_file": "CFD-WF-011-N.jpg",
+          "cfd_target": "CFD-WF-011",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 24.04,
+          "attractive": 4.13,
+          "name": "Sandra"
+        },
+        {
+          "pair_id": 3,
+          "face_file": "CFD-BF-210-N.jpg",
+          "cfd_target": "CFD-BF-210",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 24.0,
+          "attractive": 4.07,
+          "name": "Deborah"
+        },
+        {
+          "pair_id": 4,
+          "face_file": "CFD-AF-215-N.jpg",
+          "cfd_target": "CFD-AF-215",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 30.44,
+          "attractive": 2.81,
+          "name": "Sarah"
+        },
+        {
+          "pair_id": 5,
+          "face_file": "CFD-LM-223-N.jpg",
+          "cfd_target": "CFD-LM-223",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 28.75,
+          "attractive": 3.29,
+          "name": "Edward"
+        },
+        {
+          "pair_id": 6,
+          "face_file": "CFD-BM-012-N.jpg",
+          "cfd_target": "CFD-BM-012",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 36.21,
+          "attractive": 2.5,
+          "name": "Joshua"
+        },
+        {
+          "pair_id": 7,
+          "face_file": "CFD-WF-250-N.jpg",
+          "cfd_target": "CFD-WF-250",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 36.8,
+          "attractive": 1.72,
+          "name": "Janet"
+        },
+        {
+          "pair_id": 8,
+          "face_file": "CFD-LF-202-N.jpg",
+          "cfd_target": "CFD-LF-202",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 29.85,
+          "attractive": 2.78,
+          "name": "Donna"
+        },
+        {
+          "pair_id": 9,
+          "face_file": "CFD-BM-037-N.jpg",
+          "cfd_target": "CFD-BM-037",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 20.89,
+          "attractive": 4.04,
+          "name": "Jason"
+        },
+        {
+          "pair_id": 10,
+          "face_file": "CFD-LM-225-N.jpg",
+          "cfd_target": "CFD-LM-225",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 24.74,
+          "attractive": 3.41,
+          "name": "Mark"
+        },
+        {
+          "pair_id": 11,
+          "face_file": "CFD-AF-250-N.jpg",
+          "cfd_target": "CFD-AF-250",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 25.1,
+          "attractive": 3.96,
+          "name": "Rebecca"
+        },
+        {
+          "pair_id": 12,
+          "face_file": "CFD-WF-029-N.jpg",
+          "cfd_target": "CFD-WF-029",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 24.36,
+          "attractive": 4.22,
+          "name": "Cynthia"
+        },
+        {
+          "pair_id": 13,
+          "face_file": "CFD-BF-048-N.jpg",
+          "cfd_target": "CFD-BF-048",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 30.76,
+          "attractive": 2.68,
+          "name": "Betty"
+        },
+        {
+          "pair_id": 14,
+          "face_file": "CFD-LM-233-N.jpg",
+          "cfd_target": "CFD-LM-233",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 33.42,
+          "attractive": 2.42,
+          "name": "Charles"
+        },
+        {
+          "pair_id": 15,
+          "face_file": "CFD-AM-210-N.jpg",
+          "cfd_target": "CFD-AM-210",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 21.05,
+          "attractive": 3.81,
+          "name": "Daniel"
+        },
+        {
+          "pair_id": 16,
+          "face_file": "CFD-AM-221-N.jpg",
+          "cfd_target": "CFD-AM-221",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 24.12,
+          "attractive": 3.23,
+          "name": "Paul"
+        },
+        {
+          "pair_id": 17,
+          "face_file": "CFD-WM-024-N.jpg",
+          "cfd_target": "CFD-WM-024",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 20.82,
+          "attractive": 3.65,
+          "name": "Gregory"
+        },
+        {
+          "pair_id": 18,
+          "face_file": "CFD-LF-203-N.jpg",
+          "cfd_target": "CFD-LF-203",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 23.37,
+          "attractive": 4.3,
+          "name": "Gloria"
+        },
+        {
+          "pair_id": 19,
+          "face_file": "CFD-WM-026-N.jpg",
+          "cfd_target": "CFD-WM-026",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 25.69,
+          "attractive": 3.09,
+          "name": "Eric"
+        }
+      ]
+    },
+    {
+      "list_id": 4,
+      "pairs": [
+        {
+          "pair_id": 0,
+          "face_file": "CFD-WF-027-N.jpg",
+          "cfd_target": "CFD-WF-027",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 21.29,
+          "attractive": 4.69,
+          "name": "Rachel"
+        },
+        {
+          "pair_id": 1,
+          "face_file": "CFD-AF-224-N.jpg",
+          "cfd_target": "CFD-AF-224",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 28.76,
+          "attractive": 3.24,
+          "name": "Susan"
+        },
+        {
+          "pair_id": 2,
+          "face_file": "CFD-WM-021-N.jpg",
+          "cfd_target": "CFD-WM-021",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 29.12,
+          "attractive": 2.66,
+          "name": "Ryan"
+        },
+        {
+          "pair_id": 3,
+          "face_file": "CFD-BF-220-N.jpg",
+          "cfd_target": "CFD-BF-220",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 33.34,
+          "attractive": 2.27,
+          "name": "Lisa"
+        },
+        {
+          "pair_id": 4,
+          "face_file": "CFD-WF-038-N.jpg",
+          "cfd_target": "CFD-WF-038",
+          "race": "W",
+          "gender": "F",
+          "age_rated": 28.72,
+          "attractive": 3.32,
+          "name": "Pamela"
+        },
+        {
+          "pair_id": 5,
+          "face_file": "CFD-AM-250-N.jpg",
+          "cfd_target": "CFD-AM-250",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 25.88,
+          "attractive": 3.08,
+          "name": "Samuel"
+        },
+        {
+          "pair_id": 6,
+          "face_file": "CFD-LM-250-N.jpg",
+          "cfd_target": "CFD-LM-250",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 22.64,
+          "attractive": 3.89,
+          "name": "Jack"
+        },
+        {
+          "pair_id": 7,
+          "face_file": "CFD-LF-225-N.jpg",
+          "cfd_target": "CFD-LF-225",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 24.71,
+          "attractive": 3.96,
+          "name": "Dorothy"
+        },
+        {
+          "pair_id": 8,
+          "face_file": "CFD-AF-235-N.jpg",
+          "cfd_target": "CFD-AF-235",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 23.5,
+          "attractive": 4.19,
+          "name": "Diane"
+        },
+        {
+          "pair_id": 9,
+          "face_file": "CFD-LF-217-N.jpg",
+          "cfd_target": "CFD-LF-217",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 26.77,
+          "attractive": 3.63,
+          "name": "Carolyn"
+        },
+        {
+          "pair_id": 10,
+          "face_file": "CFD-BF-018-N.jpg",
+          "cfd_target": "CFD-BF-018",
+          "race": "B",
+          "gender": "F",
+          "age_rated": 26.9,
+          "attractive": 3.44,
+          "name": "Mary"
+        },
+        {
+          "pair_id": 11,
+          "face_file": "CFD-LF-252-N.jpg",
+          "cfd_target": "CFD-LF-252",
+          "race": "L",
+          "gender": "F",
+          "age_rated": 28.22,
+          "attractive": 3.15,
+          "name": "Angela"
+        },
+        {
+          "pair_id": 12,
+          "face_file": "CFD-LM-210-N.jpg",
+          "cfd_target": "CFD-LM-210",
+          "race": "L",
+          "gender": "M",
+          "age_rated": 29.48,
+          "attractive": 2.78,
+          "name": "Justin"
+        },
+        {
+          "pair_id": 13,
+          "face_file": "CFD-AF-241-N.jpg",
+          "cfd_target": "CFD-AF-241",
+          "race": "A",
+          "gender": "F",
+          "age_rated": 31.88,
+          "attractive": 2.96,
+          "name": "Nicole"
+        },
+        {
+          "pair_id": 14,
+          "face_file": "CFD-WM-002-N.jpg",
+          "cfd_target": "CFD-WM-002",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 30.43,
+          "attractive": 2.51,
+          "name": "John"
+        },
+        {
+          "pair_id": 15,
+          "face_file": "CFD-BM-230-N.jpg",
+          "cfd_target": "CFD-BM-230",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 37.58,
+          "attractive": 2.42,
+          "name": "Raymond"
+        },
+        {
+          "pair_id": 16,
+          "face_file": "CFD-BM-044-N.jpg",
+          "cfd_target": "CFD-BM-044",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 36.63,
+          "attractive": 2.42,
+          "name": "George"
+        },
+        {
+          "pair_id": 17,
+          "face_file": "CFD-AM-209-N.jpg",
+          "cfd_target": "CFD-AM-209",
+          "race": "A",
+          "gender": "M",
+          "age_rated": 27.75,
+          "attractive": 2.86,
+          "name": "Timothy"
+        },
+        {
+          "pair_id": 18,
+          "face_file": "CFD-BM-224-N.jpg",
+          "cfd_target": "CFD-BM-224",
+          "race": "B",
+          "gender": "M",
+          "age_rated": 36.48,
+          "attractive": 2.45,
+          "name": "Peter"
+        },
+        {
+          "pair_id": 19,
+          "face_file": "CFD-WM-015-N.jpg",
+          "cfd_target": "CFD-WM-015",
+          "race": "W",
+          "gender": "M",
+          "age_rated": 23.37,
+          "attractive": 3.51,
+          "name": "Dennis"
+        }
+      ]
+    }
+  ]
+}

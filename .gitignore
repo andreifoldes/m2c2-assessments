@@ -1,8 +1,16 @@
 node_modules/
 archive/
+# CFD-derived face images: not redistributable, deployed out-of-band
+# (see README "FNAME-Pairs" section; lists.json stays committed)
+assessments/fname-pairs/assets/fname-pairs/images/*.jpg
+# Private stimulus-hosting secrets (Netlify site + secret path)
+assessments/fname-pairs/tools/netlify.local.env
 test-results/
 tests/
 .playwright-mcp/
 temp/
 .superpowers/
 .claude/
+
+# Local Netlify folder
+.netlify

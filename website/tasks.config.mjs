@@ -72,6 +72,18 @@ export const WRAPPER_PARAM_DOCS = {
     default: "—",
     description: "Override the number of trials to run.",
   },
+  list: {
+    type: "number",
+    default: "1",
+    description:
+      "Which of the 4 pre-constructed balanced lists to use (1–4). Maps to the `list_id` assessment parameter; must match across a participant's sessions.",
+  },
+  stimuli_base_url: {
+    type: "string",
+    default: "assets/fname-pairs/images/",
+    description:
+      "Base URL for the face images. The CFD-derived images are not redistributable and are deployed out-of-band (see the repo README, *FNAME-Pairs* section); point this at your private stimulus host.",
+  },
   face_source: {
     type: "string",
     default: "bundled",
@@ -134,6 +146,19 @@ export const TASKS = [
       "A Face–Name–Occupation associative memory task. Participants learn face–name and face–occupation pairs, then must infer name↔occupation associations without seeing faces, and finally recognize correct pairings after a configurable delay.",
     reference:
       "[Papp et al., 2021](https://doi.org/10.1002/dad2.12243) · [Rentz et al., 2010](https://doi.org/10.1002/ana.21904) — custom implementation",
+  },
+  {
+    id: "fname-pairs",
+    title: "FNAME-Pairs",
+    kind: "custom",
+    duration: "~300 s learning / ~120 s delayed",
+    launchPath: "assessments/fname-pairs/",
+    sourceFile: "assessments/fname-pairs/fname-pairs.js",
+    wrapperFile: "assessments/fname-pairs/index.js",
+    blurb:
+      "A face–name paired-associate memory task designed for sleep-dependent memory consolidation studies. Participants study 20 face–name pairs from the Chicago Face Database, take an immediate cued-recall test, and — in a separate session launched hours later — a delayed cued-recall test on a deterministic seeded subset of the pairs. Pair identity, subsets, lure sets, and presentation orders are all reproducible from URL parameters.",
+    reference:
+      "[Ma, Correll & Wittenbrink, 2015](https://doi.org/10.3758/s13428-014-0532-5) (stimuli) — custom implementation",
   },
   {
     id: "mvlt",
