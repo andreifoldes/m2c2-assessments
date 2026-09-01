@@ -4,7 +4,9 @@
   "private": true,
   "description": "m2c2kit cognitive assessments hosted on GitHub Pages",
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "docs:start": "npm --prefix website run start",
+    "docs:build": "npm --prefix website run build"
   },
   "dependencies": {
     "@m2c2kit/assessment-color-dots": "^0.8",

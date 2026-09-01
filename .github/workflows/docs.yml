@@ -1,0 +1,76 @@
+# docs.yml — rebuilds the parameter reference whenever a task changes.
+#
+# The generator (website/scripts/generate-docs.mjs) extracts URL parameter
+# schemas straight from the task source code, so the published docs at
+# https://andreifoldes.github.io/m2c2-assessments/docs/ always match what is
+# deployed. The built site is committed to docs/ on main, which GitHub Pages
+# serves alongside the assessments (legacy Pages build, main branch, / root).
+#
+# Loop safety: the bot commit only touches docs/**, which is not in the
+# `paths` filter below, so the workflow does not retrigger itself.
+
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "assessments/**"
+      - "dist/assessments/**"
+      - "dist/modules/**"
+      - "website/**"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "assessments/**"
+      - "dist/assessments/**"
+      - "dist/modules/**"
+      - "website/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Generate and build docs
+        working-directory: website
+        run: npm run build
+
+      - name: Sync built site into docs/
+        if: github.event_name != 'pull_request'
+        # docs/superpowers holds internal plans/specs — keep it out of the sync
+        run: rsync -a --delete --exclude=superpowers website/build/ docs/
+
+      - name: Commit and push updated docs
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          if git diff --cached --quiet; then
+            echo "Docs are up to date."
+          else
+            git commit -m "docs: regenerate URL parameter reference"
+            git pull --rebase origin main
+            git push
+          fi
