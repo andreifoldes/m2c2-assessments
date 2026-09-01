@@ -31,6 +31,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: docs-${{ github.ref }}
@@ -74,3 +75,33 @@ jobs:
             git pull --rebase origin main
             git push
           fi
+
+      - name: Verify Pages build (legacy builds fail transiently; retry once)
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sleep 30
+          retried=0
+          for i in $(seq 1 40); do
+            s=$(gh api "repos/${{ github.repository }}/pages/builds/latest" --jq '.status' || echo unknown)
+            echo "Pages build status: $s"
+            case "$s" in
+              built)
+                exit 0;;
+              errored)
+                if [ "$retried" -eq 0 ]; then
+                  retried=1
+                  echo "Requesting a Pages rebuild..."
+                  gh api -X POST "repos/${{ github.repository }}/pages/builds" >/dev/null
+                  sleep 30
+                else
+                  echo "Pages build failed again after retry." >&2
+                  exit 1
+                fi;;
+              *)
+                sleep 10;;
+            esac
+          done
+          echo "Timed out waiting for the Pages build." >&2
+          exit 1
