@@ -1127,9 +1127,7 @@ export class PvtBa extends Game {
 
   _attachDivTapListener() {
     this._divTapHandler = (e) => {
-      if (e.target.id === "m2c2kit-canvas-div") {
-        this._handleTap();
-      }
+      this._handleTap();
     };
     const div = document.getElementById("m2c2kit-canvas-div");
     if (div) {
