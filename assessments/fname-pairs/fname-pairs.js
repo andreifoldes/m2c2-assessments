@@ -14,7 +14,7 @@ import {
   studyOrder,
   testOrder,
   buildOptions,
-} from "./stimuli.js?v=2";
+} from "./stimuli.js?v=3";
 
 // m2c2kit standard palette
 const SCENE_BG = [255, 255, 255, 1];
@@ -1229,6 +1229,7 @@ export class FaceNamePairs extends Game {
       this._setTypedControlsVisible(true);
       this._currentOptions = null;
       this._showInput(200, this._py(400), 280, 52);
+      if (this._inputEl) this._inputEl.dataset.nameTarget = pair.name;
     } else {
       this._hideInput();
       this._setTypedControlsVisible(false);
@@ -1539,8 +1540,9 @@ export class FaceNamePairs extends Game {
         self._getNode("completeTitle").text = "Learning Complete";
         self._getNode("completeScore").text = "";
       } else {
+        const recalled = self._roundLenient;
         self._getNode("completeScore").text =
-          `You recalled ${self._roundStrict} of ${tested} names.`;
+          `You recalled ${recalled} of ${tested} names.`;
       }
 
       scene.run(

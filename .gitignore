@@ -6,7 +6,7 @@ assessments/fname-pairs/assets/fname-pairs/images/*.jpg
 # Private stimulus-hosting secrets (Netlify site + secret path)
 assessments/fname-pairs/tools/netlify.local.env
 test-results/
-tests/
+playwright-report/
 .playwright-mcp/
 temp/
 .superpowers/

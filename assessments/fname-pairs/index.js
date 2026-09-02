@@ -3,8 +3,8 @@ import { Session } from "@m2c2kit/session";
 // cache-consistent: bump all "?v=" together (index.html, index.js,
 // fname-pairs.js) when releasing changes, or browsers may mix stale and
 // fresh modules.
-import { FaceNamePairs } from "./fname-pairs.js?v=2";
-import { selectSubset } from "./stimuli.js?v=2";
+import { FaceNamePairs } from "./fname-pairs.js?v=3";
+import { selectSubset } from "./stimuli.js?v=3";
 
 let webcamModule = null;
 let webgazerModule = null;
@@ -366,7 +366,7 @@ session.onEnd(async () => {
         <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
           <h1 style="color:#4CAF50;">Assessment Complete (Debug Mode)</h1>
           <p>No token/callback_url provided &mdash; results shown below.</p>
-          <p style="color:#555;">Phase: ${summary.phase} &nbsp;|&nbsp; Recall: ${summary.n_correct_strict}/${summary.n_test_trials} strict, ${summary.n_correct_lenient}/${summary.n_test_trials} lenient</p>
+          <p style="color:#555;">Phase: ${summary.phase} &nbsp;|&nbsp; Recall: ${summary.n_correct_lenient}/${summary.n_test_trials}</p>
           <details open style="text-align:left;max-width:600px;margin:20px auto;">
             <summary style="cursor:pointer;color:#3F51B5;font-size:16px;">Trial Data (JSON)</summary>
             <pre style="background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;color:#333;max-height:60vh;">${JSON.stringify({ summary, trials: allTrialData }, null, 2)}</pre>
