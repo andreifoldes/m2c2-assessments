@@ -188,13 +188,13 @@ export const TASKS = [
         comment:
           "A1 · evening: learning + immediate recall on list 2 (assign each participant one list, 1-4)",
         query:
-          "phase=learning&list=2&response_mode=typed&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=learning&list=2&response_mode=choice&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment:
           "A2 · morning, same participant: delayed recall of all 20 pairs (same list=2; omitting subset params tests the full list)",
         query:
-          "phase=delayed&list=2&response_mode=typed&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=delayed&list=2&response_mode=choice&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment:
@@ -203,19 +203,19 @@ export const TASKS = [
       {
         comment: "B1 · evening: learning + immediate recall on list 1",
         query:
-          "phase=learning&list=1&response_mode=typed&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=learning&list=1&response_mode=choice&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment:
           "B2 · morning, same participant: delayed recall of a seeded half (10 of 20 pairs; list/subset_size/subset_seed must stay fixed for this participant)",
         query:
-          "phase=delayed&list=1&response_mode=typed&subset_size=10&subset_seed=42&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=delayed&list=1&response_mode=choice&subset_size=10&subset_seed=42&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment:
           "B3 · next evening, same participant: delayed recall of the OTHER half (same seed + subset_complement=1 selects exactly the 10 pairs B2 did not test)",
         query:
-          "phase=delayed&list=1&response_mode=typed&subset_size=10&subset_seed=42&subset_complement=1&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=delayed&list=1&response_mode=choice&subset_size=10&subset_seed=42&subset_complement=1&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment: "Optional add-on for any learning session",
