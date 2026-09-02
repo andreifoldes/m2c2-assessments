@@ -263,7 +263,12 @@ function exampleUrls(task, gameParams) {
   }
 
   // Task-specific worked examples from tasks.config.mjs (extraExamples).
+  // Entries without a `query` render as section headers grouping the examples below them.
   for (const ex of task.extraExamples ?? []) {
+    if (!ex.query) {
+      lines.push("", `# ═══ ${ex.comment} ═══`);
+      continue;
+    }
     lines.push("", `# ${ex.comment}`, `${task.launchUrl}?${ex.query}`);
   }
 
@@ -294,6 +299,14 @@ function renderTaskPage(task, position) {
   if (task.version) out.push(`- **Deployed version:** \`${task.pkg}@${task.version}\``);
   out.push(`- **Launch URL:** [${task.launchUrl}](${task.launchUrl})`);
   out.push("");
+
+  // Task-specific prose sections from tasks.config.mjs (extraSections).
+  for (const section of task.extraSections ?? []) {
+    out.push(`## ${section.title}`);
+    out.push("");
+    out.push(section.body);
+    out.push("");
+  }
 
   out.push("## Example URL commands");
   out.push("");
