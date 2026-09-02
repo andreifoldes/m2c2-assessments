@@ -3,8 +3,12 @@ import { Session } from "@m2c2kit/session";
 // cache-consistent: bump all "?v=" together (index.html, index.js,
 // fname-pairs.js) when releasing changes, or browsers may mix stale and
 // fresh modules.
-import { FaceNamePairs } from "./fname-pairs.js?v=3";
-import { selectSubset } from "./stimuli.js?v=3";
+import { FaceNamePairs } from "./fname-pairs.js?v=5";
+import {
+  activeTypedCorrectCount,
+  selectSubset,
+  TYPED_LENIENT_DISTANCE_DEFAULT,
+} from "./stimuli.js?v=5";
 
 let webcamModule = null;
 let webgazerModule = null;
@@ -148,7 +152,6 @@ const paramOverrides = {
 for (const key of [
   "learning_duration_ms",
   "isi_ms",
-  "typed_lenient_distance",
   "criterion_prop",
   "max_learning_rounds",
 ]) {
@@ -157,6 +160,13 @@ for (const key of [
     paramOverrides[key] = parseFloat(val);
   }
 }
+
+const typedLenientRaw = params.get("typed_lenient_distance");
+const typedLenientDistance =
+  typedLenientRaw === null || !Number.isFinite(parseFloat(typedLenientRaw))
+    ? TYPED_LENIENT_DISTANCE_DEFAULT
+    : parseFloat(typedLenientRaw);
+paramOverrides.typed_lenient_distance = typedLenientDistance;
 const restudyScope = params.get("restudy_scope");
 if (restudyScope === "all" || restudyScope === "missed") {
   paramOverrides.restudy_scope = restudyScope;
@@ -362,11 +372,16 @@ session.onEnd(async () => {
       params.get("show_end_screen") !== "false" &&
       params.get("show_end_screen") !== "0";
     if (showEndScreen) {
+      const nCorrect = activeTypedCorrectCount(
+        summary.n_correct_strict,
+        summary.n_correct_lenient,
+        typedLenientDistance,
+      );
       document.body.innerHTML = `
         <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
           <h1 style="color:#4CAF50;">Assessment Complete (Debug Mode)</h1>
           <p>No token/callback_url provided &mdash; results shown below.</p>
-          <p style="color:#555;">Phase: ${summary.phase} &nbsp;|&nbsp; Recall: ${summary.n_correct_lenient}/${summary.n_test_trials}</p>
+          <p style="color:#555;">Phase: ${summary.phase} &nbsp;|&nbsp; Recall: ${nCorrect}/${summary.n_test_trials}</p>
           <details open style="text-align:left;max-width:600px;margin:20px auto;">
             <summary style="cursor:pointer;color:#3F51B5;font-size:16px;">Trial Data (JSON)</summary>
             <pre style="background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;color:#333;max-height:60vh;">${JSON.stringify({ summary, trials: allTrialData }, null, 2)}</pre>

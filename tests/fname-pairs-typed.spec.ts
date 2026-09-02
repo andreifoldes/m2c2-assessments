@@ -1,7 +1,10 @@
 import { test, expect, Page } from "@playwright/test";
 import {
+  activeTypedCorrectCount,
   levenshtein,
   normalizeName,
+  TYPED_LENIENT_DISTANCE_DEFAULT,
+  usesLenientTypedScoring,
 } from "../assessments/fname-pairs/stimuli.js";
 
 const PIXEL_JPEG = Buffer.from(
@@ -120,6 +123,20 @@ test.describe("typed-recall scoring kernel (reported typos)", () => {
     expect(normalizeName("  José ")).toBe("jose");
     expect(normalizeName("Mary-Anne")).toBe("maryanne");
   });
+
+  test("feedback score follows typed_lenient_distance from the URL", () => {
+    expect(TYPED_LENIENT_DISTANCE_DEFAULT).toBe(1);
+    expect(usesLenientTypedScoring(undefined)).toBe(true);
+    expect(usesLenientTypedScoring(null)).toBe(true);
+    expect(usesLenientTypedScoring("")).toBe(true);
+    expect(usesLenientTypedScoring(1)).toBe(true);
+    expect(usesLenientTypedScoring("1")).toBe(true);
+    expect(usesLenientTypedScoring(0)).toBe(false);
+    expect(usesLenientTypedScoring("0")).toBe(false);
+    expect(activeTypedCorrectCount(0, 4, undefined)).toBe(4);
+    expect(activeTypedCorrectCount(0, 4, 1)).toBe(4);
+    expect(activeTypedCorrectCount(0, 4, 0)).toBe(0);
+  });
 });
 
 test.describe("FNAME-Pairs typed recall (web)", () => {
@@ -185,8 +202,8 @@ test.describe("FNAME-Pairs typed recall (web)", () => {
     expect(summary.n_correct_lenient).toBe(0);
   });
 
-  test("feedback screen reports the lenient score", async ({ page }) => {
-    await openTypedRecall(page, "subset_size=2");
+  async function runOneExactOneTypo(page: Page, extraQuery = "") {
+    await openTypedRecall(page, `subset_size=2${extraQuery ? `&${extraQuery}` : ""}`);
     const input1 = await waitForNameInput(page);
     const target1 = (await input1.getAttribute("data-name-target")) ?? "";
     await input1.fill(target1);
@@ -195,12 +212,42 @@ test.describe("FNAME-Pairs typed recall (web)", () => {
     const target2 = (await input2.getAttribute("data-name-target")) ?? "";
     await input2.fill(doubledInitial(target2));
     await input2.press("Enter");
+  }
 
+  test("feedback uses the default (lenient) score when typed_lenient_distance is omitted", async ({
+    page,
+  }) => {
+    await runOneExactOneTypo(page);
     await expect(page.locator("p", { hasText: /Recall: 2\/2/ })).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.locator("p", { hasText: /Recall:/ })).not.toContainText(
-      /strict/i,
-    );
+    const { summary } = await readDebugResults(page);
+    expect(summary.n_correct_strict).toBe(1);
+    expect(summary.n_correct_lenient).toBe(2);
+  });
+
+  test("feedback reports the lenient score when typed_lenient_distance is 1", async ({
+    page,
+  }) => {
+    await runOneExactOneTypo(page, "typed_lenient_distance=1");
+    await expect(page.locator("p", { hasText: /Recall: 2\/2/ })).toBeVisible({
+      timeout: 30_000,
+    });
+    const { summary } = await readDebugResults(page);
+    expect(summary.n_correct_strict).toBe(1);
+    expect(summary.n_correct_lenient).toBe(2);
+  });
+
+  test("feedback reports the strict score when typed_lenient_distance is 0", async ({
+    page,
+  }) => {
+    await runOneExactOneTypo(page, "typed_lenient_distance=0");
+    await expect(page.locator("p", { hasText: /Recall: 1\/2/ })).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(page.locator("p", { hasText: /Recall: 2\/2/ })).toHaveCount(0);
+    const { summary } = await readDebugResults(page);
+    expect(summary.n_correct_strict).toBe(1);
+    expect(summary.n_correct_lenient).toBe(1);
   });
 });

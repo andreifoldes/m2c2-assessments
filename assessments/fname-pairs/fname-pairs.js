@@ -14,7 +14,9 @@ import {
   studyOrder,
   testOrder,
   buildOptions,
-} from "./stimuli.js?v=3";
+  activeTypedCorrectCount,
+  TYPED_LENIENT_DISTANCE_DEFAULT,
+} from "./stimuli.js?v=5";
 
 // m2c2kit standard palette
 const SCENE_BG = [255, 255, 255, 1];
@@ -128,7 +130,7 @@ export class FaceNamePairs extends Game {
           "Show correctness feedback at test (off by default: a delayed retest follows)",
       },
       typed_lenient_distance: {
-        default: 1,
+        default: TYPED_LENIENT_DISTANCE_DEFAULT,
         type: "number",
         description:
           "Max Levenshtein distance from the target name counted as lenient-correct (typed mode)",
@@ -1540,7 +1542,11 @@ export class FaceNamePairs extends Game {
         self._getNode("completeTitle").text = "Learning Complete";
         self._getNode("completeScore").text = "";
       } else {
-        const recalled = self._roundLenient;
+        const recalled = activeTypedCorrectCount(
+          self._roundStrict,
+          self._roundLenient,
+          self.getParameter("typed_lenient_distance"),
+        );
         self._getNode("completeScore").text =
           `You recalled ${recalled} of ${tested} names.`;
       }

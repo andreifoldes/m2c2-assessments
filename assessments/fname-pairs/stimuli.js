@@ -45,6 +45,27 @@ export function normalizeName(s) {
     .replace(/[^a-z]/g, "");
 }
 
+/** Matches FaceNamePairs.typed_lenient_distance when the URL omits it. */
+export const TYPED_LENIENT_DISTANCE_DEFAULT = 1;
+
+/**
+ * Typed recall is lenient when typed_lenient_distance > 0.
+ * A URL value of 0 is exact-only (strict). Missing/invalid → task default.
+ */
+export function usesLenientTypedScoring(maxDistance) {
+  if (maxDistance == null || maxDistance === "") {
+    return TYPED_LENIENT_DISTANCE_DEFAULT > 0;
+  }
+  const n = Number(maxDistance);
+  if (!Number.isFinite(n)) return TYPED_LENIENT_DISTANCE_DEFAULT > 0;
+  return n > 0;
+}
+
+/** Headline correct-count for the scoring mode in the URL. */
+export function activeTypedCorrectCount(strictCount, lenientCount, maxDistance) {
+  return usesLenientTypedScoring(maxDistance) ? lenientCount : strictCount;
+}
+
 export function levenshtein(a, b) {
   let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
   for (let i = 1; i <= a.length; i++) {
