@@ -16,6 +16,8 @@ let ambientLightModule = null;
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 const callbackUrl = params.get("callback_url");
+// Optional participant identifier, echoed verbatim into every result output.
+const pid = params.get("pid");
 const debugMode = !token || !callbackUrl;
 
 const phase = params.get("phase") === "delayed" ? "delayed" : "learning";
@@ -338,6 +340,7 @@ session.onEnd(async () => {
           {
             type: "m2c2:complete",
             assessment: "fname-pairs",
+            pid,
             summary,
             data: { trials: allTrialData },
           },
@@ -379,7 +382,9 @@ session.onEnd(async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token,
+        pid,
         data: {
+          pid,
           trials: allTrialData,
           summary,
         },
