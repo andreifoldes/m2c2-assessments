@@ -16,6 +16,8 @@ gender-matched common US first names, resizes the images, and writes:
 Usage:
   uv run build_stimuli.py --cfd-zip /tmp/cfd.zip --inspect   # explore workbook first
   uv run build_stimuli.py --cfd-zip /tmp/cfd.zip [--seed 42]
+  uv run build_stimuli.py --repartition [--seed 42]          # re-balance lists from
+                                                             # lists.json, no zip needed
 
 CFD citation: Ma, Correll, & Wittenbrink (2015), Behavior Research Methods.
 """
@@ -280,25 +282,97 @@ def list_targets(selected: list[Target], lid: int) -> list[Target]:
     return [t for t in selected if t.list_id == lid]
 
 
+BALANCE_ATTRS = ["age_rated", "attractive"]
+SMD_CRITERION = 0.10        # matching-literature negligible-imbalance threshold
+VR_CRITERION = 1.5          # variance ratio max/min across lists
+TOST_BOUND_SD = 0.5         # equivalence bound for TOST, in pooled-SD units
+LIST_PAIRS = list(itertools.combinations(range(1, N_LISTS + 1), 2))
+
+
 def anova(selected: list[Target], attr: str) -> tuple[float, float]:
     groups = [[getattr(t, attr) for t in list_targets(selected, lid)] for lid in range(1, N_LISTS + 1)]
     f, p = stats.f_oneway(*groups)
     return float(f), float(p)
 
 
+def _attr_arrays(selected: list[Target], attr: str) -> dict[int, np.ndarray]:
+    return {
+        lid: np.array([getattr(t, attr) for t in list_targets(selected, lid)])
+        for lid in range(1, N_LISTS + 1)
+    }
+
+
+def smd(a: np.ndarray, b: np.ndarray) -> float:
+    """Standardized mean difference with the pooled SD as denominator."""
+    pooled = np.sqrt((a.var(ddof=1) + b.var(ddof=1)) / 2)
+    return float((a.mean() - b.mean()) / pooled) if pooled > 0 else 0.0
+
+
+def tost_p(a: np.ndarray, b: np.ndarray, bound_sd: float = TOST_BOUND_SD) -> float:
+    """Welch-based two one-sided tests; returns the larger one-sided p.
+
+    p < .05 rejects |true difference| >= bound_sd pooled SDs, i.e. demonstrates
+    equivalence within the bound (Lakens, 2017).
+    """
+    pooled = np.sqrt((a.var(ddof=1) + b.var(ddof=1)) / 2)
+    delta = bound_sd * pooled
+    va, vb = a.var(ddof=1) / len(a), b.var(ddof=1) / len(b)
+    se = np.sqrt(va + vb)
+    df = se**4 / (va**2 / (len(a) - 1) + vb**2 / (len(b) - 1))
+    d = a.mean() - b.mean()
+    p_lower = 1 - stats.t.cdf((d + delta) / se, df)
+    p_upper = stats.t.cdf((d - delta) / se, df)
+    return float(max(p_lower, p_upper))
+
+
+def tost_min_bound(a: np.ndarray, b: np.ndarray) -> float:
+    """Smallest equivalence bound (in pooled-SD units) at which TOST rejects at
+    alpha=.05 for this pair: |SMD| + t_crit * SE/pooledSD. With n=20 per list
+    the floor is ~0.53 SD even at a zero observed difference."""
+    pooled = np.sqrt((a.var(ddof=1) + b.var(ddof=1)) / 2)
+    va, vb = a.var(ddof=1) / len(a), b.var(ddof=1) / len(b)
+    se = np.sqrt(va + vb)
+    df = se**4 / (va**2 / (len(a) - 1) + vb**2 / (len(b) - 1))
+    t_crit = stats.t.ppf(0.95, df)
+    return float(abs(a.mean() - b.mean()) / pooled + t_crit * se / pooled)
+
+
+def balance_metrics(selected: list[Target], attr: str) -> dict:
+    g = _attr_arrays(selected, attr)
+    smds = {pair: smd(g[pair[0]], g[pair[1]]) for pair in LIST_PAIRS}
+    variances = [g[lid].var(ddof=1) for lid in g]
+    f, p = anova(selected, attr)
+    return {
+        "smds": smds,
+        "max_abs_smd": max(abs(v) for v in smds.values()),
+        "variance_ratio": max(variances) / min(variances),
+        "max_ks": max(float(stats.ks_2samp(g[i], g[j]).statistic) for i, j in LIST_PAIRS),
+        "max_tost_p": max(tost_p(g[i], g[j]) for i, j in LIST_PAIRS),
+        "tost_min_bound": max(tost_min_bound(g[i], g[j]) for i, j in LIST_PAIRS),
+        "anova_f": f,
+        "anova_p": p,
+    }
+
+
 def objective(selected: list[Target]) -> float:
-    f_age, _ = anova(selected, "age_rated")
-    f_attr, _ = anova(selected, "attractive")
-    return f_age + f_attr
+    """Imbalance score per attribute: max pairwise |SMD| hinged at half the
+    criterion (mean differences below 0.05 SD are not worth optimizing further)
+    plus a variance-ratio penalty hinged at 1.1, so the search spends its moves
+    equalizing spread once means are matched."""
+    total = 0.0
+    for attr in BALANCE_ATTRS:
+        g = _attr_arrays(selected, attr)
+        max_smd = max(abs(smd(g[i], g[j])) for i, j in LIST_PAIRS)
+        total += max(0.0, max_smd - SMD_CRITERION / 2)
+        variances = [g[lid].var(ddof=1) for lid in g]
+        total += 0.5 * max(0.0, max(variances) / min(variances) - 1.1)
+    return total
 
 
 def hill_climb(selected: list[Target], cells: dict[tuple[str, str], list[Target]], max_iters: int = 500) -> None:
-    """Greedy within-cell swaps between lists (preserves categorical balance)."""
+    """Best-improvement within-cell swaps between lists, run to a local optimum
+    of the imbalance score (preserves categorical race/gender balance)."""
     for it in range(max_iters):
-        _, p_age = anova(selected, "age_rated")
-        _, p_attr = anova(selected, "attractive")
-        if min(p_age, p_attr) >= 0.2:
-            break
         current = objective(selected)
         best_gain, best_pair = 0.0, None
         for members in cells.values():
@@ -311,13 +385,17 @@ def hill_climb(selected: list[Target], cells: dict[tuple[str, str], list[Target]
                 if gain > best_gain + 1e-12:
                     best_gain, best_pair = gain, (a, b)
         if best_pair is None:
-            logger.warning("Hill-climb stalled at iteration %d", it)
+            logger.info("Hill-climb converged after %d swaps (score %.4f)", it, current)
             break
         a, b = best_pair
         a.list_id, b.list_id = b.list_id, a.list_id
-    f_age, p_age = anova(selected, "age_rated")
-    f_attr, p_attr = anova(selected, "attractive")
-    logger.info("Balance: age_rated F=%.3f p=%.3f | attractive F=%.3f p=%.3f", f_age, p_age, f_attr, p_attr)
+    for attr in BALANCE_ATTRS:
+        m = balance_metrics(selected, attr)
+        logger.info(
+            "Balance %s: max|SMD|=%.3f VR=%.3f maxKS=%.3f TOSTp=%.4f F=%.3f p=%.3f",
+            attr, m["max_abs_smd"], m["variance_ratio"], m["max_ks"],
+            m["max_tost_p"], m["anova_f"], m["anova_p"],
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -458,7 +536,30 @@ def process_images(zf: zipfile.ZipFile, selected: list[Target]) -> None:
     logger.info("Wrote %d images (%.1f MB) to %s", len(selected), total_kb / 1024, OUT_IMAGES)
 
 
-def write_lists_json(selected: list[Target], seed: int) -> None:
+def load_from_lists_json() -> tuple[list[Target], int]:
+    """Rebuild Target objects from the committed lists.json (for --repartition,
+    which re-optimizes the partition without needing the CFD zip)."""
+    data = json.loads((OUT_IMAGES / "lists.json").read_text())
+    selected = []
+    for lst in data["lists"]:
+        for p in lst["pairs"]:
+            selected.append(
+                Target(
+                    model=p["cfd_target"].removeprefix("CFD-"),
+                    race=p["race"],
+                    gender=p["gender"],
+                    age_rated=p["age_rated"],
+                    attractive=p["attractive"],
+                    zip_member="",
+                    list_id=lst["list_id"],
+                    pair_id=p["pair_id"],
+                    name=p["name"],
+                )
+            )
+    return selected, int(data.get("eligible_pool", 554))
+
+
+def write_lists_json(selected: list[Target], seed: int, eligible_pool: int) -> None:
     lists = []
     for lid in range(1, N_LISTS + 1):
         pairs = sorted(list_targets(selected, lid), key=lambda t: t.pair_id)
@@ -481,12 +582,13 @@ def write_lists_json(selected: list[Target], seed: int) -> None:
             }
         )
     payload = {
-        "version": 1,
+        "version": 2,
         "generated_note": (
             f"build_stimuli.py seed={seed} on {date.today().isoformat()}; "
             "Chicago Face Database neutral images, rated age 18-40 "
             "(Ma, Correll, & Wittenbrink, 2015)"
         ),
+        "eligible_pool": eligible_pool,
         "lists": lists,
     }
     out = OUT_IMAGES / "lists.json"
@@ -495,8 +597,6 @@ def write_lists_json(selected: list[Target], seed: int) -> None:
 
 
 def write_report(selected: list[Target], pool_size: int, seed: int) -> None:
-    f_age, p_age = anova(selected, "age_rated")
-    f_attr, p_attr = anova(selected, "attractive")
     lines = [
         "# fname-pairs stimulus balance report",
         "",
@@ -520,8 +620,43 @@ def write_report(selected: list[Target], pool_size: int, seed: int) -> None:
         )
     lines += [
         "",
-        f"One-way ANOVA across lists — rated age: F(3,76)={f_age:.3f}, p={p_age:.3f}; "
-        f"attractiveness: F(3,76)={f_attr:.3f}, p={p_attr:.3f}.",
+        "## Balance verification",
+        "",
+        "Lists are a fixed partition of the 80 selected targets, so balance is assessed with",
+        "descriptive equivalence criteria rather than a null-hypothesis test alone:",
+        "",
+        "- **max |SMD|** — largest pairwise standardized mean difference between any two lists",
+        f"  (pooled-SD denominator); < {SMD_CRITERION} is the conventional negligible-imbalance",
+        "  threshold from the covariate-balance literature (Austin, 2009).",
+        f"- **Variance ratio** — largest/smallest list variance; criterion < {VR_CRITERION}.",
+        "- **max KS D** — largest pairwise two-sample Kolmogorov-Smirnov statistic",
+        "  (whole-distribution overlap, not just means).",
+        f"- **TOST max p** — Welch two one-sided tests with a +/-{TOST_BOUND_SD} pooled-SD",
+        "  equivalence bound (Lakens, 2017), worst pair; p < .05 demonstrates all six list",
+        "  pairs are statistically equivalent within the bound. Note: with n=20 per list the",
+        "  smallest demonstrable bound is ~0.53 SD even at a zero observed difference, so the",
+        f"  +/-{TOST_BOUND_SD} test cannot reach significance by design; **TOST bound** gives the",
+        "  smallest bound (worst pair) at which equivalence IS demonstrated at alpha=.05.",
+        "- ANOVA F/p across the four lists is retained for reference only.",
+        "",
+        "| Attribute | max \\|SMD\\| | Variance ratio | max KS D | TOST max p | TOST bound | ANOVA F(3,76) | ANOVA p |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for attr in BALANCE_ATTRS:
+        m = balance_metrics(selected, attr)
+        lines.append(
+            f"| {attr} | {m['max_abs_smd']:.3f} | {m['variance_ratio']:.3f} "
+            f"| {m['max_ks']:.3f} | {m['max_tost_p']:.4f} | +/-{m['tost_min_bound']:.2f} SD "
+            f"| {m['anova_f']:.3f} | {m['anova_p']:.3f} |"
+        )
+    lines += ["", "Pairwise SMDs (list i vs j; positive = list i higher):", ""]
+    header = " | ".join(f"{i}v{j}" for i, j in LIST_PAIRS)
+    lines += [f"| Attribute | {header} |", "|---" * (len(LIST_PAIRS) + 1) + "|"]
+    for attr in BALANCE_ATTRS:
+        m = balance_metrics(selected, attr)
+        cells_ = " | ".join(f"{m['smds'][pair]:+.3f}" for pair in LIST_PAIRS)
+        lines.append(f"| {attr} | {cells_} |")
+    lines += [
         "",
         f"Within-list pairwise name Levenshtein distance >= {MIN_NAME_DISTANCE} (enforced).",
         "",
@@ -549,7 +684,25 @@ def main() -> None:
     ap.add_argument("--cfd-zip", type=Path, default=Path("/tmp/cfd.zip"))
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--inspect", action="store_true", help="print workbook structure and exit")
+    ap.add_argument(
+        "--repartition",
+        action="store_true",
+        help="re-optimize the list partition of the 80 targets already in lists.json "
+        "(no CFD zip or image processing; the image set is unchanged)",
+    )
     args = ap.parse_args()
+
+    if args.repartition:
+        selected, pool_size = load_from_lists_json()
+        cells: dict[tuple[str, str], list[Target]] = {}
+        for t in selected:
+            cells.setdefault((t.race, t.gender), []).append(t)
+        hill_climb(selected, cells)
+        assign_names(selected, args.seed)
+        write_lists_json(selected, args.seed, pool_size)
+        write_report(selected, pool_size, args.seed)
+        logger.info("Repartitioned %d targets across %d lists", len(selected), N_LISTS)
+        return
 
     with zipfile.ZipFile(args.cfd_zip) as zf:
         member = find_norming_workbook(zf)
@@ -567,7 +720,7 @@ def main() -> None:
         assign_names(selected, args.seed)
         process_images(zf, selected)
 
-    write_lists_json(selected, args.seed)
+    write_lists_json(selected, args.seed, len(pool))
     write_report(selected, len(pool), args.seed)
     logger.info("Done: %d targets across %d lists", len(selected), N_LISTS)
 
