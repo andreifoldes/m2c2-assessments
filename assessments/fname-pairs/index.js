@@ -1,6 +1,10 @@
 import { Session } from "@m2c2kit/session";
-import { FaceNamePairs } from "./fname-pairs.js";
-import { selectSubset } from "./stimuli.js";
+// Version query strings on local module imports keep the whole chain
+// cache-consistent: bump all "?v=" together (index.html, index.js,
+// fname-pairs.js) when releasing changes, or browsers may mix stale and
+// fresh modules.
+import { FaceNamePairs } from "./fname-pairs.js?v=2";
+import { selectSubset } from "./stimuli.js?v=2";
 
 let webcamModule = null;
 let webgazerModule = null;
@@ -12,6 +16,8 @@ let ambientLightModule = null;
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 const callbackUrl = params.get("callback_url");
+// Optional participant identifier, echoed verbatim into every result output.
+const pid = params.get("pid");
 const debugMode = !token || !callbackUrl;
 
 const phase = params.get("phase") === "delayed" ? "delayed" : "learning";
@@ -19,6 +25,8 @@ const responseMode = params.get("response_mode") === "choice" ? "choice" : "type
 const listId = Math.min(4, Math.max(1, parseInt(params.get("list") || "1", 10) || 1));
 const subsetSize = parseInt(params.get("subset_size") || "20", 10) || 20;
 const subsetSeed = parseInt(params.get("subset_seed") || "0", 10) || 0;
+const subsetComplement =
+  params.get("subset_complement") === "1" || params.get("subset_complement") === "true";
 
 // The CFD images are not redistributed with this public repo. In production
 // the scheduler passes stimuli_base_url pointing at a private host (unlisted
@@ -56,11 +64,18 @@ async function loadListAndImages() {
     throw new Error(`List ${listId} not found in lists.json`);
   }
 
-  // Delayed phase tests only a deterministic subset; fetch just those images.
+  // Delayed phase tests only a deterministic subset (or its complement);
+  // fetch just those images.
   const pairs =
     phase === "delayed"
-      ? selectSubset(list.pairs, subsetSize, subsetSeed)
+      ? selectSubset(list.pairs, subsetSize, subsetSeed, subsetComplement)
       : [...list.pairs].sort((a, b) => a.pair_id - b.pair_id);
+  if (pairs.length === 0) {
+    throw new Error(
+      "Subset selection left no pairs to test (subset_complement=1 with " +
+        "subset_size covering the whole list?)",
+    );
+  }
 
   if (loadingText) loadingText.textContent = `0 / ${pairs.length}`;
 
@@ -125,20 +140,32 @@ const paramOverrides = {
   list_id: listId,
   subset_size: subsetSize,
   subset_seed: subsetSeed,
+  subset_complement: subsetComplement,
   pairs_json: JSON.stringify(stimuli.pairs),
   all_names_json: JSON.stringify(stimuli.allNames),
 };
 
-for (const key of ["learning_duration_ms", "isi_ms", "typed_lenient_distance"]) {
+for (const key of [
+  "learning_duration_ms",
+  "isi_ms",
+  "typed_lenient_distance",
+  "criterion_prop",
+  "max_learning_rounds",
+]) {
   const val = params.get(key);
   if (val !== null) {
     paramOverrides[key] = parseFloat(val);
   }
 }
+const restudyScope = params.get("restudy_scope");
+if (restudyScope === "all" || restudyScope === "missed") {
+  paramOverrides.restudy_scope = restudyScope;
+}
 for (const key of [
   "immediate_test",
   "feedback_enabled",
   "allow_tap_advance",
+  "allow_skip",
   "show_trials_complete_scene",
 ]) {
   const val = params.get(key);
@@ -220,9 +247,25 @@ session.onActivityData((ev) => {
 function computeSummary(trials) {
   const tests = trials.filter((t) => t.trial_type === "test");
   const study = trials.filter((t) => t.trial_type === "study");
-  const strict = tests.filter((t) => t.is_correct_strict === true).length;
-  const lenient = tests.filter((t) => t.is_correct_lenient === true).length;
-  const rts = tests
+
+  // Criterion mode can produce multiple study-test rounds; headline accuracy
+  // is the FINAL round (the state the participant left the session in).
+  const rounds = [...new Set(tests.map((t) => t.learning_round ?? 1))].sort(
+    (a, b) => a - b,
+  );
+  const roundProps = rounds.map((r) => {
+    const rt = tests.filter((t) => (t.learning_round ?? 1) === r);
+    return +(
+      rt.filter((t) => t.is_correct_lenient === true).length / (rt.length || 1)
+    ).toFixed(3);
+  });
+  const finalRound = rounds.length ? rounds[rounds.length - 1] : 1;
+  const finalTests = tests.filter((t) => (t.learning_round ?? 1) === finalRound);
+  const strict = finalTests.filter((t) => t.is_correct_strict === true).length;
+  const lenient = finalTests.filter((t) => t.is_correct_lenient === true).length;
+
+  const criterionProp = parseFloat(params.get("criterion_prop") || "0") || 0;
+  const rts = finalTests
     .map((t) => t.rt_ms)
     .filter((v) => typeof v === "number")
     .sort((a, b) => a - b);
@@ -240,12 +283,26 @@ function computeSummary(trials) {
     response_mode: responseMode,
     subset_size: subsetSize,
     subset_seed: subsetSeed,
+    subset_complement: subsetComplement,
+    n_skipped: finalTests.filter((t) => t.skipped === true).length,
     n_study_trials: study.length,
-    n_test_trials: tests.length,
+    n_test_trials: finalTests.length,
+    n_test_trials_total: tests.length,
+    n_learning_rounds: rounds.length || 1,
+    round_prop_correct_lenient: roundProps,
+    criterion_prop: criterionProp,
+    criterion_met:
+      criterionProp > 0 && phase === "learning"
+        ? (roundProps[roundProps.length - 1] ?? 0) >= criterionProp
+        : null,
     n_correct_strict: strict,
     n_correct_lenient: lenient,
-    prop_correct_strict: tests.length ? +(strict / tests.length).toFixed(3) : null,
-    prop_correct_lenient: tests.length ? +(lenient / tests.length).toFixed(3) : null,
+    prop_correct_strict: finalTests.length
+      ? +(strict / finalTests.length).toFixed(3)
+      : null,
+    prop_correct_lenient: finalTests.length
+      ? +(lenient / finalTests.length).toFixed(3)
+      : null,
     mean_rt_ms: meanRt,
     median_rt_ms: medianRt,
   };
@@ -283,6 +340,7 @@ session.onEnd(async () => {
           {
             type: "m2c2:complete",
             assessment: "fname-pairs",
+            pid,
             summary,
             data: { trials: allTrialData },
           },
@@ -324,7 +382,9 @@ session.onEnd(async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token,
+        pid,
         data: {
+          pid,
           trials: allTrialData,
           summary,
         },

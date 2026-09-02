@@ -9,6 +9,8 @@ const assessment = new PvtBa();
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 const callbackUrl = params.get("callback_url");
+// Optional participant identifier, echoed verbatim into every result output.
+const pid = params.get("pid");
 const debugMode = !token || !callbackUrl;
 
 const paramOverrides = {};
@@ -126,6 +128,7 @@ session.onEnd(async () => {
         window.parent.postMessage({
           type: "m2c2:complete",
           assessment: "pvt-ba",
+          pid,
           summary: {
             n_trials: __t.length,
             duration_s: __last && typeof __last.elapsed_test_time_ms === "number"
@@ -170,7 +173,9 @@ session.onEnd(async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token,
+        pid,
         data: {
+          pid,
           trials: allTrialData,
           total_duration_seconds: allTrialData.length > 0
             ? +(allTrialData[allTrialData.length - 1].elapsed_test_time_ms / 1000).toFixed(1)

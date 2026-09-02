@@ -14,7 +14,7 @@ import {
   studyOrder,
   testOrder,
   buildOptions,
-} from "./stimuli.js";
+} from "./stimuli.js?v=2";
 
 // m2c2kit standard palette
 const SCENE_BG = [255, 255, 255, 1];
@@ -64,11 +64,46 @@ export class FaceNamePairs extends Game {
         description:
           "Seed for the delayed-recall subset; must match across a participant's sessions",
       },
+      subset_complement: {
+        default: false,
+        type: "boolean",
+        description:
+          "Test the pairs NOT in the seeded subset (delayed phase) — lets two " +
+          "delayed sessions cover disjoint halves of the list",
+      },
+      allow_skip: {
+        default: true,
+        type: "boolean",
+        description:
+          "Show an 'I don't know' button in typed recall so participants can " +
+          "pass without guessing (skips score as incorrect)",
+      },
       immediate_test: {
         default: true,
         type: "boolean",
         description:
           "Run the immediate cued-recall test after study (learning phase only)",
+      },
+      criterion_prop: {
+        default: 0,
+        type: "number",
+        description:
+          "Learning-to-criterion mode: minimum proportion correct (lenient) on the " +
+          "immediate test; below it, another study-test round runs. 0 disables.",
+      },
+      max_learning_rounds: {
+        default: 3,
+        type: "number",
+        description:
+          "Maximum study-test rounds in criterion mode (safety cap; the task " +
+          "proceeds after this many rounds even below criterion)",
+      },
+      restudy_scope: {
+        default: "missed",
+        type: "string",
+        description:
+          "Pairs restudied in rounds after the first: missed (only lenient-incorrect " +
+          "pairs) | all. The test always covers all pairs.",
       },
       learning_duration_ms: {
         default: 5000,
@@ -196,6 +231,20 @@ export class FaceNamePairs extends Game {
           type: "integer",
           description: "Delayed-subset seed parameter echoed for provenance",
         },
+        learning_round: {
+          type: "integer",
+          description:
+            "Study-test round this trial belongs to (1-based; >1 only in criterion mode)",
+        },
+        subset_complement: {
+          type: "boolean",
+          description: "Whether the complement of the seeded subset was tested",
+        },
+        skipped: {
+          type: ["boolean", "null"],
+          description:
+            "Participant used the 'I don't know' button (typed mode test rows)",
+        },
         study_position: {
           type: ["integer", "null"],
           description: "Presentation position within the study block (0-based)",
@@ -261,8 +310,10 @@ export class FaceNamePairs extends Game {
     this._studySeq = [];
     this._testSeq = [];
     this._globalTrialIndex = 0;
-    this._correctStrict = 0;
-    this._correctLenient = 0;
+    this._learningRound = 1;
+    this._roundStrict = 0;
+    this._roundLenient = 0;
+    this._roundMissed = [];
     this._responded = false;
     this._faceImgEl = null;
     this._inputEl = null;
@@ -275,6 +326,7 @@ export class FaceNamePairs extends Game {
     this._buildStudyScene();
     this._buildTestIntroScene();
     this._buildTestScene();
+    this._buildRoundIntroScene();
     this._buildCompleteScene();
   }
 
@@ -513,14 +565,52 @@ export class FaceNamePairs extends Game {
 
     // index.js has already applied selectSubset() for the delayed phase, so
     // this._pairs is exactly the set to study/test. Only ordering happens here.
+    this._learningRound = 1;
     this._studySeq =
-      phase === "learning" ? studyOrder(this._pairs, listId, subsetSeed) : [];
-    this._testSeq = testOrder(this._pairs, listId, subsetSeed, phase);
+      phase === "learning"
+        ? studyOrder(this._pairs, listId, subsetSeed, 1)
+        : [];
+    this._testSeq = testOrder(this._pairs, listId, subsetSeed, phase, 1);
 
     this._globalTrialIndex = 0;
-    this._correctStrict = 0;
-    this._correctLenient = 0;
     this._responded = false;
+  }
+
+  // ── Learning-to-criterion loop ─────────────────────────────
+
+  _criterionUnmet() {
+    const criterion = this.getParameter("criterion_prop");
+    if (!(criterion > 0) || this.getParameter("phase") !== "learning") {
+      return false;
+    }
+    const prop = this._testSeq.length
+      ? this._roundLenient / this._testSeq.length
+      : 1;
+    return (
+      prop < criterion &&
+      this._learningRound < this.getParameter("max_learning_rounds")
+    );
+  }
+
+  _beginNextRound() {
+    const listId = this.getParameter("list_id");
+    const subsetSeed = this.getParameter("subset_seed");
+    this._lastRoundLenient = this._roundLenient;
+    this._lastRoundTotal = this._testSeq.length;
+    this._learningRound++;
+    const restudy =
+      this.getParameter("restudy_scope") === "all" || this._roundMissed.length === 0
+        ? this._pairs
+        : this._roundMissed;
+    this._studySeq = studyOrder(restudy, listId, subsetSeed, this._learningRound);
+    this._testSeq = testOrder(
+      this._pairs,
+      listId,
+      subsetSeed,
+      this.getParameter("phase"),
+      this._learningRound,
+    );
+    this.presentScene("round-intro", Transition.none());
   }
 
   _recordCommonFields(trialType, pair) {
@@ -538,6 +628,8 @@ export class FaceNamePairs extends Game {
     this.addTrialData("response_mode", this.getParameter("response_mode"));
     this.addTrialData("subset_size", this.getParameter("subset_size"));
     this.addTrialData("subset_seed", this.getParameter("subset_seed"));
+    this.addTrialData("subset_complement", this.getParameter("subset_complement"));
+    this.addTrialData("learning_round", this._learningRound);
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -754,10 +846,11 @@ export class FaceNamePairs extends Game {
         this.presentScene("complete", Transition.none());
         return;
       }
-      this.presentScene(
-        this.getParameter("show_tutorial") ? "test-intro" : "test",
-        Transition.none(),
-      );
+      // Rounds after the first were introduced by the round-intro scene, so
+      // the "Memory Test" interstitial would be redundant there.
+      const showIntro =
+        this.getParameter("show_tutorial") && this._learningRound === 1;
+      this.presentScene(showIntro ? "test-intro" : "test", Transition.none());
       return;
     }
 
@@ -836,6 +929,7 @@ export class FaceNamePairs extends Game {
     this.addTrialData("edit_distance", null);
     this.addTrialData("is_correct_strict", null);
     this.addTrialData("is_correct_lenient", null);
+    this.addTrialData("skipped", null);
     this.addTrialData("rt_ms", null);
     this.addTrialData("response_timestamp", null);
     this.trialComplete();
@@ -1011,6 +1105,30 @@ export class FaceNamePairs extends Game {
       }),
     );
 
+    // Typed mode: explicit pass option so participants never have to guess
+    const skipBg = new Shape({
+      name: "tSkipBtn",
+      rect: { width: 170, height: 44 },
+      cornerRadius: 22,
+      fillColor: [235, 235, 240, 1],
+      strokeColor: OPTION_BORDER,
+      lineWidth: 1,
+      position: { x: 200, y: this._py(545) },
+      isUserInteractionEnabled: true,
+      zPosition: 10,
+    });
+    scene.addChild(skipBg);
+    scene.addChild(
+      new Label({
+        name: "tSkipLabel",
+        text: "I don't know",
+        fontSize: 16,
+        fontColor: TEXT_SECONDARY,
+        position: { x: 200, y: this._py(545) },
+        zPosition: 11,
+      }),
+    );
+
     // ── Choice mode: 4 option buttons
     for (let i = 0; i < 4; i++) {
       const yPos = this._py(420 + i * 78);
@@ -1047,8 +1165,14 @@ export class FaceNamePairs extends Game {
     submitBg.onTapDown(() => {
       self._handleTypedSubmit();
     });
+    skipBg.onTapDown(() => {
+      self._handleTypedSkip();
+    });
 
     scene.onAppear(() => {
+      self._roundStrict = 0;
+      self._roundLenient = 0;
+      self._roundMissed = [];
       self._showTestTrial(0);
     });
   }
@@ -1056,8 +1180,11 @@ export class FaceNamePairs extends Game {
   _setTypedControlsVisible(visible) {
     this._getNode("tSubmitBtn").hidden = !visible;
     this._getNode("tSubmitLabel").hidden = !visible;
-    const btn = this._getNode("tSubmitBtn");
-    btn.isUserInteractionEnabled = visible;
+    this._getNode("tSubmitBtn").isUserInteractionEnabled = visible;
+    const skipVisible = visible && this.getParameter("allow_skip");
+    this._getNode("tSkipBtn").hidden = !skipVisible;
+    this._getNode("tSkipLabel").hidden = !skipVisible;
+    this._getNode("tSkipBtn").isUserInteractionEnabled = skipVisible;
   }
 
   _setChoiceControlsVisible(visible) {
@@ -1076,7 +1203,11 @@ export class FaceNamePairs extends Game {
     if (index >= total) {
       this._hideFace();
       this._hideInput();
-      this.presentScene("complete", Transition.none());
+      if (this._criterionUnmet()) {
+        this._beginNextRound();
+      } else {
+        this.presentScene("complete", Transition.none());
+      }
       return;
     }
 
@@ -1126,12 +1257,17 @@ export class FaceNamePairs extends Game {
   _handleTypedSubmit() {
     if (this._responded) return;
     if (this.getParameter("response_mode") !== "typed") return;
+    const raw = this._inputEl ? this._inputEl.value : "";
+    if (!raw.trim() && this.getParameter("allow_skip")) {
+      // Empty submits are ignored while the explicit skip button exists —
+      // "I don't know" is the intentional way to pass without an answer.
+      return;
+    }
     this._responded = true;
 
     const pair = this._testSeq[this._currentTestIndex];
     const rt = Timer.now() - this._testOnsetTime;
     const responseTimestamp = performance.now();
-    const raw = this._inputEl ? this._inputEl.value : "";
     const normalized = normalizeName(raw);
     const target = normalizeName(pair.name);
     const distance = levenshtein(normalized, target);
@@ -1150,6 +1286,7 @@ export class FaceNamePairs extends Game {
       editDistance: distance,
       isStrict,
       isLenient,
+      skipped: false,
       rt,
       responseTimestamp,
     });
@@ -1159,6 +1296,39 @@ export class FaceNamePairs extends Game {
         ? "Correct!"
         : `The name was ${pair.name}`;
       this._getNode("tFeedback").fontColor = isLenient ? GREEN : RED;
+    }
+    this._advanceTestAfterDelay();
+  }
+
+  _handleTypedSkip() {
+    if (this._responded) return;
+    if (this.getParameter("response_mode") !== "typed") return;
+    if (!this.getParameter("allow_skip")) return;
+    this._responded = true;
+
+    const pair = this._testSeq[this._currentTestIndex];
+    const rt = Timer.now() - this._testOnsetTime;
+    const responseTimestamp = performance.now();
+
+    this._setTypedControlsVisible(false);
+    this._hideInput();
+
+    this._finishTestTrial(pair, {
+      raw: null,
+      normalized: null,
+      optionsJson: null,
+      selectedIndex: null,
+      editDistance: null,
+      isStrict: false,
+      isLenient: false,
+      skipped: true,
+      rt,
+      responseTimestamp,
+    });
+
+    if (this.getParameter("feedback_enabled")) {
+      this._getNode("tFeedback").text = `The name was ${pair.name}`;
+      this._getNode("tFeedback").fontColor = RED;
     }
     this._advanceTestAfterDelay();
   }
@@ -1201,6 +1371,7 @@ export class FaceNamePairs extends Game {
       editDistance: null,
       isStrict: isCorrect,
       isLenient: isCorrect,
+      skipped: false,
       rt,
       responseTimestamp,
     });
@@ -1209,8 +1380,9 @@ export class FaceNamePairs extends Game {
   }
 
   _finishTestTrial(pair, r) {
-    if (r.isStrict) this._correctStrict++;
-    if (r.isLenient) this._correctLenient++;
+    if (r.isStrict) this._roundStrict++;
+    if (r.isLenient) this._roundLenient++;
+    else this._roundMissed.push(pair);
 
     this._recordCommonFields("test", pair);
     this.addTrialData("study_position", null);
@@ -1224,6 +1396,7 @@ export class FaceNamePairs extends Game {
     this.addTrialData("edit_distance", r.editDistance);
     this.addTrialData("is_correct_strict", r.isStrict);
     this.addTrialData("is_correct_lenient", r.isLenient);
+    this.addTrialData("skipped", r.skipped === true);
     this.addTrialData("rt_ms", Math.round(r.rt));
     this.addTrialData("response_timestamp", r.responseTimestamp);
     this.trialComplete();
@@ -1245,6 +1418,70 @@ export class FaceNamePairs extends Game {
       ]),
       "test-advance",
     );
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // Round intro (criterion mode: shown before each extra round)
+  // ═══════════════════════════════════════════════════════════
+
+  _buildRoundIntroScene() {
+    const scene = new Scene({ name: "round-intro", backgroundColor: SCENE_BG });
+    this.addScene(scene);
+
+    scene.addChild(
+      new Label({
+        text: "Let's Practice Again",
+        fontSize: 28,
+        fontColor: TEXT_PRIMARY,
+        position: { x: 200, y: this._py(240) },
+      }),
+    );
+    scene.addChild(
+      new Label({
+        name: "riBody",
+        text: "",
+        fontSize: 18,
+        fontColor: TEXT_SECONDARY,
+        position: { x: 200, y: this._py(370) },
+        preferredMaxLayoutWidth: 320,
+      }),
+    );
+
+    const btnBg = new Shape({
+      rect: { width: 160, height: 50 },
+      cornerRadius: 25,
+      fillColor: GREEN,
+      position: { x: 200, y: this._py(540) },
+      isUserInteractionEnabled: true,
+      zPosition: 10,
+    });
+    scene.addChild(btnBg);
+    scene.addChild(
+      new Label({
+        text: "Continue",
+        fontSize: 20,
+        fontColor: WHITE,
+        position: { x: 200, y: this._py(540) },
+        zPosition: 11,
+      }),
+    );
+
+    const self = this;
+    btnBg.onTapDown(() => {
+      self.presentScene("study", Transition.none());
+    });
+
+    scene.onAppear(() => {
+      self._hideFace();
+      self._hideInput();
+      const restudyN = self._studySeq.length;
+      self._getNode("riBody").text =
+        `You remembered ${self._lastRoundLenient} of ` +
+        `${self._lastRoundTotal} names.\n\n` +
+        `You will now study ${restudyN} ` +
+        `${restudyN === 1 ? "pair" : "pairs"} again,\n` +
+        `then take the memory test once more.`;
+    });
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -1303,7 +1540,7 @@ export class FaceNamePairs extends Game {
         self._getNode("completeScore").text = "";
       } else {
         self._getNode("completeScore").text =
-          `You recalled ${self._correctStrict} of ${tested} names.`;
+          `You recalled ${self._roundStrict} of ${tested} names.`;
       }
 
       scene.run(

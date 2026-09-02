@@ -87,6 +87,10 @@ assessment.setParameters({
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 const callbackUrl = params.get("callback_url");
+// Optional participant identifier, echoed into the results payload. Stripped
+// from the forwarded params so the game engine does not see an unknown key.
+const pid = params.get("pid");
+context.urlParams.delete("pid");
 const numberOfTrials = params.get("number_of_trials");
 
 // Override number_of_trials from URL param if provided
@@ -136,7 +140,9 @@ session.onEnd(async () => {
       },
       body: JSON.stringify({
         token,
+        pid,
         data: {
+          pid,
           trials: allTrialData
         }
       }),

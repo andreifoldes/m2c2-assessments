@@ -26,6 +26,12 @@ export const WRAPPER_PARAM_DOCS = {
     default: "—",
     description: "URL to POST results to when the assessment ends.",
   },
+  pid: {
+    type: "string",
+    default: "—",
+    description:
+      "Optional participant identifier. Echoed verbatim into the results: top-level `pid` next to `token` in the callback POST, inside `data`, and in the embed-mode `postMessage`. Useful when the callback endpoint does not mint per-participant tokens, or to link multi-session designs (e.g. FNAME-Pairs learning vs. delayed) from the URL alone.",
+  },
   show_end_screen: {
     type: "string",
     default: "true",
@@ -159,6 +165,68 @@ export const TASKS = [
       "A face–name paired-associate memory task designed for sleep-dependent memory consolidation studies. Participants study 20 face–name pairs from the Chicago Face Database, take an immediate cued-recall test, and — in a separate session launched hours later — a delayed cued-recall test on a deterministic seeded subset of the pairs. Pair identity, subsets, lure sets, and presentation orders are all reproducible from URL parameters.",
     reference:
       "[Ma, Correll & Wittenbrink, 2015](https://doi.org/10.3758/s13428-014-0532-5) (stimuli) — custom implementation",
+    extraSections: [
+      {
+        title: "Stimuli: Chicago Face Database",
+        body: [
+          "Face photographs come from the **[Chicago Face Database (CFD)](https://www.chicagofaces.org/)**:",
+          "",
+          "> Ma, D. S., Correll, J., & Wittenbrink, B. (2015). The Chicago Face Database: A free stimulus set of faces and norming data. *Behavior Research Methods, 47*(4), 1122–1135. [doi:10.3758/s13428-014-0532-5](https://doi.org/10.3758/s13428-014-0532-5)",
+          "",
+          "80 neutral-expression targets with a rated age of 18–40 were selected using the CFD's published norming data and organized into 4 fixed lists of 20 face–name pairs. Lists are balanced for race (5 each of Asian, Black, Latino/a, and White targets per list), gender (10 male / 10 female per list), rated age, and rated attractiveness — verified by one-way ANOVA across lists (see [`tools/stimulus_report.md`](https://github.com/andreifoldes/m2c2-assessments/blob/main/assessments/fname-pairs/tools/stimulus_report.md)). Each face is paired with a common US first name matched to the target's gender; within a list, all names differ by a Levenshtein distance of at least 3 to keep typed responses discriminable.",
+          "",
+          "Per the CFD's usage terms, the images are **not redistributed in this repository**. To run the task, [request access to the CFD](https://www.chicagofaces.org/download/), regenerate the image set with the bundled build script (`assessments/fname-pairs/tools/build_stimuli.py`), host the images privately, and pass your host via the `stimuli_base_url` URL parameter (see the repo README, *FNAME-Pairs → Private image hosting*).",
+        ].join("\n"),
+      },
+    ],
+    extraExamples: [
+      {
+        comment:
+          "Use case A — one participant: learn a 20-pair list, then delayed recall of ALL pairs",
+      },
+      {
+        comment:
+          "A1 · evening: learning + immediate recall on list 2 (assign each participant one list, 1-4)",
+        query:
+          "phase=learning&list=2&response_mode=typed&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+      {
+        comment:
+          "A2 · morning, same participant: delayed recall of all 20 pairs (same list=2; omitting subset params tests the full list)",
+        query:
+          "phase=delayed&list=2&response_mode=typed&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+      {
+        comment:
+          "Use case B — one participant: learn a 20-pair list, then recall one half now and the other half later",
+      },
+      {
+        comment: "B1 · evening: learning + immediate recall on list 1",
+        query:
+          "phase=learning&list=1&response_mode=typed&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+      {
+        comment:
+          "B2 · morning, same participant: delayed recall of a seeded half (10 of 20 pairs; list/subset_size/subset_seed must stay fixed for this participant)",
+        query:
+          "phase=delayed&list=1&response_mode=typed&subset_size=10&subset_seed=42&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+      {
+        comment:
+          "B3 · next evening, same participant: delayed recall of the OTHER half (same seed + subset_complement=1 selects exactly the 10 pairs B2 did not test)",
+        query:
+          "phase=delayed&list=1&response_mode=typed&subset_size=10&subset_seed=42&subset_complement=1&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+      {
+        comment: "Optional add-on for any learning session",
+      },
+      {
+        comment:
+          "Learning-to-criterion: repeat study-test rounds until 60% immediate recall (max 3 rounds)",
+        query:
+          "phase=learning&list=1&criterion_prop=0.6&max_learning_rounds=3&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+    ],
   },
   {
     id: "mvlt",
