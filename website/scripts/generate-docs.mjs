@@ -301,11 +301,30 @@ function renderTaskPage(task, position) {
   out.push("");
 
   // Task-specific prose sections from tasks.config.mjs (extraSections).
+  // `includeFile: {file, heading}` appends a `## heading` section extracted
+  // verbatim from a committed markdown file (path relative to the repo root),
+  // so generated numbers (e.g. balance reports) never go stale in the docs.
   for (const section of task.extraSections ?? []) {
     out.push(`## ${section.title}`);
     out.push("");
-    out.push(section.body);
-    out.push("");
+    if (section.body) {
+      out.push(section.body);
+      out.push("");
+    }
+    if (section.includeFile) {
+      const { file, heading } = section.includeFile;
+      const text = fs.readFileSync(path.join(REPO_ROOT, file), "utf8");
+      const lines = text.split("\n");
+      const start = lines.findIndex((l) => l.trim() === `## ${heading}`);
+      if (start === -1) {
+        warn(`extraSections includeFile: heading "## ${heading}" not found in ${file}`);
+      } else {
+        let end = lines.slice(start + 1).findIndex((l) => l.startsWith("## "));
+        end = end === -1 ? lines.length : start + 1 + end;
+        out.push(lines.slice(start + 1, end).join("\n").trim());
+        out.push("");
+      }
+    }
   }
 
   out.push("## Example URL commands");

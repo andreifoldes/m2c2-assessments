@@ -173,10 +173,20 @@ export const TASKS = [
           "",
           "> Ma, D. S., Correll, J., & Wittenbrink, B. (2015). The Chicago Face Database: A free stimulus set of faces and norming data. *Behavior Research Methods, 47*(4), 1122–1135. [doi:10.3758/s13428-014-0532-5](https://doi.org/10.3758/s13428-014-0532-5)",
           "",
-          "80 neutral-expression targets with a rated age of 18–40 were selected using the CFD's published norming data and organized into 4 fixed lists of 20 face–name pairs. Lists are balanced for race (5 each of Asian, Black, Latino/a, and White targets per list), gender (10 male / 10 female per list), rated age, and rated attractiveness — verified by one-way ANOVA across lists (see [`tools/stimulus_report.md`](https://github.com/andreifoldes/m2c2-assessments/blob/main/assessments/fname-pairs/tools/stimulus_report.md)). Each face is paired with a common US first name matched to the target's gender; within a list, all names differ by a Levenshtein distance of at least 3 to keep typed responses discriminable.",
+          "80 neutral-expression targets with a rated age of 18–40 were selected using the CFD's published norming data and organized into 4 fixed lists of 20 face–name pairs. Lists are exactly matched on race (5 each of Asian, Black, Latino/a, and White targets per list) and gender (10 male / 10 female per list), and equated on rated age and attractiveness — see *List balance* below. Each face is paired with a common US first name matched to the target's gender; within a list, all names differ by a Levenshtein distance of at least 3 to keep typed responses discriminable.",
           "",
           "Per the CFD's usage terms, the images are **not redistributed in this repository**. To run the task, [request access to the CFD](https://www.chicagofaces.org/download/), regenerate the image set with the bundled build script (`assessments/fname-pairs/tools/build_stimuli.py`), host the images privately, and pass your host via the `stimuli_base_url` URL parameter (see the repo README, *FNAME-Pairs → Private image hosting*).",
         ].join("\n"),
+      },
+      {
+        title: "List balance",
+        body: [
+          "The 4 lists are a fixed partition of the 80 selected targets, so a non-significant ANOVA would be weak evidence of comparability (absence of evidence, not evidence of equivalence). Instead, after an initial snake-draft deal, the build script optimizes the partition with within-cell swaps (which preserve the exact race × gender composition) against descriptive equivalence criteria, and reports inferential equivalence tests alongside. The section below is extracted verbatim from the committed [`tools/stimulus_report.md`](https://github.com/andreifoldes/m2c2-assessments/blob/main/assessments/fname-pairs/tools/stimulus_report.md), so the numbers always reflect the deployed `lists.json`.",
+        ].join("\n"),
+        includeFile: {
+          file: "assessments/fname-pairs/tools/stimulus_report.md",
+          heading: "Balance verification",
+        },
       },
     ],
     extraExamples: [
