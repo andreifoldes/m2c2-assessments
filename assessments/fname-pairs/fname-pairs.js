@@ -42,10 +42,10 @@ export class FaceNamePairs extends Game {
           "delayed (cued recall only, launched as a separate session)",
       },
       response_mode: {
-        default: "typed",
+        default: "choice",
         type: "string",
         description:
-          "typed (free recall via keyboard) | choice (4-alternative forced choice)",
+          "choice (4-alternative forced choice) | typed (free recall via keyboard)",
       },
       list_id: {
         default: 1,

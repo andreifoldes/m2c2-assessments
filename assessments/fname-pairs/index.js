@@ -21,7 +21,7 @@ const pid = params.get("pid");
 const debugMode = !token || !callbackUrl;
 
 const phase = params.get("phase") === "delayed" ? "delayed" : "learning";
-const responseMode = params.get("response_mode") === "choice" ? "choice" : "typed";
+const responseMode = params.get("response_mode") === "typed" ? "typed" : "choice";
 const listId = Math.min(4, Math.max(1, parseInt(params.get("list") || "1", 10) || 1));
 const subsetSize = parseInt(params.get("subset_size") || "20", 10) || 20;
 const subsetSeed = parseInt(params.get("subset_seed") || "0", 10) || 0;

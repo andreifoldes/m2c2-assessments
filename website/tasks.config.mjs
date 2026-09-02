@@ -173,10 +173,20 @@ export const TASKS = [
           "",
           "> Ma, D. S., Correll, J., & Wittenbrink, B. (2015). The Chicago Face Database: A free stimulus set of faces and norming data. *Behavior Research Methods, 47*(4), 1122–1135. [doi:10.3758/s13428-014-0532-5](https://doi.org/10.3758/s13428-014-0532-5)",
           "",
-          "80 neutral-expression targets with a rated age of 18–40 were selected using the CFD's published norming data and organized into 4 fixed lists of 20 face–name pairs. Lists are balanced for race (5 each of Asian, Black, Latino/a, and White targets per list), gender (10 male / 10 female per list), rated age, and rated attractiveness — verified by one-way ANOVA across lists (see [`tools/stimulus_report.md`](https://github.com/andreifoldes/m2c2-assessments/blob/main/assessments/fname-pairs/tools/stimulus_report.md)). Each face is paired with a common US first name matched to the target's gender; within a list, all names differ by a Levenshtein distance of at least 3 to keep typed responses discriminable.",
+          "80 neutral-expression targets with a rated age of 18–40 were selected using the CFD's published norming data and organized into 4 fixed lists of 20 face–name pairs. Lists are exactly matched on race (5 each of Asian, Black, Latino/a, and White targets per list) and gender (10 male / 10 female per list), and equated on rated age and attractiveness — see *List balance* below. Each face is paired with a common US first name matched to the target's gender; within a list, all names differ by a Levenshtein distance of at least 3 to keep typed responses discriminable.",
           "",
           "Per the CFD's usage terms, the images are **not redistributed in this repository**. To run the task, [request access to the CFD](https://www.chicagofaces.org/download/), regenerate the image set with the bundled build script (`assessments/fname-pairs/tools/build_stimuli.py`), host the images privately, and pass your host via the `stimuli_base_url` URL parameter (see the repo README, *FNAME-Pairs → Private image hosting*).",
         ].join("\n"),
+      },
+      {
+        title: "List balance",
+        body: [
+          "The 4 lists are a fixed partition of the 80 selected targets, so a non-significant ANOVA would be weak evidence of comparability (absence of evidence, not evidence of equivalence). Instead, after an initial snake-draft deal, the build script optimizes the partition with within-cell swaps (which preserve the exact race × gender composition) against descriptive equivalence criteria, and reports inferential equivalence tests alongside. The section below is extracted verbatim from the committed [`tools/stimulus_report.md`](https://github.com/andreifoldes/m2c2-assessments/blob/main/assessments/fname-pairs/tools/stimulus_report.md), so the numbers always reflect the deployed `lists.json`.",
+        ].join("\n"),
+        includeFile: {
+          file: "assessments/fname-pairs/tools/stimulus_report.md",
+          heading: "Balance verification",
+        },
       },
     ],
     extraExamples: [
@@ -188,13 +198,13 @@ export const TASKS = [
         comment:
           "A1 · evening: learning + immediate recall on list 2 (assign each participant one list, 1-4)",
         query:
-          "phase=learning&list=2&response_mode=typed&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=learning&list=2&response_mode=choice&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment:
           "A2 · morning, same participant: delayed recall of all 20 pairs (same list=2; omitting subset params tests the full list)",
         query:
-          "phase=delayed&list=2&response_mode=typed&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=delayed&list=2&response_mode=choice&pid=P001&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment:
@@ -203,19 +213,19 @@ export const TASKS = [
       {
         comment: "B1 · evening: learning + immediate recall on list 1",
         query:
-          "phase=learning&list=1&response_mode=typed&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=learning&list=1&response_mode=choice&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment:
           "B2 · morning, same participant: delayed recall of a seeded half (10 of 20 pairs; list/subset_size/subset_seed must stay fixed for this participant)",
         query:
-          "phase=delayed&list=1&response_mode=typed&subset_size=10&subset_seed=42&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=delayed&list=1&response_mode=choice&subset_size=10&subset_seed=42&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment:
           "B3 · next evening, same participant: delayed recall of the OTHER half (same seed + subset_complement=1 selects exactly the 10 pairs B2 did not test)",
         query:
-          "phase=delayed&list=1&response_mode=typed&subset_size=10&subset_seed=42&subset_complement=1&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
+          "phase=delayed&list=1&response_mode=choice&subset_size=10&subset_seed=42&subset_complement=1&pid=P002&stimuli_base_url=<STIMULI_BASE_URL>",
       },
       {
         comment: "Optional add-on for any learning session",
