@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "generated_note": "build_stimuli.py seed=42 on 2026-09-02; Chicago Face Database neutral images, rated age 18-40 (Ma, Correll, & Wittenbrink, 2015)",
+  "version": 3,
+  "generated_note": "build_stimuli.py seed=42 on 2026-09-02; Chicago Face Database neutral images, rated age 18-40 (Ma, Correll, & Wittenbrink, 2015); names from ONS England & Wales baby-name ranks 2006-2025",
   "eligible_pool": 554,
   "lists": [
     {
@@ -14,7 +14,8 @@
           "gender": "M",
           "age_rated": 37.58,
           "attractive": 2.42,
-          "name": "Jeffrey"
+          "name": "Oliver",
+          "name_rank_20y": 2.05
         },
         {
           "pair_id": 1,
@@ -24,7 +25,8 @@
           "gender": "F",
           "age_rated": 29.62,
           "attractive": 2.96,
-          "name": "Nancy"
+          "name": "Emma",
+          "name_rank_20y": 54.05
         },
         {
           "pair_id": 2,
@@ -34,7 +36,8 @@
           "gender": "M",
           "age_rated": 33.33,
           "attractive": 2.12,
-          "name": "Richard"
+          "name": "Alexander",
+          "name_rank_20y": 25.15
         },
         {
           "pair_id": 3,
@@ -44,7 +47,8 @@
           "gender": "F",
           "age_rated": 30.07,
           "attractive": 2.77,
-          "name": "Melissa"
+          "name": "Poppy",
+          "name_rank_20y": 14.75
         },
         {
           "pair_id": 4,
@@ -54,7 +58,8 @@
           "gender": "F",
           "age_rated": 30.75,
           "attractive": 2.86,
-          "name": "Amanda"
+          "name": "Maisie",
+          "name_rank_20y": 42.2
         },
         {
           "pair_id": 5,
@@ -64,7 +69,8 @@
           "gender": "F",
           "age_rated": 27.2,
           "attractive": 3.48,
-          "name": "Brenda"
+          "name": "Harriet",
+          "name_rank_20y": 64.7
         },
         {
           "pair_id": 6,
@@ -74,7 +80,8 @@
           "gender": "F",
           "age_rated": 30.14,
           "attractive": 3.17,
-          "name": "Emily"
+          "name": "Charlotte",
+          "name_rank_20y": 18.85
         },
         {
           "pair_id": 7,
@@ -84,7 +91,8 @@
           "gender": "F",
           "age_rated": 26.46,
           "attractive": 3.79,
-          "name": "Linda"
+          "name": "Lily",
+          "name_rank_20y": 7.3
         },
         {
           "pair_id": 8,
@@ -94,7 +102,8 @@
           "gender": "M",
           "age_rated": 20.82,
           "attractive": 3.65,
-          "name": "Brian"
+          "name": "Logan",
+          "name_rank_20y": 41.35
         },
         {
           "pair_id": 9,
@@ -104,7 +113,8 @@
           "gender": "M",
           "age_rated": 25.32,
           "attractive": 3.43,
-          "name": "Jerry"
+          "name": "Isaac",
+          "name_rank_20y": 30.5
         },
         {
           "pair_id": 10,
@@ -114,7 +124,8 @@
           "gender": "F",
           "age_rated": 19.91,
           "attractive": 5.09,
-          "name": "Kathleen"
+          "name": "Freya",
+          "name_rank_20y": 16.35
         },
         {
           "pair_id": 11,
@@ -124,7 +135,8 @@
           "gender": "F",
           "age_rated": 24.7,
           "attractive": 3.81,
-          "name": "Laura"
+          "name": "Sophia",
+          "name_rank_20y": 18.5
         },
         {
           "pair_id": 12,
@@ -134,7 +146,8 @@
           "gender": "M",
           "age_rated": 27.27,
           "attractive": 2.69,
-          "name": "Aaron"
+          "name": "Joseph",
+          "name_rank_20y": 28.95
         },
         {
           "pair_id": 13,
@@ -144,7 +157,8 @@
           "gender": "M",
           "age_rated": 25.88,
           "attractive": 3.08,
-          "name": "Tyler"
+          "name": "Ethan",
+          "name_rank_20y": 25.95
         },
         {
           "pair_id": 14,
@@ -154,7 +168,8 @@
           "gender": "F",
           "age_rated": 29.76,
           "attractive": 3.1,
-          "name": "Jessica"
+          "name": "Chloe",
+          "name_rank_20y": 31.3
         },
         {
           "pair_id": 15,
@@ -164,7 +179,8 @@
           "gender": "F",
           "age_rated": 31.88,
           "attractive": 2.96,
-          "name": "Amy"
+          "name": "Maya",
+          "name_rank_20y": 45.2
         },
         {
           "pair_id": 16,
@@ -174,7 +190,8 @@
           "gender": "M",
           "age_rated": 24.18,
           "attractive": 3.33,
-          "name": "James"
+          "name": "Zachary",
+          "name_rank_20y": 56.65
         },
         {
           "pair_id": 17,
@@ -184,7 +201,8 @@
           "gender": "M",
           "age_rated": 27.92,
           "attractive": 3.24,
-          "name": "Andrew"
+          "name": "Noah",
+          "name_rank_20y": 14.1
         },
         {
           "pair_id": 18,
@@ -194,7 +212,8 @@
           "gender": "M",
           "age_rated": 21.42,
           "attractive": 4.28,
-          "name": "Ronald"
+          "name": "Henry",
+          "name_rank_20y": 20.25
         },
         {
           "pair_id": 19,
@@ -204,7 +223,8 @@
           "gender": "M",
           "age_rated": 27.21,
           "attractive": 3.5,
-          "name": "William"
+          "name": "James",
+          "name_rank_20y": 18.35
         }
       ]
     },
@@ -219,7 +239,8 @@
           "gender": "F",
           "age_rated": 33.34,
           "attractive": 2.27,
-          "name": "Karen"
+          "name": "Willow",
+          "name_rank_20y": 61.85
         },
         {
           "pair_id": 1,
@@ -229,7 +250,8 @@
           "gender": "M",
           "age_rated": 28.69,
           "attractive": 3.21,
-          "name": "Joseph"
+          "name": "Alfie",
+          "name_rank_20y": 12.15
         },
         {
           "pair_id": 2,
@@ -239,7 +261,8 @@
           "gender": "F",
           "age_rated": 27.93,
           "attractive": 3.38,
-          "name": "Barbara"
+          "name": "Erin",
+          "name_rank_20y": 46.1
         },
         {
           "pair_id": 3,
@@ -249,7 +272,8 @@
           "gender": "F",
           "age_rated": 25.87,
           "attractive": 3.74,
-          "name": "Sharon"
+          "name": "Florence",
+          "name_rank_20y": 36.2
         },
         {
           "pair_id": 4,
@@ -259,7 +283,8 @@
           "gender": "F",
           "age_rated": 25.23,
           "attractive": 3.73,
-          "name": "Helen"
+          "name": "Sienna",
+          "name_rank_20y": 31.05
         },
         {
           "pair_id": 5,
@@ -269,7 +294,8 @@
           "gender": "M",
           "age_rated": 25.12,
           "attractive": 3.12,
-          "name": "Kevin"
+          "name": "Lucas",
+          "name_rank_20y": 27.5
         },
         {
           "pair_id": 6,
@@ -279,7 +305,8 @@
           "gender": "M",
           "age_rated": 24.12,
           "attractive": 3.23,
-          "name": "Thomas"
+          "name": "Thomas",
+          "name_rank_20y": 11.55
         },
         {
           "pair_id": 7,
@@ -289,7 +316,8 @@
           "gender": "M",
           "age_rated": 24.93,
           "attractive": 3.2,
-          "name": "Frank"
+          "name": "Max",
+          "name_rank_20y": 30.0
         },
         {
           "pair_id": 8,
@@ -299,7 +327,8 @@
           "gender": "F",
           "age_rated": 26.85,
           "attractive": 3.73,
-          "name": "Heather"
+          "name": "Scarlett",
+          "name_rank_20y": 40.3
         },
         {
           "pair_id": 9,
@@ -309,7 +338,8 @@
           "gender": "M",
           "age_rated": 35.19,
           "attractive": 2.19,
-          "name": "Jacob"
+          "name": "Joshua",
+          "name_rank_20y": 19.3
         },
         {
           "pair_id": 10,
@@ -319,7 +349,8 @@
           "gender": "F",
           "age_rated": 21.55,
           "attractive": 4.62,
-          "name": "Carol"
+          "name": "Daisy",
+          "name_rank_20y": 21.5
         },
         {
           "pair_id": 11,
@@ -329,7 +360,8 @@
           "gender": "F",
           "age_rated": 22.34,
           "attractive": 4.21,
-          "name": "Shirley"
+          "name": "Grace",
+          "name_rank_20y": 12.05
         },
         {
           "pair_id": 12,
@@ -339,7 +371,8 @@
           "gender": "M",
           "age_rated": 33.03,
           "attractive": 2.34,
-          "name": "David"
+          "name": "Harrison",
+          "name_rank_20y": 39.0
         },
         {
           "pair_id": 13,
@@ -349,7 +382,8 @@
           "gender": "M",
           "age_rated": 20.89,
           "attractive": 4.04,
-          "name": "Steven"
+          "name": "Muhammad",
+          "name_rank_20y": 15.75
         },
         {
           "pair_id": 14,
@@ -359,7 +393,8 @@
           "gender": "M",
           "age_rated": 28.67,
           "attractive": 2.79,
-          "name": "Brandon"
+          "name": "Archie",
+          "name_rank_20y": 19.05
         },
         {
           "pair_id": 15,
@@ -369,7 +404,8 @@
           "gender": "F",
           "age_rated": 30.35,
           "attractive": 2.81,
-          "name": "Ashley"
+          "name": "Lola",
+          "name_rank_20y": 51.85
         },
         {
           "pair_id": 16,
@@ -379,7 +415,8 @@
           "gender": "F",
           "age_rated": 27.28,
           "attractive": 3.59,
-          "name": "Alice"
+          "name": "Ava",
+          "name_rank_20y": 11.3
         },
         {
           "pair_id": 17,
@@ -389,7 +426,8 @@
           "gender": "M",
           "age_rated": 27.42,
           "attractive": 3.12,
-          "name": "Patrick"
+          "name": "Reuben",
+          "name_rank_20y": 55.8
         },
         {
           "pair_id": 18,
@@ -399,7 +437,8 @@
           "gender": "F",
           "age_rated": 25.69,
           "attractive": 3.93,
-          "name": "Anna"
+          "name": "Amelia",
+          "name_rank_20y": 3.75
         },
         {
           "pair_id": 19,
@@ -409,7 +448,8 @@
           "gender": "M",
           "age_rated": 35.37,
           "attractive": 2.49,
-          "name": "Scott"
+          "name": "Dylan",
+          "name_rank_20y": 40.0
         }
       ]
     },
@@ -424,7 +464,8 @@
           "gender": "M",
           "age_rated": 24.77,
           "attractive": 3.48,
-          "name": "Robert"
+          "name": "Adam",
+          "name_rank_20y": 36.1
         },
         {
           "pair_id": 1,
@@ -434,7 +475,8 @@
           "gender": "M",
           "age_rated": 36.21,
           "attractive": 2.5,
-          "name": "Jason"
+          "name": "Harry",
+          "name_rank_20y": 6.65
         },
         {
           "pair_id": 2,
@@ -444,7 +486,8 @@
           "gender": "M",
           "age_rated": 21.05,
           "attractive": 3.81,
-          "name": "Daniel"
+          "name": "Oscar",
+          "name_rank_20y": 15.15
         },
         {
           "pair_id": 3,
@@ -454,7 +497,8 @@
           "gender": "M",
           "age_rated": 28.75,
           "attractive": 3.29,
-          "name": "Edward"
+          "name": "Finley",
+          "name_rank_20y": 31.8
         },
         {
           "pair_id": 4,
@@ -464,7 +508,8 @@
           "gender": "M",
           "age_rated": 24.68,
           "attractive": 3.52,
-          "name": "Paul"
+          "name": "Jacob",
+          "name_rank_20y": 15.15
         },
         {
           "pair_id": 5,
@@ -474,7 +519,8 @@
           "gender": "M",
           "age_rated": 24.74,
           "attractive": 3.41,
-          "name": "Mark"
+          "name": "Arthur",
+          "name_rank_20y": 43.0
         },
         {
           "pair_id": 6,
@@ -484,7 +530,8 @@
           "gender": "F",
           "age_rated": 24.0,
           "attractive": 4.07,
-          "name": "Deborah"
+          "name": "Emily",
+          "name_rank_20y": 11.05
         },
         {
           "pair_id": 7,
@@ -494,7 +541,8 @@
           "gender": "M",
           "age_rated": 25.69,
           "attractive": 3.09,
-          "name": "Gregory"
+          "name": "George",
+          "name_rank_20y": 6.9
         },
         {
           "pair_id": 8,
@@ -504,7 +552,8 @@
           "gender": "F",
           "age_rated": 25.1,
           "attractive": 3.96,
-          "name": "Rebecca"
+          "name": "Alice",
+          "name_rank_20y": 35.2
         },
         {
           "pair_id": 9,
@@ -514,7 +563,8 @@
           "gender": "F",
           "age_rated": 24.04,
           "attractive": 4.13,
-          "name": "Sandra"
+          "name": "Matilda",
+          "name_rank_20y": 37.35
         },
         {
           "pair_id": 10,
@@ -524,7 +574,8 @@
           "gender": "F",
           "age_rated": 36.8,
           "attractive": 1.72,
-          "name": "Janet"
+          "name": "Elizabeth",
+          "name_rank_20y": 48.5
         },
         {
           "pair_id": 11,
@@ -534,7 +585,8 @@
           "gender": "F",
           "age_rated": 27.62,
           "attractive": 3.69,
-          "name": "Emma"
+          "name": "Ruby",
+          "name_rank_20y": 20.2
         },
         {
           "pair_id": 12,
@@ -544,7 +596,8 @@
           "gender": "F",
           "age_rated": 28.22,
           "attractive": 3.15,
-          "name": "Gloria"
+          "name": "Esme",
+          "name_rank_20y": 61.4
         },
         {
           "pair_id": 13,
@@ -554,7 +607,8 @@
           "gender": "F",
           "age_rated": 30.44,
           "attractive": 2.81,
-          "name": "Sarah"
+          "name": "Isla",
+          "name_rank_20y": 15.75
         },
         {
           "pair_id": 14,
@@ -564,7 +618,8 @@
           "gender": "F",
           "age_rated": 29.85,
           "attractive": 2.78,
-          "name": "Donna"
+          "name": "Evelyn",
+          "name_rank_20y": 45.45
         },
         {
           "pair_id": 15,
@@ -574,7 +629,8 @@
           "gender": "M",
           "age_rated": 25.11,
           "attractive": 3.67,
-          "name": "Joshua"
+          "name": "Freddie",
+          "name_rank_20y": 28.7
         },
         {
           "pair_id": 16,
@@ -584,7 +640,8 @@
           "gender": "M",
           "age_rated": 24.82,
           "attractive": 3.27,
-          "name": "Eric"
+          "name": "Theo",
+          "name_rank_20y": 34.65
         },
         {
           "pair_id": 17,
@@ -594,7 +651,8 @@
           "gender": "F",
           "age_rated": 30.76,
           "attractive": 2.68,
-          "name": "Betty"
+          "name": "Olivia",
+          "name_rank_20y": 1.4
         },
         {
           "pair_id": 18,
@@ -604,7 +662,8 @@
           "gender": "F",
           "age_rated": 24.36,
           "attractive": 4.22,
-          "name": "Cynthia"
+          "name": "Rosie",
+          "name_rank_20y": 37.05
         },
         {
           "pair_id": 19,
@@ -614,7 +673,8 @@
           "gender": "M",
           "age_rated": 33.42,
           "attractive": 2.42,
-          "name": "Charles"
+          "name": "Sebastian",
+          "name_rank_20y": 48.0
         }
       ]
     },
@@ -629,7 +689,8 @@
           "gender": "M",
           "age_rated": 36.48,
           "attractive": 2.45,
-          "name": "Peter"
+          "name": "Riley",
+          "name_rank_20y": 49.35
         },
         {
           "pair_id": 1,
@@ -639,7 +700,8 @@
           "gender": "F",
           "age_rated": 25.28,
           "attractive": 3.7,
-          "name": "Lisa"
+          "name": "Phoebe",
+          "name_rank_20y": 23.5
         },
         {
           "pair_id": 2,
@@ -649,7 +711,8 @@
           "gender": "M",
           "age_rated": 30.43,
           "attractive": 2.51,
-          "name": "John"
+          "name": "William",
+          "name_rank_20y": 14.2
         },
         {
           "pair_id": 3,
@@ -659,7 +722,8 @@
           "gender": "M",
           "age_rated": 22.64,
           "attractive": 3.89,
-          "name": "Jack"
+          "name": "Edward",
+          "name_rank_20y": 32.6
         },
         {
           "pair_id": 4,
@@ -669,7 +733,8 @@
           "gender": "M",
           "age_rated": 23.37,
           "attractive": 3.51,
-          "name": "Dennis"
+          "name": "Jack",
+          "name_rank_20y": 7.1
         },
         {
           "pair_id": 5,
@@ -679,7 +744,8 @@
           "gender": "F",
           "age_rated": 29.69,
           "attractive": 2.85,
-          "name": "Diane"
+          "name": "Imogen",
+          "name_rank_20y": 42.85
         },
         {
           "pair_id": 6,
@@ -689,7 +755,8 @@
           "gender": "F",
           "age_rated": 23.5,
           "attractive": 4.19,
-          "name": "Nicole"
+          "name": "Millie",
+          "name_rank_20y": 29.25
         },
         {
           "pair_id": 7,
@@ -699,7 +766,8 @@
           "gender": "F",
           "age_rated": 26.9,
           "attractive": 3.44,
-          "name": "Mary"
+          "name": "Ella",
+          "name_rank_20y": 17.4
         },
         {
           "pair_id": 8,
@@ -709,7 +777,8 @@
           "gender": "M",
           "age_rated": 25.92,
           "attractive": 2.96,
-          "name": "Timothy"
+          "name": "Leo",
+          "name_rank_20y": 17.45
         },
         {
           "pair_id": 9,
@@ -719,7 +788,8 @@
           "gender": "M",
           "age_rated": 29.48,
           "attractive": 2.78,
-          "name": "Justin"
+          "name": "Mason",
+          "name_rank_20y": 43.95
         },
         {
           "pair_id": 10,
@@ -729,7 +799,8 @@
           "gender": "F",
           "age_rated": 28.72,
           "attractive": 3.32,
-          "name": "Pamela"
+          "name": "Layla",
+          "name_rank_20y": 49.2
         },
         {
           "pair_id": 11,
@@ -739,7 +810,8 @@
           "gender": "F",
           "age_rated": 26.77,
           "attractive": 3.63,
-          "name": "Dorothy"
+          "name": "Emilia",
+          "name_rank_20y": 59.35
         },
         {
           "pair_id": 12,
@@ -749,7 +821,8 @@
           "gender": "F",
           "age_rated": 24.71,
           "attractive": 3.96,
-          "name": "Angela"
+          "name": "Evie",
+          "name_rank_20y": 17.25
         },
         {
           "pair_id": 13,
@@ -759,7 +832,8 @@
           "gender": "F",
           "age_rated": 23.37,
           "attractive": 4.3,
-          "name": "Carolyn"
+          "name": "Eleanor",
+          "name_rank_20y": 55.5
         },
         {
           "pair_id": 14,
@@ -769,7 +843,8 @@
           "gender": "M",
           "age_rated": 36.63,
           "attractive": 2.42,
-          "name": "George"
+          "name": "Samuel",
+          "name_rank_20y": 31.4
         },
         {
           "pair_id": 15,
@@ -779,7 +854,8 @@
           "gender": "M",
           "age_rated": 29.12,
           "attractive": 2.66,
-          "name": "Ryan"
+          "name": "Daniel",
+          "name_rank_20y": 30.9
         },
         {
           "pair_id": 16,
@@ -789,7 +865,8 @@
           "gender": "F",
           "age_rated": 21.29,
           "attractive": 4.69,
-          "name": "Rachel"
+          "name": "Mia",
+          "name_rank_20y": 10.85
         },
         {
           "pair_id": 17,
@@ -799,7 +876,8 @@
           "gender": "M",
           "age_rated": 31.88,
           "attractive": 2.96,
-          "name": "Raymond"
+          "name": "Charlie",
+          "name_rank_20y": 9.7
         },
         {
           "pair_id": 18,
@@ -809,7 +887,8 @@
           "gender": "F",
           "age_rated": 28.76,
           "attractive": 3.24,
-          "name": "Susan"
+          "name": "Isabella",
+          "name_rank_20y": 10.65
         },
         {
           "pair_id": 19,
@@ -819,7 +898,8 @@
           "gender": "M",
           "age_rated": 27.75,
           "attractive": 2.86,
-          "name": "Samuel"
+          "name": "Benjamin",
+          "name_rank_20y": 33.4
         }
       ]
     }

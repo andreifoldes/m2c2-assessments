@@ -334,7 +334,7 @@ The 4 lists of 20 pairs are fixed in `assessments/fname-pairs/assets/fname-pairs
 
 - 80 CFD targets (neutral expression, rated age 18–40): 20 per race (Asian/Black/Latino/White), 10 male / 10 female per race.
 - Each list: exactly 5 per race and 10M/10F, with rated age and attractiveness equalized across lists by swap optimization on equivalence criteria — all pairwise standardized mean differences |SMD| ≤ 0.05 (negligible-imbalance threshold 0.10, Austin 2009) and variance ratios ≤ 1.07, with distributional overlap (pairwise KS) and TOST equivalence bounds (Lakens 2017) reported in `tools/stimulus_report.md`.
-- Names: 80 unique high-frequency US first names, gender-matched, balanced for length across lists, with within-list pairwise Levenshtein distance ≥ 3 (so lenient typed scoring can never confuse two names in a list).
+- Names: 80 unique England & Wales first names from the ONS Baby names explorer, gender-matched (10 male / 10 female per list), selected by 20-year historical popularity (mean annual rank over the most recent 20 published years) and equated across lists *within gender* by same-gender hill-climb, with within-list pairwise Levenshtein distance ≥ 3 (so lenient typed scoring can never confuse two names in a list).
 
 Regenerate with:
 
@@ -342,6 +342,7 @@ Regenerate with:
 curl -L -o /tmp/cfd.zip https://cfd-website-downloads.s3.us-east-2.amazonaws.com/cfd.zip  # ~1.6 GB, requires CFD access agreement
 uv run assessments/fname-pairs/tools/build_stimuli.py --cfd-zip /tmp/cfd.zip --inspect     # sanity-check workbook detection
 uv run assessments/fname-pairs/tools/build_stimuli.py --cfd-zip /tmp/cfd.zip
+uv run assessments/fname-pairs/tools/build_stimuli.py --reassign-names                     # keep faces; reassign ONS names
 ```
 
 ### Private Image Hosting
