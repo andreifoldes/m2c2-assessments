@@ -1,5 +1,5 @@
 import { Session } from "@m2c2kit/session";
-import { Prices } from "./prices.js?v=3";
+import { Prices, ITEM_IMAGES } from "./prices.js?v=3";
 let webcamModule = null;
 let webgazerModule = null;
 let ambientLightModule = null;
@@ -44,8 +44,55 @@ if (tutorialParam !== null) {
   paramOverrides.show_tutorial =
     tutorialParam !== "false" && tutorialParam !== "0";
 }
+// recognition_feedback=1 or true re-enables green/red accuracy coloring of
+// the chosen button in the recognition phase (off by default).
+const recogFeedbackParam = params.get("recognition_feedback");
+if (recogFeedbackParam !== null) {
+  paramOverrides.show_recognition_feedback =
+    recogFeedbackParam === "1" || recogFeedbackParam === "true";
+}
 if (Object.keys(paramOverrides).length > 0) {
   assessment.setParameters(paramOverrides);
+}
+
+// images=1 or images=true shows item photographs during the tutorial and
+// learning phases. Images are prefetched into data URLs before the session
+// starts so that trial-onset timing is unaffected by network latency.
+const imagesParam = params.get("images");
+const imagesEnabled = imagesParam === "1" || imagesParam === "true";
+if (imagesEnabled) {
+  const stimuliBaseUrl =
+    params.get("stimuli_base_url") || "assets/prices/images/";
+  const entries = await Promise.all(
+    Object.entries(ITEM_IMAGES).map(async ([item, file]) => {
+      try {
+        const resp = await fetch(`${stimuliBaseUrl}${file}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const blob = await resp.blob();
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        return [item, dataUrl];
+      } catch (e) {
+        console.warn(`[Prices] Could not load image for "${item}":`, e);
+        return null;
+      }
+    }),
+  );
+  const loaded = entries.filter(Boolean);
+  if (loaded.length === 0) {
+    console.warn(
+      "[Prices] images=1 but no images could be loaded; running without images.",
+    );
+  } else {
+    assessment.setParameters({
+      show_images: true,
+      item_images: JSON.stringify(Object.fromEntries(loaded)),
+    });
+  }
 }
 
 // webcam=1 or webcam=true enables the optional recording feature

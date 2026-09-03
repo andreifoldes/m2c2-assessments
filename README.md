@@ -172,10 +172,13 @@ An associative memory task with a learning and recognition phase. Participants a
 | `learning_duration_ms` | number | `3000` | How long each item-price pair is displayed during the learning phase (ms). |
 | `show_good_price_question` | number | `1` | Set to `0` to hide the "Is this a good price?" question during the learning phase. |
 | `tutorial` | string | `true` | Set to `false` or `0` to skip the tutorial screens. |
+| `images` | string | — | Set to `1` or `true` to show an item photograph (THINGS database best-picks) above each item during the tutorial example and the learning phase. The recognition phase stays word-only. |
+| `stimuli_base_url` | string | `assets/prices/images/` | Base URL for the item photographs. The THINGS images are fair-use research stimuli hosted on a private URL outside this repository; only used when `images=1`. |
+| `recognition_feedback` | string | — | Set to `1` or `true` to color the chosen button green/red by accuracy in the recognition phase. By default the selection is highlighted in a neutral color, giving no accuracy feedback. |
 | `min_price_distance_usd` | number | `3.0` | Minimum separation between the correct price and distractor, expressed in USD. Automatically converted to the local currency equivalent using approximate exchange rates (see below). |
 | `locale` | string | `en-GB` | BCP 47 locale tag (e.g. `en-GB`, `fr-FR`). Set to `auto` to detect from the browser. |
 | `currency` | string | `GBP` | ISO 4217 currency code (e.g. `GBP`, `EUR`). Set to `auto` to infer from locale. |
-| `excluded_items` | string | — | Comma-separated item names to exclude from this session. Used to enforce the within-day no-repeat rule: across up to 4 sessions per day, the 40-item pool is drawn without replacement so no item appears twice on the same day. The calling server tracks which items have been used today and passes them here. |
+| `excluded_items` | string | — | Comma-separated item names to exclude from this session. Used to enforce the within-day no-repeat rule: across up to 4 sessions per day, the item pool is drawn without replacement so no item appears twice on the same day. The calling server tracks which items have been used today and passes them here. |
 | `used_item_prices` | string (JSON) | `{}` | JSON object mapping item names to arrays of prices previously paired with them, e.g. `{"Almonds":[3.27,5.82],"Cereal":[7.63]}`. Prevents the same item-price pair from being re-presented across the 28 longitudinal sessions. The calling server maintains this history and passes it here. |
 | `webcam` | string | — | Set to `1` or `true` to enable optional camera recording. Participants see a consent prompt; if they accept, the front camera records and the video is saved locally at session end. |
 | `webgazer` | string | — | Set to `1` or `true` to enable browser-based eye tracking via [WebGazer.js](https://github.com/brownhci/WebGazer). Exports gaze coordinates as CSV. Can be combined with `webcam=1`. |
@@ -222,9 +225,9 @@ Each recognition trial emits: `trial_index`, `item`, `correct_price`, `distracto
 
 The pool contains common food and household items. 10 items are drawn per session.
 
-**Food:** Almonds, Applesauce, Blueberries, Cashews, Celery, Cereal, Cheeseburger, Cooking Spray, Cucumber, Limes, Noodles, Pineapple, Ramen, Rolls, Salad, Salsa, Sandwich, Spinach, Tortillas, Vegetable Oil, Waffles, Zucchini
+**Food:** Almonds, Applesauce, Blueberries, Bread, Butter, Celery, Cereal, Cheese, Coffee, Cucumber, Flour, Gum, Hamburger, Jam, Limes, Peanut Butter, Pickles, Pineapple, Rolls, Salad, Sandwich, Spinach, Tortillas, Vegetable Oil, Zucchini
 
-**Household & Personal Care:** Aluminum Foil, Batteries, Bleach, Detergent, Dish Soap, Dryer Sheets, Light Bulbs, Napkins, Paper Towels, Pencils, Plastic Wrap, Sponge, Toilet Paper, Trash Bags, Aspirin, Conditioner, Floss, Lotion
+**Household & Personal Care:** Aluminum Foil, Batteries, Light Bulb, Napkins, Paper Towel, Pencils, Soap, Sponges, Toilet Paper Rolls, Aspirin, Deodorant, Floss, Lotion, Toothbrush
 
 ---
 

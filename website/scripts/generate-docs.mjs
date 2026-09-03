@@ -56,8 +56,34 @@ function braceMatch(text, start) {
 }
 
 /** Evaluate an object-literal source string in an isolated context. */
-function evalObjectLiteral(objText) {
-  return vm.runInNewContext(`(${objText})`, {}, { timeout: 1000 });
+function evalObjectLiteral(objText, context = {}) {
+  return vm.runInNewContext(`(${objText})`, context, { timeout: 1000 });
+}
+
+/**
+ * Collect `export const NAME = <literal>` bindings from a file and the
+ * relative modules it imports, so schema defaults that reference those
+ * constants (e.g. TYPED_LENIENT_DISTANCE_DEFAULT) can be evaluated.
+ */
+function collectExportedLiterals(file, seen = new Set()) {
+  const resolved = file.replace(/\?.*$/, "");
+  if (seen.has(resolved) || !fs.existsSync(resolved)) return {};
+  seen.add(resolved);
+  const text = fs.readFileSync(resolved, "utf8");
+  const context = {};
+  for (const m of text.matchAll(/export\s+const\s+(\w+)\s*=\s*([^;\n]+)/g)) {
+    try {
+      context[m[1]] = vm.runInNewContext(`(${m[2].trim()})`, {}, { timeout: 200 });
+    } catch {
+      // Skip non-literal initializers.
+    }
+  }
+  for (const m of text.matchAll(/from\s+["'](\.[^"']+)["']/g)) {
+    let dep = path.resolve(path.dirname(resolved), m[1].replace(/\?.*$/, ""));
+    if (!path.extname(dep)) dep += ".js";
+    Object.assign(context, collectExportedLiterals(dep, seen));
+  }
+  return context;
 }
 
 /**
@@ -70,7 +96,7 @@ function extractSchema(file) {
   const idx = text.indexOf(marker);
   if (idx === -1) throw new Error(`No defaultParameters found in ${file}`);
   const objText = braceMatch(text, idx + marker.length - 1);
-  return evalObjectLiteral(objText);
+  return evalObjectLiteral(objText, collectExportedLiterals(file));
 }
 
 /** URL keys read by a wrapper via literal `.get("x")` calls. */
@@ -215,10 +241,13 @@ function fmtDescription(spec) {
  */
 function paramTables(task) {
   const schemaNames = new Set(Object.keys(task.schema));
+  // Per-task wrapperParamDocs (e.g. a different stimuli_base_url default)
+  // override the shared WRAPPER_PARAM_DOCS on that task's page only.
+  const wrapperDocs = { ...WRAPPER_PARAM_DOCS, ...(task.wrapperParamDocs ?? {}) };
   const sessionParams = [];
   for (const key of [...task.wrapper.urlKeys].sort()) {
     if (schemaNames.has(key)) continue; // documented in the schema table
-    const doc = WRAPPER_PARAM_DOCS[key];
+    const doc = wrapperDocs[key];
     if (!doc) {
       warn(`${task.id}: URL parameter "${key}" has no entry in WRAPPER_PARAM_DOCS`);
       sessionParams.push({ name: key, type: "string", default: "—", description: "" });

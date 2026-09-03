@@ -4,8 +4,9 @@
  * Parameter tables are NOT maintained here — they are extracted from each
  * task's source code (`defaultParameters` schema + the URL keys the launch
  * wrapper reads). This file only holds prose that cannot be derived from
- * code: task blurbs, citations, and descriptions for wrapper-level URL
- * parameters that have no schema entry in the source.
+ * code: task blurbs, citations, extraSections, extraExamples, and descriptions
+ * for wrapper-level URL parameters that have no schema entry in the source.
+ * Per-task `wrapperParamDocs` overrides WRAPPER_PARAM_DOCS on that task's page.
  */
 
 export const SITE_BASE = "https://andreifoldes.github.io/m2c2-assessments";
@@ -84,11 +85,23 @@ export const WRAPPER_PARAM_DOCS = {
     description:
       "Which of the 4 pre-constructed balanced lists to use (1–4). Maps to the `list_id` assessment parameter; must match across a participant's sessions.",
   },
+  images: {
+    type: "string",
+    default: "—",
+    description:
+      "Set to `1` or `true` to show an item photograph above each item during the tutorial example and the learning phase (Prices). The recognition phase stays word-only. If photographs cannot be loaded, the task falls back to word-only mode.",
+  },
+  recognition_feedback: {
+    type: "string",
+    default: "—",
+    description:
+      "Set to `1` or `true` to color the chosen recognition button green/red by accuracy (Prices). By default the selection is highlighted in a neutral color, giving no accuracy feedback.",
+  },
   stimuli_base_url: {
     type: "string",
-    default: "assets/fname-pairs/images/",
+    default: "task-specific",
     description:
-      "Base URL for the face images. The CFD-derived images are not redistributable and are deployed out-of-band (see the repo README, *FNAME-Pairs* section); point this at your private stimulus host.",
+      "Base URL for stimulus photographs. Images are not redistributed in this repository; point this at your private stimulus host. Defaults and hosting notes are on each task page (Prices, FNAME-Pairs).",
   },
   face_source: {
     type: "string",
@@ -139,6 +152,47 @@ export const TASKS = [
       "An associative memory task with a learning and a recognition phase. Participants are shown item–price pairs and asked to remember them, then tested on which price was paired with each item. Prices are localized to the participant's currency.",
     reference:
       "[ARC](https://github.com/jasonhass/Ambulatory-Research-in-Cognition) · [Nicosia et al., 2022](https://doi.org/10.1017/S135561772200042X) — custom implementation",
+    wrapperParamDocs: {
+      stimuli_base_url: {
+        type: "string",
+        default: "assets/prices/images/",
+        description:
+          "Base URL for the item photographs. Only used when `images=1`. The THINGS images are fair-use research stimuli hosted outside this repository (see *Running with or without images*).",
+      },
+    },
+    extraSections: [
+      {
+        title: "Running with or without images",
+        body: [
+          "By default the task is **word-only**: each item is shown as its name plus a price. Add `images=1` (or `images=true`) to show a photograph of the item above the name during the tutorial example and the learning phase. The **recognition phase stays word-only** in both modes, so the test remains of the item–price association rather than picture recognition.",
+          "",
+          "Photographs are prefetched as data URLs before the session starts, so trial-onset timing is not affected by network latency. If `images=1` is set but no photographs can be loaded (missing host, CORS failure, empty directory), the task logs a warning and runs in word-only mode. Trial data include `images_enabled` so analyses can distinguish the two modes.",
+          "",
+          "The photographs are **not redistributed in this repository**. Host them privately (same pattern as [FNAME-Pairs](fname-pairs): an unguessable path on a host you control, with cross-origin GET allowed) and pass the host via `stimuli_base_url`. Locally, if the gitignored files are present under `assessments/prices/assets/prices/images/`, `?images=1` works without that parameter. A deploy script at `assessments/prices/tools/deploy_stimuli.sh` publishes the files to a private-by-obscurity Netlify site.",
+        ].join("\n"),
+      },
+      {
+        title: "How the photographs were selected",
+        body: [
+          "Item photographs come from the **[THINGS database](https://things-initiative.org/)**:",
+          "",
+          "> Hebart, M. N., Dickter, A. H., Kidder, A., Kwok, W. Y., Corriveau, A., Van Wicklin, C., & Baker, C. I. (2019). THINGS: A database of 1,854 object concepts and 26,170 naturalistic object images. *PLOS ONE, 14*(10), e0223792. [doi:10.1371/journal.pone.0223792](https://doi.org/10.1371/journal.pone.0223792)",
+          "",
+          "> Stoinski, L. M., Perkuhn, J., & Hebart, M. N. (2024). THINGSplus: New norms and metadata for the THINGS database of 1854 object concepts and 26,107 natural object images. *Behavior Research Methods, 56*(3), 1583–1603. [doi:10.3758/s13428-023-02110-8](https://doi.org/10.3758/s13428-023-02110-8)",
+          "",
+          "Each of the 40 pool items (plus the tutorial example, Bananas) is mapped to a THINGS concept. Candidate photographs for that concept were ranked on THINGSplus **nameability** together with image-level recognizability and memorability; the **rank-1 (best-pick)** image is the one the task loads. A few items map to a nearby concept rather than an identical label: Aspirin → `pill`, Lotion → `cream`, Vegetable Oil → `oil`, Light Bulb → `lightbulb`.",
+          "",
+          "That choice followed a source audit of the item pool against four open-licensed emoji families (OpenMoji, Twemoji, Noto Emoji, Fluent Emoji), the THINGSplus CC0 one-per-concept photographs, the THINGS best-picks, and [MultiPic](https://www.bcbl.eu/databases/multipic/) line drawings. Emoji coverage was incomplete and some mappings collided (for example Celery and Spinach both mapped to \"leafy green\"). MultiPic supermarket coverage was thin. THINGS best-picks uniquely covered every pool item with a distinct, nameable photograph, so they were selected.",
+        ].join("\n"),
+      },
+    ],
+    extraExamples: [
+      {
+        comment:
+          "With item photographs (THINGS best-picks; recognition phase stays word-only)",
+        query: "images=1&stimuli_base_url=<STIMULI_BASE_URL>",
+      },
+    ],
   },
   {
     id: "fname",
@@ -165,6 +219,14 @@ export const TASKS = [
       "A face–name paired-associate memory task designed for sleep-dependent memory consolidation studies. Participants study 20 face–name pairs from the Chicago Face Database, take an immediate cued-recall test, and — in a separate session launched hours later — a delayed cued-recall test on a deterministic seeded subset of the pairs. Pair identity, subsets, lure sets, and presentation orders are all reproducible from URL parameters.",
     reference:
       "[Ma, Correll & Wittenbrink, 2015](https://doi.org/10.3758/s13428-014-0532-5) (stimuli) — custom implementation",
+    wrapperParamDocs: {
+      stimuli_base_url: {
+        type: "string",
+        default: "assets/fname-pairs/images/",
+        description:
+          "Base URL for the face images. The CFD-derived images are not redistributable and are deployed out-of-band (see the repo README, *FNAME-Pairs* section); point this at your private stimulus host.",
+      },
+    },
     extraSections: [
       {
         title: "Stimuli: Chicago Face Database",

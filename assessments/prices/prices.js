@@ -188,43 +188,42 @@ const ITEM_POOL = [
   "Almonds",
   "Applesauce",
   "Blueberries",
-  "Cashews",
+  "Bread",
+  "Butter",
   "Celery",
   "Cereal",
-  "Cheeseburger",
-  "Cooking Spray",
+  "Cheese",
+  "Coffee",
   "Cucumber",
+  "Flour",
+  "Gum",
+  "Hamburger",
+  "Jam",
   "Limes",
-  "Noodles",
+  "Peanut Butter",
+  "Pickles",
   "Pineapple",
-  "Ramen",
   "Rolls",
   "Salad",
-  "Salsa",
   "Sandwich",
   "Spinach",
   "Tortillas",
   "Vegetable Oil",
-  "Waffles",
   "Zucchini",
   "Aluminum Foil",
   "Batteries",
-  "Bleach",
-  "Detergent",
-  "Dish Soap",
-  "Dryer Sheets",
-  "Light Bulbs",
+  "Light Bulb",
   "Napkins",
-  "Paper Towels",
+  "Paper Towel",
   "Pencils",
-  "Plastic Wrap",
-  "Sponge",
-  "Toilet Paper",
-  "Trash Bags",
+  "Soap",
+  "Sponges",
+  "Toilet Paper Rolls",
   "Aspirin",
-  "Conditioner",
+  "Deodorant",
   "Floss",
   "Lotion",
+  "Toothbrush",
 ];
 
 const TUTORIAL_ITEMS = [
@@ -232,6 +231,55 @@ const TUTORIAL_ITEMS = [
   { item: "Soup", price: 5.82, alt: 2.01 },
   { item: "Dental Floss", price: 7.63, alt: 2.33 },
 ];
+
+// Item photographs from the THINGS database (Hebart et al., 2019), selected
+// via THINGSplus norms (Stoinski et al., 2024) for nameability and
+// memorability; per-item audit in temp/icon-comparison.html. The files are
+// fair-use research stimuli hosted OUTSIDE this repository — index.js
+// prefetches them from stimuli_base_url when images=1 and passes data URLs
+// in via the item_images parameter. "Bananas" is the tutorial example.
+export const ITEM_IMAGES = {
+  "Almonds": "almond_10s.jpg",
+  "Applesauce": "applesauce_07s.jpg",
+  "Blueberries": "blueberry_01b.jpg",
+  "Bread": "bread_02s.jpg",
+  "Butter": "butter_13s.jpg",
+  "Celery": "celery_02n.jpg",
+  "Cereal": "cereal_01b.jpg",
+  "Cheese": "cheese_05n.jpg",
+  "Coffee": "coffee_09s.jpg",
+  "Cucumber": "cucumber_07s.jpg",
+  "Flour": "flour_03s.jpg",
+  "Gum": "gum_03s.jpg",
+  "Hamburger": "hamburger_12s.jpg",
+  "Jam": "jam_07s.jpg",
+  "Limes": "lime_08s.jpg",
+  "Peanut Butter": "peanut_butter_11s.jpg",
+  "Pickles": "pickle_06n.jpg",
+  "Pineapple": "pineapple_07s.jpg",
+  "Rolls": "roll_06s.jpg",
+  "Salad": "salad_10s.jpg",
+  "Sandwich": "sandwich_09s.jpg",
+  "Spinach": "spinach_03s.jpg",
+  "Tortillas": "tortilla_13s.jpg",
+  "Vegetable Oil": "oil_13s.jpg",
+  "Zucchini": "zucchini_03s.jpg",
+  "Aluminum Foil": "aluminum_foil_09s.jpg",
+  "Batteries": "battery_05n.jpg",
+  "Light Bulb": "lightbulb_13s.jpg",
+  "Napkins": "napkin_12s.jpg",
+  "Paper Towel": "paper_towel_01b.jpg",
+  "Pencils": "pencil_02s.jpg",
+  "Soap": "soap_03s.jpg",
+  "Sponges": "sponge_13s.jpg",
+  "Toilet Paper Rolls": "toilet_paper_05s.jpg",
+  "Aspirin": "pill_07s.jpg",
+  "Deodorant": "deodorant_05s.jpg",
+  "Floss": "floss_12s.jpg",
+  "Lotion": "cream_01b.jpg",
+  "Toothbrush": "toothbrush_06s.jpg",
+  "Bananas": "banana_12s.jpg",
+};
 
 function shuffleArray(arr) {
   const a = [...arr];
@@ -330,6 +378,27 @@ export class Prices extends Game {
         default: true,
         type: "boolean",
         description: "Show the tutorial before the test",
+      },
+      show_images: {
+        default: false,
+        type: "boolean",
+        description:
+          "Show item photographs in the tutorial and learning phases " +
+          "(enabled via the images=1 URL param)",
+      },
+      item_images: {
+        default: "{}",
+        type: "string",
+        description:
+          "JSON map of item name to image data URL (set by index.js " +
+          "after image prefetch)",
+      },
+      show_recognition_feedback: {
+        default: false,
+        type: "boolean",
+        description:
+          "Color the chosen recognition button green/red by accuracy. " +
+          "Off by default: the selection is highlighted neutrally instead",
       },
       min_price_distance_usd: {
         default: 3.0,
@@ -455,6 +524,11 @@ export class Prices extends Game {
           type: "string",
           description: "ISO 4217 currency code used for this session",
         },
+        images_enabled: {
+          type: "boolean",
+          description:
+            "Whether item photographs were shown in the learning phase",
+        },
       },
       parameters: defaultParameters,
     });
@@ -473,6 +547,11 @@ export class Prices extends Game {
     this._currentRecognitionDisplayTime = 0;
     this._responded = false;
 
+    this._itemImgEl = null;
+    this._itemImgState = null;
+    this._itemImagesMap = null;
+    this._resizeHooked = false;
+
     this._resolveCurrency();
 
     if (this.getParameter("show_tutorial")) {
@@ -484,6 +563,122 @@ export class Prices extends Game {
     this._buildTransitionScene();
     this._buildRecognitionScene();
     this._buildEndScene();
+  }
+
+  // ─── Item image overlay ──────────────────────────────────
+  // m2c2kit images must be declared at construction time, so the optional
+  // item photographs are shown via an HTML <img> overlay positioned in the
+  // 400x800 logical coordinate system (same technique as fname-pairs).
+
+  _imagesOn() {
+    const v = this.getParameter("show_images");
+    return v === true || v === "true";
+  }
+
+  _itemImage(itemName) {
+    if (!this._imagesOn()) return null;
+    if (!this._itemImagesMap) {
+      try {
+        this._itemImagesMap = JSON.parse(this.getParameter("item_images"));
+      } catch (e) {
+        console.warn("[Prices] Could not parse item_images parameter:", e);
+        this._itemImagesMap = {};
+      }
+    }
+    return this._itemImagesMap[itemName] || null;
+  }
+
+  _canvasMetrics() {
+    const canvas = document.querySelector("#m2c2kit canvas");
+    if (!canvas) return null;
+    const canvasRect = canvas.getBoundingClientRect();
+    const parentRect = canvas.parentElement.getBoundingClientRect();
+    return {
+      scaleX: canvasRect.width / 400,
+      scaleY: canvasRect.height / 800,
+      offsetX: canvasRect.left - parentRect.left,
+      offsetY: canvasRect.top - parentRect.top,
+    };
+  }
+
+  _hookResize() {
+    if (this._resizeHooked) return;
+    this._resizeHooked = true;
+    const reposition = () => {
+      const s = this._itemImgState;
+      if (s) this._showItemImage(s.dataUrl, s.x, s.y, s.size);
+    };
+    window.addEventListener("resize", reposition);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", reposition);
+    }
+  }
+
+  _ensureItemImageOverlay() {
+    if (this._itemImgEl) return;
+    const container = document.getElementById("m2c2kit");
+    if (!container) return;
+    const img = document.createElement("img");
+    img.id = "prices-item-image-overlay";
+    img.style.cssText = `
+      position: absolute;
+      top: 0; left: 0;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #fff;
+      pointer-events: none;
+      display: none;
+      z-index: 100;
+    `;
+    container.style.position = "relative";
+    container.appendChild(img);
+    this._itemImgEl = img;
+    this._hookResize();
+  }
+
+  _showItemImage(dataUrl, logicalX, logicalY, logicalSize) {
+    this._ensureItemImageOverlay();
+    if (!this._itemImgEl) return;
+    const m = this._canvasMetrics();
+    if (!m) return;
+
+    const el = this._itemImgEl;
+    const w = logicalSize * m.scaleX;
+    const h = logicalSize * m.scaleY;
+    el.style.width = `${w}px`;
+    el.style.height = `${h}px`;
+    el.style.left = `${m.offsetX + logicalX * m.scaleX - w / 2}px`;
+    el.style.top = `${m.offsetY + logicalY * m.scaleY - h / 2}px`;
+    el.style.display = "block";
+    this._itemImgState = { dataUrl, x: logicalX, y: logicalY, size: logicalSize };
+
+    if (el.src === dataUrl) {
+      el.style.visibility = "visible";
+      return;
+    }
+    // Keep the element invisible until the new data URL has decoded, so the
+    // previous trial's image never flashes during the swap.
+    el.style.visibility = "hidden";
+    el.src = dataUrl;
+    const reveal = () => {
+      const cur = this._itemImgState;
+      if (cur && cur.dataUrl === dataUrl && el.src === dataUrl) {
+        el.style.visibility = "visible";
+      }
+    };
+    if (el.decode) {
+      el.decode().then(reveal).catch(reveal);
+    } else {
+      el.onload = reveal;
+    }
+  }
+
+  _hideItemImage() {
+    if (this._itemImgEl) {
+      this._itemImgEl.style.display = "none";
+      this._itemImgEl.style.visibility = "hidden";
+    }
+    this._itemImgState = null;
   }
 
   // ─── Tutorial ────────────────────────────────────────────
@@ -567,12 +762,16 @@ export class Prices extends Game {
       }),
     );
 
+    // Example card (taller when the Bananas photograph is shown)
+    const T = this._imagesOn()
+      ? { cardH: 320, cardY: 345, img: 240, item: 305, price: 355, question: 405, btns: 440, tooltip: 545 }
+      : { cardH: 220, cardY: 310, img: 0, item: 260, price: 310, question: 365, btns: 400, tooltip: 490 };
     // Example card
     const exCard = new Shape({
-      rect: { width: 300, height: 220 },
+      rect: { width: 300, height: T.cardH },
       cornerRadius: 16,
       fillColor: CARD_BG,
-      position: { x: 200, y: 310 },
+      position: { x: 200, y: T.cardY },
     });
     s2.addChild(exCard);
 
@@ -581,7 +780,7 @@ export class Prices extends Game {
         text: TUTORIAL_ITEMS[0].item,
         fontSize: 30,
         fontColor: TEXT_PRIMARY,
-        position: { x: 200, y: 260 },
+        position: { x: 200, y: T.item },
       }),
     );
     s2.addChild(
@@ -589,7 +788,7 @@ export class Prices extends Game {
         text: this._formatPrice(TUTORIAL_ITEMS[0].price),
         fontSize: 38,
         fontColor: TEXT_PRIMARY,
-        position: { x: 200, y: 310 },
+        position: { x: 200, y: T.price },
       }),
     );
     s2.addChild(
@@ -597,7 +796,7 @@ export class Prices extends Game {
         text: "Is this a good price?",
         fontSize: 16,
         fontColor: TEXT_SECONDARY,
-        position: { x: 200, y: 365 },
+        position: { x: 200, y: T.question },
       }),
     );
 
@@ -606,7 +805,7 @@ export class Prices extends Game {
       rect: { width: 80, height: 36 },
       cornerRadius: 18,
       fillColor: [220, 220, 225, 1],
-      position: { x: 155, y: 400 },
+      position: { x: 155, y: T.btns },
     });
     s2.addChild(yesEx);
     s2.addChild(
@@ -614,7 +813,7 @@ export class Prices extends Game {
         text: "Yes",
         fontSize: 15,
         fontColor: TEXT_PRIMARY,
-        position: { x: 155, y: 400 },
+        position: { x: 155, y: T.btns },
       }),
     );
 
@@ -622,7 +821,7 @@ export class Prices extends Game {
       rect: { width: 80, height: 36 },
       cornerRadius: 18,
       fillColor: [220, 220, 225, 1],
-      position: { x: 245, y: 400 },
+      position: { x: 245, y: T.btns },
     });
     s2.addChild(noEx);
     s2.addChild(
@@ -630,7 +829,7 @@ export class Prices extends Game {
         text: "No",
         fontSize: 15,
         fontColor: TEXT_PRIMARY,
-        position: { x: 245, y: 400 },
+        position: { x: 245, y: T.btns },
       }),
     );
 
@@ -639,7 +838,7 @@ export class Prices extends Game {
       rect: { width: 280, height: 50 },
       cornerRadius: 10,
       fillColor: ACCENT,
-      position: { x: 200, y: 490 },
+      position: { x: 200, y: T.tooltip },
     });
     s2.addChild(tooltipBg);
     s2.addChild(
@@ -647,7 +846,7 @@ export class Prices extends Game {
         text: "Choose the answer that makes\nsense to you.",
         fontSize: 14,
         fontColor: [255, 255, 255, 1],
-        position: { x: 200, y: 490 },
+        position: { x: 200, y: T.tooltip },
         preferredMaxLayoutWidth: 260,
       }),
     );
@@ -670,11 +869,17 @@ export class Prices extends Game {
         zPosition: 11,
       }),
     );
-    nextBtn2Bg.onTapDown(() =>
-      this.presentScene("tut_3", Transition.none()),
-    );
+    nextBtn2Bg.onTapDown(() => {
+      this._hideItemImage();
+      this.presentScene("tut_3", Transition.none());
+    });
 
     this._addSkipTutorialButton(s2);
+
+    s2.onAppear(() => {
+      const bananaUrl = this._itemImage("Bananas");
+      if (bananaUrl) this._showItemImage(bananaUrl, 200, T.img, 110);
+    });
 
     // Screen 3: Recognition phase example
     const s3 = new Scene({ name: "tut_3", backgroundColor: SCENE_BG });
@@ -802,9 +1007,10 @@ export class Prices extends Game {
       zPosition: 20,
     });
     scene.addChild(label);
-    label.onTapDown(() =>
-      this.presentScene("instructions", Transition.none()),
-    );
+    label.onTapDown(() => {
+      this._hideItemImage();
+      this.presentScene("instructions", Transition.none());
+    });
   }
 
   // ─── Instructions ────────────────────────────────────────
@@ -954,6 +1160,12 @@ export class Prices extends Game {
     const scene = new Scene({ name: "learning", backgroundColor: SCENE_BG });
     this.addScene(scene);
 
+    // Layout shifts down when item photographs are enabled, making room for
+    // the image at the top of the card.
+    const L = this._imagesOn()
+      ? { cardH: 460, cardY: 340, item: 330, price: 400, question: 455, btns: 505, timer: 590 }
+      : { cardH: 340, cardY: 310, item: 220, price: 290, question: 360, btns: 415, timer: 490 };
+
     // Progress bar
     scene.addChild(
       new Shape({
@@ -989,10 +1201,10 @@ export class Prices extends Game {
     scene.addChild(
       new Shape({
         name: "learnCard",
-        rect: { width: 320, height: 340 },
+        rect: { width: 320, height: L.cardH },
         cornerRadius: 20,
         fillColor: CARD_BG,
-        position: { x: 200, y: 310 },
+        position: { x: 200, y: L.cardY },
       }),
     );
 
@@ -1003,7 +1215,7 @@ export class Prices extends Game {
         text: "",
         fontSize: 32,
         fontColor: TEXT_PRIMARY,
-        position: { x: 200, y: 220 },
+        position: { x: 200, y: L.item },
         preferredMaxLayoutWidth: 280,
       }),
     );
@@ -1015,7 +1227,7 @@ export class Prices extends Game {
         text: "",
         fontSize: 42,
         fontColor: TEXT_PRIMARY,
-        position: { x: 200, y: 290 },
+        position: { x: 200, y: L.price },
       }),
     );
 
@@ -1026,7 +1238,7 @@ export class Prices extends Game {
         text: "Is this a good price?",
         fontSize: 16,
         fontColor: TEXT_SECONDARY,
-        position: { x: 200, y: 360 },
+        position: { x: 200, y: L.question },
       }),
     );
 
@@ -1036,7 +1248,7 @@ export class Prices extends Game {
       rect: { width: 100, height: 40 },
       cornerRadius: 20,
       fillColor: [220, 220, 225, 1],
-      position: { x: 145, y: 415 },
+      position: { x: 145, y: L.btns },
       isUserInteractionEnabled: true,
       zPosition: 10,
     });
@@ -1047,7 +1259,7 @@ export class Prices extends Game {
         text: "Yes",
         fontSize: 16,
         fontColor: TEXT_PRIMARY,
-        position: { x: 145, y: 415 },
+        position: { x: 145, y: L.btns },
         zPosition: 11,
       }),
     );
@@ -1058,7 +1270,7 @@ export class Prices extends Game {
       rect: { width: 100, height: 40 },
       cornerRadius: 20,
       fillColor: [220, 220, 225, 1],
-      position: { x: 255, y: 415 },
+      position: { x: 255, y: L.btns },
       isUserInteractionEnabled: true,
       zPosition: 10,
     });
@@ -1069,7 +1281,7 @@ export class Prices extends Game {
         text: "No",
         fontSize: 16,
         fontColor: TEXT_PRIMARY,
-        position: { x: 255, y: 415 },
+        position: { x: 255, y: L.btns },
         zPosition: 11,
       }),
     );
@@ -1081,7 +1293,7 @@ export class Prices extends Game {
         rect: { width: 320, height: 3 },
         cornerRadius: 1,
         fillColor: ACCENT,
-        position: { x: 200, y: 490 },
+        position: { x: 200, y: L.timer },
       }),
     );
 
@@ -1399,6 +1611,7 @@ export class Prices extends Game {
   _showLearningItem(index) {
     const numItems = this.getParameter("number_of_items");
     if (index >= numItems) {
+      this._hideItemImage();
       this.presentScene("transition", Transition.none());
       return;
     }
@@ -1420,6 +1633,13 @@ export class Prices extends Game {
 
     const priceLabel = this._getNode("learnPriceLabel");
     priceLabel.text = this._formatPrice(item.price);
+
+    const itemImgUrl = this._itemImage(item.item);
+    if (itemImgUrl) {
+      this._showItemImage(itemImgUrl, 200, 195, 160);
+    } else {
+      this._hideItemImage();
+    }
 
     // Show/hide good price question
     const showQuestion = this.getParameter("show_good_price_question");
@@ -1582,7 +1802,13 @@ export class Prices extends Game {
       selectedPosition === 0
         ? this._getNode("recogBtn1Bg")
         : this._getNode("recogBtn2Bg");
-    selectedBg.fillColor = isCorrect ? [200, 240, 200, 1] : [240, 200, 200, 1];
+    const fb = this.getParameter("show_recognition_feedback");
+    selectedBg.fillColor =
+      fb === true || fb === "true"
+        ? isCorrect
+          ? [200, 240, 200, 1]
+          : [240, 200, 200, 1]
+        : ACCENT;
 
     // Record trial data
     this.addTrialData("trial_index", this.trialIndex);
@@ -1594,6 +1820,7 @@ export class Prices extends Game {
       this._goodPriceResponses[dataIndex],
     );
     this.addTrialData("correct_position", this._currentCorrectPosition);
+    this.addTrialData("images_enabled", this._imagesOn());
     this.addTrialData("selected_position", selectedPosition);
     this.addTrialData("is_correct", isCorrect);
     this.addTrialData("response_time_ms", Math.round(rt));
