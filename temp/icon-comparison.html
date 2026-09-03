@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prices task &middot; stimulus source audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Sora:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #faf6ef; --ink: #2b2620; --rule: #e4dccd; --accent: #b4552d;
+    --icon-size: 52px; --cell-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 2.5rem 1.5rem 5rem; background: var(--paper); color: var(--ink);
+    font-family: "Sora", sans-serif; font-size: 14px; line-height: 1.45; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  h1 { font-family: "Fraunces", serif; font-weight: 700; font-size: 2.1rem; margin: 0 0 .3rem; letter-spacing: -0.01em; }
+  .sub { color: #7a6f5f; margin: 0 0 1.6rem; max-width: 70ch; }
+  .controls { display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
+  .controls label { display: flex; gap: .6rem; align-items: center; font-size: .82rem; color: #7a6f5f; }
+  input[type="range"] { accent-color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; background: var(--cell-bg); box-shadow: 0 1px 0 var(--rule), 0 12px 30px -18px rgba(43,38,32,.35); }
+  thead th { position: sticky; top: 0; background: var(--ink); color: var(--paper); padding: .7rem .8rem; text-align: left; font-weight: 600; font-size: .82rem; z-index: 2; }
+  thead th.fam { text-align: center; min-width: 92px; }
+  thead th.fam-photo { background: #46392a; }
+  thead a { color: inherit; text-decoration: none; border-bottom: 1px dotted rgba(250,246,239,.5); }
+  .lic, .count { display: block; font-weight: 400; font-size: .68rem; opacity: .65; margin-top: .15rem; }
+  tbody td, tbody th { border-bottom: 1px solid var(--rule); padding: .45rem .8rem; }
+  tbody th[scope="row"] { text-align: left; font-weight: 600; white-space: nowrap; width: 1%; }
+  tr.cat td { font-family: "Fraunces", serif; font-size: 1.05rem; font-weight: 700; background: var(--paper); padding-top: 1.1rem; border-bottom: 2px solid var(--ink); }
+  td.icon { text-align: center; }
+  td.icon img { width: var(--icon-size); height: var(--icon-size); object-fit: contain; vertical-align: middle; transition: width .15s, height .15s; background: #fff; }
+  td.icon .cap { display: block; font-size: .66rem; color: #9a8f7d; margin-top: .15rem; }
+  td.icon.none { color: #c9bfae; font-size: 1.1rem; }
+  td.match { max-width: 175px; }
+  .ename { display: block; font-size: .78rem; color: #7a6f5f; margin-top: .2rem; }
+  .note { display: block; font-size: .72rem; color: var(--accent); margin-top: .1rem; }
+  .badge { display: inline-block; font-size: .68rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: .12rem .45rem; border-radius: 3px; }
+  .q-exact { background: #dcefd8; color: #2c5e26; }
+  .q-close { background: #e8e4f5; color: #4a3d8f; }
+  .q-weak { background: #fbeed3; color: #8a5f13; }
+  .q-conflict { background: #fadfd3; color: #a03a12; }
+  .q-miss { background: #efe9df; color: #8d8271; }
+  tr.row-conflict th, tr.row-conflict td { background: #fdf4ef; }
+  body.dark { --cell-bg: #26221c; --paper: #1a1713; --ink: #ece5d8; --rule: #3b352c; }
+  body.dark thead th { background: #0f0d0a; }
+  body.dark thead th.fam-photo { background: #241a10; }
+  body.dark tr.cat td { border-bottom-color: var(--ink); }
+  body.dark td.icon.none { color: #55503f; }
+  body.dark tr.row-conflict th, body.dark tr.row-conflict td { background: #2e2118; }
+  body.dark .sub, body.dark .controls label, body.dark .ename { color: #a89c88; }
+  .foot { margin-top: 1.4rem; font-size: .78rem; color: #7a6f5f; max-width: 85ch; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Prices task &mdash; stimulus source audit</h1><!-- v3: adds THINGS best-pick column -->
+  <p class="sub">All 40 <code>ITEM_POOL</code> entries against four open-licensed emoji families (CDN-loaded vectors) plus two normed research databases: <strong>THINGS&#8288;+</strong> CC0 photographs and <strong>MultiPic</strong> colored line drawings (both stored locally next to this file). Badge rates the emoji match; photo captions show the database&rsquo;s own concept name (&asymp; close, ~ loose).</p>
+  <div class="controls">
+    <label>Icon size <input type="range" min="28" max="120" value="52" oninput="document.documentElement.style.setProperty('--icon-size', this.value + 'px')"> </label>
+    <label><input type="checkbox" onchange="document.body.classList.toggle('dark', this.checked)"> dark background preview</label>
+  </div>
+  <table>
+    <thead><tr><th>Item</th><th>Best emoji match</th><th class="fam "><a href="https://openmoji.org">OpenMoji</a><span class="lic">CC BY-SA 4.0</span><span class="count">44/60</span></th><th class="fam "><a href="https://github.com/jdecked/twemoji">Twemoji</a><span class="lic">CC BY 4.0</span><span class="count">44/60</span></th><th class="fam "><a href="https://github.com/googlefonts/noto-emoji">Noto Emoji</a><span class="lic">Apache 2.0</span><span class="count">44/60</span></th><th class="fam "><a href="https://github.com/microsoft/fluentui-emoji">Fluent Emoji</a><span class="lic">MIT</span><span class="count">43/60</span></th><th class="fam fam-photo"><a href="https://things-initiative.org">THINGS+</a><span class="lic">CC0 photos</span><span class="count">60/60</span></th><th class="fam fam-photo"><a href="https://osf.io/jum2f/">THINGS best</a><span class="lic">fair use</span><span class="count">60/60</span></th><th class="fam fam-photo"><a href="https://www.bcbl.eu/databases/multipic/">MultiPic</a><span class="lic">free (research)</span><span class="count">11/60</span></th></tr></thead>
+    <tbody>
+<tr class="cat"><td colspan="9">Food</td></tr>
+<tr class="">
+    <th scope="row">Almonds</th>
+    <td class="match"><span class="badge q-weak">Loose</span><span class="ename">peanuts</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F95C.svg" alt="Almonds (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f95c.svg" alt="Almonds (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f95c.svg" alt="Almonds (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Peanuts/Color/peanuts_color.svg" alt="Almonds (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/almond.jpg" alt="Almonds (things)" loading="lazy"><span class="cap">almond</span></td><td class="icon"><img src="things_best/almond_10s.jpg" alt="Almonds (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.87
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Applesauce</th>
+    <td class="match"><span class="badge q-weak">Loose</span><span class="ename">canned food</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F96B.svg" alt="Applesauce (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f96b.svg" alt="Applesauce (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f96b.svg" alt="Applesauce (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Canned%20food/Color/canned_food_color.svg" alt="Applesauce (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/applesauce.jpg" alt="Applesauce (things)" loading="lazy"><span class="cap">applesauce</span></td><td class="icon"><img src="things_best/applesauce_07s.jpg" alt="Applesauce (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.76
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Blueberries</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">blueberries</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1FAD0.svg" alt="Blueberries (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1fad0.svg" alt="Blueberries (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1fad0.svg" alt="Blueberries (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Blueberries/Color/blueberries_color.svg" alt="Blueberries (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/blueberry.jpg" alt="Blueberries (things)" loading="lazy"><span class="cap">blueberry</span></td><td class="icon"><img src="things_best/blueberry_01b.jpg" alt="Blueberries (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.80
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Bread</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">bread</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F35E.svg" alt="Bread (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f35e.svg" alt="Bread (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f35e.svg" alt="Bread (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Bread/Color/bread_color.svg" alt="Bread (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/bread.jpg" alt="Bread (things)" loading="lazy"><span class="cap">bread</span></td><td class="icon"><img src="things_best/bread_02s.jpg" alt="Bread (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Butter</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">butter</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F9C8.svg" alt="Butter (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9c8.svg" alt="Butter (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f9c8.svg" alt="Butter (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Butter/Color/butter_color.svg" alt="Butter (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/butter.jpg" alt="Butter (things)" loading="lazy"><span class="cap">butter</span></td><td class="icon"><img src="things_best/butter_13s.jpg" alt="Butter (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.76
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Celery</th>
+    <td class="match"><span class="badge q-weak">Loose</span><span class="ename">leafy green</span><span class="note">collides with Spinach</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F96C.svg" alt="Celery (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f96c.svg" alt="Celery (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f96c.svg" alt="Celery (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Leafy%20green/Color/leafy_green_color.svg" alt="Celery (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/celery.jpg" alt="Celery (things)" loading="lazy"><span class="cap">celery</span></td><td class="icon"><img src="things_best/celery_02n.jpg" alt="Celery (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.80
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Cereal</th>
+    <td class="match"><span class="badge q-close">Close</span><span class="ename">bowl with spoon</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F963.svg" alt="Cereal (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f963.svg" alt="Cereal (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f963.svg" alt="Cereal (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Bowl%20with%20spoon/Color/bowl_with_spoon_color.svg" alt="Cereal (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/cereal.jpg" alt="Cereal (things)" loading="lazy"><span class="cap">cereal</span></td><td class="icon"><img src="things_best/cereal_01b.jpg" alt="Cereal (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.78
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Cheese</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">cheese wedge</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F9C0.svg" alt="Cheese (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9c0.svg" alt="Cheese (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f9c0.svg" alt="Cheese (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Cheese%20wedge/Color/cheese_wedge_color.svg" alt="Cheese (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/cheese.jpg" alt="Cheese (things)" loading="lazy"><span class="cap">cheese</span></td><td class="icon"><img src="things_best/cheese_05n.jpg" alt="Cheese (thingsbest)" loading="lazy"><span class="cap">nm 0.88 &middot; mem 0.78
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Coffee</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">hot beverage</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/2615.svg" alt="Coffee (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/2615.svg" alt="Coffee (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u2615.svg" alt="Coffee (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Hot%20beverage/Color/hot_beverage_color.svg" alt="Coffee (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/coffee.jpg" alt="Coffee (things)" loading="lazy"><span class="cap">coffee</span></td><td class="icon"><img src="things_best/coffee_09s.jpg" alt="Coffee (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Cucumber</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">cucumber</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F952.svg" alt="Cucumber (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f952.svg" alt="Cucumber (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f952.svg" alt="Cucumber (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Cucumber/Color/cucumber_color.svg" alt="Cucumber (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/cucumber.jpg" alt="Cucumber (things)" loading="lazy"><span class="cap">cucumber</span></td><td class="icon"><img src="things_best/cucumber_07s.jpg" alt="Cucumber (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.76
+</span></td><td class="icon"><img src="multipic/PICTURE_559.png" alt="Cucumber (multipic)" loading="lazy"><span class="cap">cucumber</span></td></tr>
+<tr class="">
+    <th scope="row">Flour</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/flour.jpg" alt="Flour (things)" loading="lazy"><span class="cap">flour</span></td><td class="icon"><img src="things_best/flour_03s.jpg" alt="Flour (thingsbest)" loading="lazy"><span class="cap">nm 0.94 &middot; mem 0.64
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Gum</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/gum.jpg" alt="Gum (things)" loading="lazy"><span class="cap">gum</span></td><td class="icon"><img src="things_best/gum_03s.jpg" alt="Gum (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.93
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Hamburger</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">hamburger</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F354.svg" alt="Hamburger (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f354.svg" alt="Hamburger (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f354.svg" alt="Hamburger (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Hamburger/Color/hamburger_color.svg" alt="Hamburger (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/hamburger.jpg" alt="Hamburger (things)" loading="lazy"><span class="cap">hamburger</span></td><td class="icon"><img src="things_best/hamburger_12s.jpg" alt="Hamburger (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.81
+</span></td><td class="icon"><img src="multipic/PICTURE_11.png" alt="Hamburger (multipic)" loading="lazy"><span class="cap">burger</span></td></tr>
+<tr class="">
+    <th scope="row">Jam</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/jam.jpg" alt="Jam (things)" loading="lazy"><span class="cap">jam</span></td><td class="icon"><img src="things_best/jam_07s.jpg" alt="Jam (thingsbest)" loading="lazy"><span class="cap">nm 0.81 &middot; mem 0.86
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Limes</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">lime</span><span class="note">Emoji 15.1 — may be missing in older sets</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F34B-200D-1F7E9.svg" alt="Limes (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f34b-200d-1f7e9.svg" alt="Limes (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f34b_200d_1f7e9.svg" alt="Limes (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Lime/Color/lime_color.svg" alt="Limes (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/lime.jpg" alt="Limes (things)" loading="lazy"><span class="cap">lime</span></td><td class="icon"><img src="things_best/lime_08s.jpg" alt="Limes (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.78
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Peanut Butter</th>
+    <td class="match"><span class="badge q-miss">No icon</span><span class="note">no emoji; peanuts already used for Almonds</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/peanut_butter.jpg" alt="Peanut Butter (things)" loading="lazy"><span class="cap">peanut butter</span></td><td class="icon"><img src="things_best/peanut_butter_11s.jpg" alt="Peanut Butter (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.87
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Pickles</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/pickle.jpg" alt="Pickles (things)" loading="lazy"><span class="cap">pickle</span></td><td class="icon"><img src="things_best/pickle_06n.jpg" alt="Pickles (thingsbest)" loading="lazy"><span class="cap">nm 0.83 &middot; mem 0.86
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Pineapple</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">pineapple</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F34D.svg" alt="Pineapple (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f34d.svg" alt="Pineapple (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f34d.svg" alt="Pineapple (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pineapple/Color/pineapple_color.svg" alt="Pineapple (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/pineapple.jpg" alt="Pineapple (things)" loading="lazy"><span class="cap">pineapple</span></td><td class="icon"><img src="things_best/pineapple_07s.jpg" alt="Pineapple (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.82
+</span></td><td class="icon"><img src="multipic/PICTURE_442.png" alt="Pineapple (multipic)" loading="lazy"><span class="cap">pineapple</span></td></tr>
+<tr class="">
+    <th scope="row">Rolls</th>
+    <td class="match"><span class="badge q-weak">Loose</span><span class="ename">croissant</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F950.svg" alt="Rolls (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f950.svg" alt="Rolls (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f950.svg" alt="Rolls (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Croissant/Color/croissant_color.svg" alt="Rolls (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/roll.jpg" alt="Rolls (things)" loading="lazy"><span class="cap">roll≈</span></td><td class="icon"><img src="things_best/roll_06s.jpg" alt="Rolls (thingsbest)" loading="lazy"><span class="cap">nm 0.94 &middot; mem 0.84
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Salad</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">green salad</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F957.svg" alt="Salad (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f957.svg" alt="Salad (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f957.svg" alt="Salad (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Green%20salad/Color/green_salad_color.svg" alt="Salad (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/salad.jpg" alt="Salad (things)" loading="lazy"><span class="cap">salad</span></td><td class="icon"><img src="things_best/salad_10s.jpg" alt="Salad (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.80
+</span></td><td class="icon"><img src="multipic/PICTURE_191.png" alt="Salad (multipic)" loading="lazy"><span class="cap">salad</span></td></tr>
+<tr class="">
+    <th scope="row">Sandwich</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">sandwich</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F96A.svg" alt="Sandwich (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f96a.svg" alt="Sandwich (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f96a.svg" alt="Sandwich (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Sandwich/Color/sandwich_color.svg" alt="Sandwich (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/sandwich.jpg" alt="Sandwich (things)" loading="lazy"><span class="cap">sandwich</span></td><td class="icon"><img src="things_best/sandwich_09s.jpg" alt="Sandwich (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.83
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Spinach</th>
+    <td class="match"><span class="badge q-weak">Loose</span><span class="ename">leafy green</span><span class="note">collides with Celery</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F96C.svg" alt="Spinach (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f96c.svg" alt="Spinach (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f96c.svg" alt="Spinach (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Leafy%20green/Color/leafy_green_color.svg" alt="Spinach (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/spinach.jpg" alt="Spinach (things)" loading="lazy"><span class="cap">spinach</span></td><td class="icon"><img src="things_best/spinach_03s.jpg" alt="Spinach (thingsbest)" loading="lazy"><span class="cap">nm 0.95 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Tortillas</th>
+    <td class="match"><span class="badge q-close">Close</span><span class="ename">flatbread</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1FAD3.svg" alt="Tortillas (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1fad3.svg" alt="Tortillas (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1fad3.svg" alt="Tortillas (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Flatbread/Color/flatbread_color.svg" alt="Tortillas (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/tortilla.jpg" alt="Tortillas (things)" loading="lazy"><span class="cap">tortilla</span></td><td class="icon"><img src="things_best/tortilla_13s.jpg" alt="Tortillas (thingsbest)" loading="lazy"><span class="cap">nm 0.94 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Vegetable Oil</th>
+    <td class="match"><span class="badge q-weak">Loose</span><span class="ename">olive</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1FAD2.svg" alt="Vegetable Oil (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1fad2.svg" alt="Vegetable Oil (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1fad2.svg" alt="Vegetable Oil (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Olive/Color/olive_color.svg" alt="Vegetable Oil (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/oil.jpg" alt="Vegetable Oil (things)" loading="lazy"><span class="cap">oil≈</span></td><td class="icon"><img src="things_best/oil_13s.jpg" alt="Vegetable Oil (thingsbest)" loading="lazy"><span class="cap">nm 0.89 &middot; mem 0.72
+</span></td><td class="icon"><img src="multipic/PICTURE_456.png" alt="Vegetable Oil (multipic)" loading="lazy"><span class="cap">oil≈</span></td></tr>
+<tr class="row-conflict">
+    <th scope="row">Zucchini</th>
+    <td class="match"><span class="badge q-conflict">Duplicate</span><span class="ename">cucumber</span><span class="note">identical image to Cucumber</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F952.svg" alt="Zucchini (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f952.svg" alt="Zucchini (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f952.svg" alt="Zucchini (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Cucumber/Color/cucumber_color.svg" alt="Zucchini (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/zucchini.jpg" alt="Zucchini (things)" loading="lazy"><span class="cap">zucchini</span></td><td class="icon"><img src="things_best/zucchini_03s.jpg" alt="Zucchini (thingsbest)" loading="lazy"><span class="cap">nm 0.89 &middot; mem 0.81
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="cat"><td colspan="9">Household</td></tr>
+<tr class="">
+    <th scope="row">Aluminum Foil</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/aluminum_foil.jpg" alt="Aluminum Foil (things)" loading="lazy"><span class="cap">aluminum foil</span></td><td class="icon"><img src="things_best/aluminum_foil_09s.jpg" alt="Aluminum Foil (thingsbest)" loading="lazy"><span class="cap">nm 0.68 &middot; mem 0.85
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Batteries</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">battery</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F50B.svg" alt="Batteries (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f50b.svg" alt="Batteries (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f50b.svg" alt="Batteries (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Battery/Color/battery_color.svg" alt="Batteries (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/battery.jpg" alt="Batteries (things)" loading="lazy"><span class="cap">battery</span></td><td class="icon"><img src="things_best/battery_05n.jpg" alt="Batteries (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.83
+</span></td><td class="icon"><img src="multipic/PICTURE_656.png" alt="Batteries (multipic)" loading="lazy"><span class="cap">battery</span></td></tr>
+<tr class="">
+    <th scope="row">Light Bulb</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">light bulb</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F4A1.svg" alt="Light Bulb (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f4a1.svg" alt="Light Bulb (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f4a1.svg" alt="Light Bulb (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Light%20bulb/Color/light_bulb_color.svg" alt="Light Bulb (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/lightbulb.jpg" alt="Light Bulb (things)" loading="lazy"><span class="cap">lightbulb</span></td><td class="icon"><img src="things_best/lightbulb_13s.jpg" alt="Light Bulb (thingsbest)" loading="lazy"><span class="cap">nm 0.53 &middot; mem 0.88
+</span></td><td class="icon"><img src="multipic/PICTURE_244.png" alt="Light Bulb (multipic)" loading="lazy"><span class="cap">lightbulb</span></td></tr>
+<tr class="">
+    <th scope="row">Napkins</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/napkin.jpg" alt="Napkins (things)" loading="lazy"><span class="cap">napkin</span></td><td class="icon"><img src="things_best/napkin_12s.jpg" alt="Napkins (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.78
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="row-conflict">
+    <th scope="row">Paper Towel</th>
+    <td class="match"><span class="badge q-conflict">Duplicate</span><span class="ename">roll of paper</span><span class="note">identical emoji to Toilet Paper Rolls</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F9FB.svg" alt="Paper Towel (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9fb.svg" alt="Paper Towel (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f9fb.svg" alt="Paper Towel (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Roll%20of%20paper/Color/roll_of_paper_color.svg" alt="Paper Towel (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/paper_towel.jpg" alt="Paper Towel (things)" loading="lazy"><span class="cap">paper towel</span></td><td class="icon"><img src="things_best/paper_towel_01b.jpg" alt="Paper Towel (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.93
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Pencils</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">pencil</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/270F.svg" alt="Pencils (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/270f.svg" alt="Pencils (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u270f.svg" alt="Pencils (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pencil/Color/pencil_color.svg" alt="Pencils (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/pencil.jpg" alt="Pencils (things)" loading="lazy"><span class="cap">pencil</span></td><td class="icon"><img src="things_best/pencil_02s.jpg" alt="Pencils (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.81
+</span></td><td class="icon"><img src="multipic/PICTURE_654.png" alt="Pencils (multipic)" loading="lazy"><span class="cap">pencil</span></td></tr>
+<tr class="">
+    <th scope="row">Soap</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">soap</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F9FC.svg" alt="Soap (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9fc.svg" alt="Soap (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f9fc.svg" alt="Soap (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Soap/Color/soap_color.svg" alt="Soap (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/soap.jpg" alt="Soap (things)" loading="lazy"><span class="cap">soap</span></td><td class="icon"><img src="things_best/soap_03s.jpg" alt="Soap (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.81
+</span></td><td class="icon"><img src="multipic/PICTURE_619.png" alt="Soap (multipic)" loading="lazy"><span class="cap">soap≈</span></td></tr>
+<tr class="">
+    <th scope="row">Sponges</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">sponge</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F9FD.svg" alt="Sponges (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9fd.svg" alt="Sponges (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f9fd.svg" alt="Sponges (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Sponge/Color/sponge_color.svg" alt="Sponges (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/sponge.jpg" alt="Sponges (things)" loading="lazy"><span class="cap">sponge</span></td><td class="icon"><img src="things_best/sponge_13s.jpg" alt="Sponges (thingsbest)" loading="lazy"><span class="cap">nm 0.95 &middot; mem 0.93
+</span></td><td class="icon"><img src="multipic/PICTURE_650.png" alt="Sponges (multipic)" loading="lazy"><span class="cap">sponge</span></td></tr>
+<tr class="">
+    <th scope="row">Toilet Paper Rolls</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">roll of paper</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F9FB.svg" alt="Toilet Paper Rolls (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9fb.svg" alt="Toilet Paper Rolls (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f9fb.svg" alt="Toilet Paper Rolls (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Roll%20of%20paper/Color/roll_of_paper_color.svg" alt="Toilet Paper Rolls (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/toilet_paper.jpg" alt="Toilet Paper Rolls (things)" loading="lazy"><span class="cap">toilet paper</span></td><td class="icon"><img src="things_best/toilet_paper_05s.jpg" alt="Toilet Paper Rolls (thingsbest)" loading="lazy"><span class="cap">nm 0.89 &middot; mem 0.85
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="cat"><td colspan="9">Personal care</td></tr>
+<tr class="">
+    <th scope="row">Aspirin</th>
+    <td class="match"><span class="badge q-close">Close</span><span class="ename">pill</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F48A.svg" alt="Aspirin (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f48a.svg" alt="Aspirin (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f48a.svg" alt="Aspirin (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pill/Color/pill_color.svg" alt="Aspirin (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/pill.jpg" alt="Aspirin (things)" loading="lazy"><span class="cap">pill≈</span></td><td class="icon"><img src="things_best/pill_07s.jpg" alt="Aspirin (thingsbest)" loading="lazy"><span class="cap">nm 0.94 &middot; mem 0.83
+</span></td><td class="icon"><img src="multipic/PICTURE_556.png" alt="Aspirin (multipic)" loading="lazy"><span class="cap">pill≈</span></td></tr>
+<tr class="">
+    <th scope="row">Deodorant</th>
+    <td class="match"><span class="badge q-miss">No icon</span><span class="note">no deodorant emoji exists</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/deodorant.jpg" alt="Deodorant (things)" loading="lazy"><span class="cap">deodorant</span></td><td class="icon"><img src="things_best/deodorant_05s.jpg" alt="Deodorant (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.64
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Floss</th>
+    <td class="match"><span class="badge q-weak">Loose</span><span class="ename">tooth</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F9B7.svg" alt="Floss (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9b7.svg" alt="Floss (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f9b7.svg" alt="Floss (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Tooth/Color/tooth_color.svg" alt="Floss (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/floss.jpg" alt="Floss (things)" loading="lazy"><span class="cap">floss</span></td><td class="icon"><img src="things_best/floss_12s.jpg" alt="Floss (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.78
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Lotion</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">lotion bottle</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F9F4.svg" alt="Lotion (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f9f4.svg" alt="Lotion (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f9f4.svg" alt="Lotion (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Lotion%20bottle/Color/lotion_bottle_color.svg" alt="Lotion (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/cream.jpg" alt="Lotion (things)" loading="lazy"><span class="cap">cream≈</span></td><td class="icon"><img src="things_best/cream_01b.jpg" alt="Lotion (thingsbest)" loading="lazy"><span class="cap">nm 0.80 &middot; mem 0.77
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Toothbrush</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">toothbrush</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1FAA5.svg" alt="Toothbrush (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1faa5.svg" alt="Toothbrush (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1faa5.svg" alt="Toothbrush (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Toothbrush/Color/toothbrush_color.svg" alt="Toothbrush (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/toothbrush.jpg" alt="Toothbrush (things)" loading="lazy"><span class="cap">toothbrush</span></td><td class="icon"><img src="things_best/toothbrush_06s.jpg" alt="Toothbrush (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.86
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="cat"><td colspan="9">Candidate additions &mdash; packaged retail (not in pool)</td></tr>
+<tr class="">
+    <th scope="row">Chocolate</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">chocolate bar</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F36B.svg" alt="Chocolate (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f36b.svg" alt="Chocolate (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f36b.svg" alt="Chocolate (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Chocolate%20bar/Color/chocolate_bar_color.svg" alt="Chocolate (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/chocolate.jpg" alt="Chocolate (things)" loading="lazy"><span class="cap">chocolate</span></td><td class="icon"><img src="things_best/chocolate_03s.jpg" alt="Chocolate (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.84
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Cookies</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">cookie</span><span class="note">all cookie photos name ~0.5 (cookie/biscuit split)</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F36A.svg" alt="Cookies (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f36a.svg" alt="Cookies (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f36a.svg" alt="Cookies (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Cookie/Color/cookie_color.svg" alt="Cookies (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/cookie.jpg" alt="Cookies (things)" loading="lazy"><span class="cap">cookie</span></td><td class="icon"><img src="things_best/cookie_03s.jpg" alt="Cookies (thingsbest)" loading="lazy"><span class="cap">nm 0.50 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Crackers</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/cracker.jpg" alt="Crackers (things)" loading="lazy"><span class="cap">cracker</span></td><td class="icon"><img src="things_best/cracker_06s.jpg" alt="Crackers (thingsbest)" loading="lazy"><span class="cap">nm 0.90 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Eggs</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">egg</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F95A.svg" alt="Eggs (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f95a.svg" alt="Eggs (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f95a.svg" alt="Eggs (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Egg/Color/egg_color.svg" alt="Eggs (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/egg.jpg" alt="Eggs (things)" loading="lazy"><span class="cap">egg</span></td><td class="icon"><img src="things_best/egg_09s.jpg" alt="Eggs (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.85
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Honey</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">honey pot</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F36F.svg" alt="Honey (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f36f.svg" alt="Honey (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f36f.svg" alt="Honey (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Honey%20pot/Color/honey_pot_color.svg" alt="Honey (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/honey.jpg" alt="Honey (things)" loading="lazy"><span class="cap">honey</span></td><td class="icon"><img src="things_best/honey_13s.jpg" alt="Honey (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.79
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Ice Cream</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">ice cream</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F368.svg" alt="Ice Cream (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f368.svg" alt="Ice Cream (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f368.svg" alt="Ice Cream (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Ice%20cream/Color/ice_cream_color.svg" alt="Ice Cream (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/ice_cream.jpg" alt="Ice Cream (things)" loading="lazy"><span class="cap">ice cream</span></td><td class="icon"><img src="things_best/ice_cream_03s.jpg" alt="Ice Cream (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.81
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Ketchup</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/ketchup.jpg" alt="Ketchup (things)" loading="lazy"><span class="cap">ketchup</span></td><td class="icon"><img src="things_best/ketchup_02s.jpg" alt="Ketchup (thingsbest)" loading="lazy"><span class="cap">nm 0.94 &middot; mem 0.81
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Marshmallows</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/marshmallow.jpg" alt="Marshmallows (things)" loading="lazy"><span class="cap">marshmallow</span></td><td class="icon"><img src="things_best/marshmallow_02s.jpg" alt="Marshmallows (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Milk</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">glass of milk</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F95B.svg" alt="Milk (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f95b.svg" alt="Milk (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f95b.svg" alt="Milk (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Glass%20of%20milk/Color/glass_of_milk_color.svg" alt="Milk (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/milk.jpg" alt="Milk (things)" loading="lazy"><span class="cap">milk</span></td><td class="icon"><img src="things_best/milk_18s.jpg" alt="Milk (thingsbest)" loading="lazy"><span class="cap">nm 0.75 &middot; mem 0.76
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Mustard</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/mustard.jpg" alt="Mustard (things)" loading="lazy"><span class="cap">mustard</span></td><td class="icon"><img src="things_best/mustard_01b.jpg" alt="Mustard (thingsbest)" loading="lazy"><span class="cap">nm 0.94 &middot; mem 0.80
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Nail Polish</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">nail polish</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F485.svg" alt="Nail Polish (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f485.svg" alt="Nail Polish (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f485.svg" alt="Nail Polish (noto)" loading="lazy"></td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/nail_polish.jpg" alt="Nail Polish (things)" loading="lazy"><span class="cap">nail polish</span></td><td class="icon"><img src="things_best/nail_polish_12s.jpg" alt="Nail Polish (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.93
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Popcorn</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">popcorn</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F37F.svg" alt="Popcorn (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f37f.svg" alt="Popcorn (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f37f.svg" alt="Popcorn (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Popcorn/Color/popcorn_color.svg" alt="Popcorn (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/popcorn.jpg" alt="Popcorn (things)" loading="lazy"><span class="cap">popcorn</span></td><td class="icon"><img src="things_best/popcorn_09s.jpg" alt="Popcorn (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.79
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Potato Chips</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/chips.jpg" alt="Potato Chips (things)" loading="lazy"><span class="cap">chips</span></td><td class="icon"><img src="things_best/chips_09s.jpg" alt="Potato Chips (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Pretzels</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">pretzel</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F968.svg" alt="Pretzels (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f968.svg" alt="Pretzels (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f968.svg" alt="Pretzels (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pretzel/Color/pretzel_color.svg" alt="Pretzels (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/pretzel.jpg" alt="Pretzels (things)" loading="lazy"><span class="cap">pretzel</span></td><td class="icon"><img src="things_best/pretzel_01b.jpg" alt="Pretzels (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Razors</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">razor</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1FA92.svg" alt="Razors (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1fa92.svg" alt="Razors (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1fa92.svg" alt="Razors (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Razor/Color/razor_color.svg" alt="Razors (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/razor.jpg" alt="Razors (things)" loading="lazy"><span class="cap">razor</span></td><td class="icon"><img src="things_best/razor_08s.jpg" alt="Razors (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.84
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Rice</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">cooked rice</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F35A.svg" alt="Rice (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f35a.svg" alt="Rice (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f35a.svg" alt="Rice (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Cooked%20rice/Color/cooked_rice_color.svg" alt="Rice (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/rice.jpg" alt="Rice (things)" loading="lazy"><span class="cap">rice</span></td><td class="icon"><img src="things_best/rice_09s.jpg" alt="Rice (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.81
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Shaving Cream</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/shaving_cream.jpg" alt="Shaving Cream (things)" loading="lazy"><span class="cap">shaving cream</span></td><td class="icon"><img src="things_best/shaving_cream_08s.jpg" alt="Shaving Cream (thingsbest)" loading="lazy"><span class="cap">nm 0.82 &middot; mem 0.82
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Soup</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">pot of food</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F372.svg" alt="Soup (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f372.svg" alt="Soup (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f372.svg" alt="Soup (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Pot%20of%20food/Color/pot_of_food_color.svg" alt="Soup (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/soup.jpg" alt="Soup (things)" loading="lazy"><span class="cap">soup</span></td><td class="icon"><img src="things_best/soup_02s.jpg" alt="Soup (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.78
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Tea</th>
+    <td class="match"><span class="badge q-exact">Exact</span><span class="ename">teacup without handle</span></td>
+    <td class="icon"><img src="https://cdn.jsdelivr.net/gh/hfg-gmuend/openmoji@latest/color/svg/1F375.svg" alt="Tea (openmoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f375.svg" alt="Tea (twemoji)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/svg/emoji_u1f375.svg" alt="Tea (noto)" loading="lazy"></td><td class="icon"><img src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/Teacup%20without%20handle/Color/teacup_without_handle_color.svg" alt="Tea (fluent)" loading="lazy"></td><td class="icon"><img src="things_cc0/tea.jpg" alt="Tea (things)" loading="lazy"><span class="cap">tea</span></td><td class="icon"><img src="things_best/tea_03s.jpg" alt="Tea (thingsbest)" loading="lazy"><span class="cap">nm 1.00 &middot; mem 0.80
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Toothpaste</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/toothpaste.jpg" alt="Toothpaste (things)" loading="lazy"><span class="cap">toothpaste</span></td><td class="icon"><img src="things_best/toothpaste_04s.jpg" alt="Toothpaste (thingsbest)" loading="lazy"><span class="cap">nm 0.95 &middot; mem 0.83
+</span></td><td class="icon none">&mdash;</td></tr>
+<tr class="">
+    <th scope="row">Yogurt</th>
+    <td class="match"><span class="badge q-miss">No icon</span></td>
+    <td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon none">&mdash;</td><td class="icon"><img src="things_cc0/yogurt.jpg" alt="Yogurt (things)" loading="lazy"><span class="cap">yogurt</span></td><td class="icon"><img src="things_best/yogurt_12s.jpg" alt="Yogurt (thingsbest)" loading="lazy"><span class="cap">nm 0.88 &middot; mem 0.83
+</span></td><td class="icon none">&mdash;</td></tr>
+
+    </tbody>
+  </table>
+  <p class="foot">THINGS&#8288;+ column uses the one-per-concept CC0 (public domain) subset from <a href="https://osf.io/jum2f/">osf.io/jum2f</a> &mdash; the full THINGS set has 12+ photos per concept with naming, typicality, and familiarity norms. MultiPic (Du&ntilde;abeitia et al., 2018) has UK-English name-agreement and visual-complexity norms; its supermarket coverage is thin because the set targets classic picture-naming vocabulary. Cells marked &mdash; have no defensible match in that source. Licenses: OpenMoji CC&nbsp;BY-SA&nbsp;4.0, Twemoji CC&nbsp;BY&nbsp;4.0, Noto Apache&nbsp;2.0, Fluent MIT, THINGS&#8288;+ CC0, MultiPic free for research use.</p>
+</div>
+<script>
+(function () {
+  var base = new URLSearchParams(location.search).get('stimuli_base_url');
+  if (!base) return;
+  if (!base.endsWith('/')) base += '/';
+  document.querySelectorAll('img').forEach(function (img) {
+    var src = img.getAttribute('src');
+    if (/^(things_best|things_cc0|multipic)\//.test(src)) img.src = base + src;
+  });
+})();
+</script>
+</body>
+</html>

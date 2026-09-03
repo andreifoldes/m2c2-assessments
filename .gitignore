@@ -14,3 +14,7 @@ temp/
 
 # Local Netlify folder
 .netlify
+# THINGS item photographs (fair-use research stimuli, not redistributable)
+assessments/prices/assets/prices/images/*.jpg
+# Netlify secret site config for prices stimuli (never commit)
+assessments/prices/tools/netlify.local.env
