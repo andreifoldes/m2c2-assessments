@@ -10,6 +10,7 @@ import {
   WebColors,
   RandomDraws,
   Transition,
+  Easings,
 } from "@m2c2kit/core";
 import { AdaptiveAlgorithm, Classification } from "./adaptive-algorithm.js";
 
@@ -194,6 +195,10 @@ export class PvtBa extends Game {
     this._waitingForISI = false;
     this._responded = false;
     this._counterInterval = null;
+    this._demoCounterInterval = null;
+    this._demoThumb = null;
+    this._demoThumbRest = null;
+    this._demoBox = null;
     this._currentISI = 0;
     this._testEnded = false;
 
@@ -223,8 +228,111 @@ export class PvtBa extends Game {
     scene.addChild(skipLabel);
 
     skipLabel.onTapDown(() => {
+      this._stopDemoCounter();
       this.presentScene("countdown", Transition.none());
     });
+  }
+
+  _stopDemoCounter() {
+    if (this._demoCounterInterval) {
+      clearInterval(this._demoCounterInterval);
+      this._demoCounterInterval = null;
+    }
+    if (this._demoThumb) {
+      this._demoThumb.removeAllActions();
+      if (this._demoThumbRest) {
+        this._demoThumb.position = this._demoThumbRest;
+      }
+      this._demoThumb.scale = 1;
+    }
+    if (this._demoBox) {
+      this._demoBox.strokeColor = STIMULUS_BOX_BORDER;
+    }
+  }
+
+  _setDemoThumbPressed(pressed) {
+    const thumb = this._demoThumb;
+    const rest = this._demoThumbRest;
+    if (!thumb || !rest) return;
+
+    thumb.removeAllActions();
+    const dest = pressed
+      ? { x: rest.x - 10, y: rest.y - 32 }
+      : rest;
+    const duration = pressed ? 80 : 160;
+    thumb.run(
+      Action.group([
+        Action.move({
+          point: dest,
+          duration,
+          easing: pressed ? Easings.cubicOut : Easings.cubicInOut,
+        }),
+        Action.scale({
+          scale: pressed ? 0.88 : 1,
+          duration,
+        }),
+      ]),
+    );
+  }
+
+  _startDemoCounter(demoCounter, demoBox) {
+    this._demoBox = demoBox;
+    this._stopDemoCounter();
+
+    // Typical PVT responses: a mix of quicker and slower average times.
+    const demoRtsMs = [231, 278, 241, 319];
+    const emptyMsByTrial = [1000, 1400, 850, 1200];
+    const holdMs = 800;
+    const lapseThreshold = this.getParameter("lapse_threshold_ms");
+    let trialIndex = 0;
+    let phase = "empty";
+    let phaseStart = Timer.now();
+    demoCounter.text = "";
+    demoCounter.fontColor = GREEN;
+    demoBox.strokeColor = STIMULUS_BOX_BORDER;
+    this._setDemoThumbPressed(false);
+
+    const feedbackColor = (rt) =>
+      rt < lapseThreshold * 0.7 ? GREEN : YELLOW;
+
+    this._demoCounterInterval = setInterval(() => {
+      const now = Timer.now();
+      const elapsed = now - phaseStart;
+      const targetRt = demoRtsMs[trialIndex];
+      const emptyMs = emptyMsByTrial[trialIndex];
+
+      if (phase === "empty") {
+        demoCounter.text = "";
+        if (elapsed >= emptyMs) {
+          phase = "counting";
+          phaseStart = now;
+          demoCounter.fontColor = GREEN;
+          demoBox.strokeColor = STIMULUS_BOX_BORDER;
+          demoCounter.text = "1";
+        }
+      } else if (phase === "counting") {
+        const ms = Math.max(1, Math.round(now - phaseStart));
+        if (ms >= targetRt) {
+          demoCounter.text = String(targetRt);
+          const color = feedbackColor(targetRt);
+          demoCounter.fontColor = color;
+          demoBox.strokeColor = color;
+          phase = "hold";
+          phaseStart = now;
+          this._setDemoThumbPressed(true);
+        } else {
+          demoCounter.text = String(ms);
+        }
+      } else if (elapsed >= holdMs) {
+        trialIndex = (trialIndex + 1) % demoRtsMs.length;
+        phase = "empty";
+        phaseStart = now;
+        demoCounter.text = "";
+        demoCounter.fontColor = GREEN;
+        demoBox.strokeColor = STIMULUS_BOX_BORDER;
+        this._setDemoThumbPressed(false);
+      }
+    }, 16);
   }
 
   _buildTutorialScenes() {
@@ -298,7 +406,7 @@ export class PvtBa extends Game {
     this._addSkipTutorialButton(scene2);
 
     const thumbTitle = new Label({
-      text: "Get Ready",
+      text: "How It Works",
       fontSize: 28,
       fontColor: TEXT_PRIMARY,
       position: { x: 200, y: this._py(120) },
@@ -316,9 +424,7 @@ export class PvtBa extends Game {
     scene2.addChild(thumbBox);
 
     const thumbInstr = new Label({
-      text: isTouchDevice
-        ? "Hover the thumb of your\ndominant hand over the\nscreen and watch the box."
-        : "Position your mouse cursor\nover the box and get\nready to click.",
+      text: "The task will begin with an\nempty box on the screen.",
       fontSize: 20,
       fontColor: TEXT_SECONDARY,
       position: { x: 200, y: this._py(460) },
@@ -328,8 +434,8 @@ export class PvtBa extends Game {
 
     const thumbHint = new Label({
       text: isTouchDevice
-        ? "Keep your thumb close to the\nscreen so you can tap quickly."
-        : "Keep your hand on the mouse\nso you can click quickly.",
+        ? "When it starts, hover your thumb\nover the screen so you can tap quickly."
+        : "When it starts, position your mouse\nover the box so you can click quickly.",
       fontSize: 16,
       fontColor: TEXT_TERTIARY,
       position: { x: 200, y: this._py(570) },
@@ -396,21 +502,26 @@ export class PvtBa extends Game {
     scene3.addChild(demoBox);
 
     const demoCounter = new Label({
-      text: "325",
+      text: "",
       fontSize: 48,
       fontColor: GREEN,
       position: { x: 200, y: this._py(240) },
+      zPosition: 12,
     });
     scene3.addChild(demoCounter);
 
-    if (isTouchDevice) {
-      const thumbIllustration3 = new Sprite({
-        imageName: "rightThumb",
-        position: { x: 310, y: this._py(380) },
-        zPosition: 5,
-      });
-      scene3.addChild(thumbIllustration3);
-    }
+    const thumbIllustration3 = new Sprite({
+      imageName: "rightThumb",
+      position: { x: 310, y: this._py(390) },
+      zPosition: 8,
+    });
+    scene3.addChild(thumbIllustration3);
+
+    scene3.onAppear(() => {
+      this._demoThumb = thumbIllustration3;
+      this._demoThumbRest = { x: 310, y: this._py(390) };
+      this._startDemoCounter(demoCounter, demoBox);
+    });
 
     const howInstr1 = new Label({
       text: "A counter will appear in the box.",
@@ -468,6 +579,7 @@ export class PvtBa extends Game {
     scene3.addChild(beginLabel);
 
     beginBtn.onTapDown(() => {
+      this._stopDemoCounter();
       this.presentScene("countdown", Transition.none());
     });
   }

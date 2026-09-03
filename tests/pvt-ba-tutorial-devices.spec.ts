@@ -45,7 +45,7 @@ async function clickGameCoords(
 
 /**
  * Navigate to PVT-BA and advance past tutorial page 1 to reach page 2
- * ("Get Ready" with the device-specific illustration).
+ * ("How It Works" with the device-specific illustration).
  */
 async function goToTutorialPage2(page: Page): Promise<void> {
   await page.goto(PVT_BA_URL);
