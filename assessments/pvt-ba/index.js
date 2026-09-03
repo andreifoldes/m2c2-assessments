@@ -1,5 +1,5 @@
 import { Session } from "@m2c2kit/session";
-import { PvtBa } from "./pvt-ba.js";
+import { PvtBa } from "./pvt-ba.js?v=3";
 let webcamModule = null;
 let webgazerModule = null;
 let ambientLightModule = null;
