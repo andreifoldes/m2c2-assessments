@@ -1,5 +1,5 @@
 import { Session } from "@m2c2kit/session";
-import { Prices, ITEM_IMAGES } from "./prices.js?v=4";
+import { Prices, ITEM_IMAGES } from "./prices.js?v=5";
 let webcamModule = null;
 let webgazerModule = null;
 let ambientLightModule = null;
@@ -58,11 +58,26 @@ if (Object.keys(paramOverrides).length > 0) {
 // images=1 or images=true shows item photographs during the tutorial and
 // learning phases. Images are prefetched into data URLs before the session
 // starts so that trial-onset timing is unaffected by network latency.
+// The public GitHub Pages demo (no token / callback / embed) loads photos
+// automatically; study launches stay word-only unless they pass images=1.
+// THINGS license forbids committing the image binaries, so the demo reads
+// them from a private-by-obscurity host (same pattern as FNAME-Pairs).
+const DEMO_STIMULI_BASE_URL =
+  "https://prices-stim-480f5e7b.netlify.app/742e275312caae3b129c5f8b31ad3c09/";
+const LOCAL_STIMULI_BASE_URL = "assets/prices/images/";
 const imagesParam = params.get("images");
-const imagesEnabled = imagesParam === "1" || imagesParam === "true";
+const imagesExplicitOn = imagesParam === "1" || imagesParam === "true";
+const imagesExplicitOff = imagesParam === "0" || imagesParam === "false";
+const publicDemo = !token && !callbackUrl && params.get("embed") !== "1";
+const imagesEnabled =
+  imagesExplicitOn || (publicDemo && !imagesExplicitOff);
 if (imagesEnabled) {
-  const stimuliBaseUrl =
-    params.get("stimuli_base_url") || "assets/prices/images/";
+  const isLocalHost =
+    location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  let stimuliBaseUrl =
+    params.get("stimuli_base_url") ||
+    (isLocalHost ? LOCAL_STIMULI_BASE_URL : DEMO_STIMULI_BASE_URL);
+  if (!stimuliBaseUrl.endsWith("/")) stimuliBaseUrl += "/";
   const entries = await Promise.all(
     Object.entries(ITEM_IMAGES).map(async ([item, file]) => {
       try {

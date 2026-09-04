@@ -164,7 +164,7 @@ export const TASKS = [
       {
         title: "Running with or without images",
         body: [
-          "By default the task is **word-only**: each item is shown as its name plus a price. Add `images=1` (or `images=true`) to show a photograph of the item above the name during the tutorial example and the learning phase. The **recognition phase stays word-only** in both modes, so the test remains of the item–price association rather than picture recognition.",
+          "Study launches (token, callback, or `embed=1`) are **word-only** by default: each item is shown as its name plus a price. Add `images=1` (or `images=true`) to show a photograph of the item above the name during the tutorial example and the learning phase. The public GitHub Pages demo (no token / callback / embed) loads photographs automatically; pass `images=0` to force word-only. The **recognition phase stays word-only** in both modes, so the test remains of the item–price association rather than picture recognition.",
           "",
           "Photographs are prefetched as data URLs before the session starts, so trial-onset timing is not affected by network latency. If `images=1` is set but no photographs can be loaded (missing host, CORS failure, empty directory), the task logs a warning and runs in word-only mode. Trial data include `images_enabled` so analyses can distinguish the two modes.",
           "",
