@@ -1,5 +1,5 @@
 import { Session } from "@m2c2kit/session";
-import { Prices, ITEM_IMAGES } from "./prices.js?v=3";
+import { Prices, ITEM_IMAGES } from "./prices.js?v=4";
 let webcamModule = null;
 let webgazerModule = null;
 let ambientLightModule = null;
