@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="100%" height="100%" viewBox="0 0 240 360" version="1.1"
+     xmlns="http://www.w3.org/2000/svg" xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-linecap:round;stroke-miterlimit:2;">
+  <!-- Classic arrow pointer. Hotspot (tip) at the top-left of the viewBox so the
+       sprite reads as "pointing up-left" toward the stimulus box, mirroring the
+       right-thumb illustration used on touch devices. Line-art aesthetic: white
+       fill with a black outline. -->
+  <path d="M20,20 L20,300 L90,230 L140,340 L180,320 L128,214 L210,214 Z"
+        style="fill:rgb(253,253,253);stroke:rgb(24,24,26);stroke-width:14;"/>
+</svg>

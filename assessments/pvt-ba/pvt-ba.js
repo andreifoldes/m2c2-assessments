@@ -114,6 +114,12 @@ export class PvtBa extends Game {
           height: 198,
           url: "images/rightthumb.svg",
         },
+        {
+          imageName: "mouseCursor",
+          width: 80,
+          height: 120,
+          url: "images/mousecursor.svg",
+        },
       ],
       trialSchema: {
         trial_index: { type: "integer", description: "0-based trial index" },
@@ -199,6 +205,9 @@ export class PvtBa extends Game {
     this._demoThumb = null;
     this._demoThumbRest = null;
     this._demoBox = null;
+    this._demoRipple = null;
+    this._demoRippleHome = null;
+    this._pointerIsCursor = false;
     this._currentISI = 0;
     this._testEnded = false;
 
@@ -245,6 +254,11 @@ export class PvtBa extends Game {
       }
       this._demoThumb.scale = 1;
     }
+    if (this._demoRipple) {
+      this._demoRipple.removeAllActions();
+      this._demoRipple.hidden = true;
+      this._demoRipple.alpha = 0;
+    }
     if (this._demoBox) {
       this._demoBox.strokeColor = STIMULUS_BOX_BORDER;
     }
@@ -256,6 +270,36 @@ export class PvtBa extends Game {
     if (!thumb || !rest) return;
 
     thumb.removeAllActions();
+
+    // Desktop: the pointer is a mouse cursor. A "press" is a momentary click
+    // (quick press-and-release pulse + an expanding ring), not a sustained lift.
+    if (this._pointerIsCursor) {
+      if (pressed) {
+        thumb.run(
+          Action.sequence([
+            Action.group([
+              Action.move({
+                point: { x: rest.x - 4, y: rest.y - 6 },
+                duration: 70,
+                easing: Easings.cubicOut,
+              }),
+              Action.scale({ scale: 0.82, duration: 70 }),
+            ]),
+            Action.group([
+              Action.move({ point: rest, duration: 130, easing: Easings.cubicInOut }),
+              Action.scale({ scale: 1, duration: 130 }),
+            ]),
+          ]),
+        );
+        this._playClickRipple();
+      } else {
+        thumb.position = rest;
+        thumb.scale = 1;
+      }
+      return;
+    }
+
+    // Touch: the thumb lifts toward the box on tap and settles back afterwards.
     const dest = pressed
       ? { x: rest.x - 10, y: rest.y - 32 }
       : rest;
@@ -270,6 +314,31 @@ export class PvtBa extends Game {
         Action.scale({
           scale: pressed ? 0.88 : 1,
           duration,
+        }),
+      ]),
+    );
+  }
+
+  // Expanding "click" ring shown at the cursor tip on each demo click (desktop).
+  _playClickRipple() {
+    const ripple = this._demoRipple;
+    const home = this._demoRippleHome;
+    if (!ripple || !home) return;
+    ripple.removeAllActions();
+    ripple.position = home;
+    ripple.scale = 0.25;
+    ripple.alpha = 0.55;
+    ripple.hidden = false;
+    ripple.run(
+      Action.sequence([
+        Action.group([
+          Action.scale({ scale: 1.6, duration: 400 }),
+          Action.fadeAlpha({ alpha: 0, duration: 400 }),
+        ]),
+        Action.custom({
+          callback: () => {
+            ripple.hidden = true;
+          },
         }),
       ]),
     );
@@ -397,6 +466,8 @@ export class PvtBa extends Game {
     // --- Screen 2: Thumb/mouse positioning ---
     const isTouchDevice =
       ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+    // Touch devices see a thumb illustration; desktop sees a mouse cursor.
+    const pointerImage = isTouchDevice ? "rightThumb" : "mouseCursor";
 
     const scene2 = new Scene({
       name: "tutorial_2",
@@ -443,14 +514,14 @@ export class PvtBa extends Game {
     });
     scene2.addChild(thumbHint);
 
-    if (isTouchDevice) {
-      const thumbIllustration = new Sprite({
-        imageName: "rightThumb",
-        position: { x: 310, y: this._py(440) },
-        zPosition: 5,
-      });
-      scene2.addChild(thumbIllustration);
-    }
+    const posIllustration = new Sprite({
+      imageName: pointerImage,
+      position: isTouchDevice
+        ? { x: 310, y: this._py(440) }
+        : { x: 300, y: this._py(400) },
+      zPosition: 5,
+    });
+    scene2.addChild(posIllustration);
 
     const nextBtn2 = new Shape({
       rect: { width: 200, height: 56 },
@@ -510,16 +581,40 @@ export class PvtBa extends Game {
     });
     scene3.addChild(demoCounter);
 
-    const thumbIllustration3 = new Sprite({
-      imageName: "rightThumb",
-      position: { x: 310, y: this._py(390) },
+    const pointerRest = isTouchDevice
+      ? { x: 310, y: this._py(390) }
+      : { x: 300, y: this._py(380) };
+    const demoPointer = new Sprite({
+      imageName: pointerImage,
+      position: { x: pointerRest.x, y: pointerRest.y },
       zPosition: 8,
     });
-    scene3.addChild(thumbIllustration3);
+    scene3.addChild(demoPointer);
+
+    // Desktop only: an expanding ring at the cursor tip on each demo click.
+    // The cursor's hotspot (viewBox 0,0) sits up-left of the sprite centre.
+    let demoRipple = null;
+    let rippleHome = null;
+    if (!isTouchDevice) {
+      rippleHome = { x: pointerRest.x - 33, y: pointerRest.y - 53 };
+      demoRipple = new Shape({
+        circleOfRadius: 26,
+        fillColor: [0, 0, 0, 0],
+        strokeColor: [0, 0, 0, 0.5],
+        lineWidth: 4,
+        position: { x: rippleHome.x, y: rippleHome.y },
+        zPosition: 7,
+        hidden: true,
+      });
+      scene3.addChild(demoRipple);
+    }
 
     scene3.onAppear(() => {
-      this._demoThumb = thumbIllustration3;
-      this._demoThumbRest = { x: 310, y: this._py(390) };
+      this._pointerIsCursor = !isTouchDevice;
+      this._demoThumb = demoPointer;
+      this._demoThumbRest = { x: pointerRest.x, y: pointerRest.y };
+      this._demoRipple = demoRipple;
+      this._demoRippleHome = rippleHome;
       this._startDemoCounter(demoCounter, demoBox);
     });
 
