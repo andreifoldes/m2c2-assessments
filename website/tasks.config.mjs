@@ -152,6 +152,26 @@ export const TASKS = [
       "Sustained Attention to Response Task with feedback. Digits 1-9 appear one at a time at random sizes; the participant presses the space bar (or taps) for every digit except 3. Each digit is followed by a circle-with-cross mask that turns green after a correct press, and errors trigger a 3 s 'MISTAKE' message. An 18-trial training block precedes the 72-trial test block.",
     reference:
       "[Stoet, 2010](https://doi.org/10.3758/BRM.42.4.1096) · [Robertson et al., 1997](https://doi.org/10.1016/S0028-3932(97)00015-8) — re-implementation of the PsyToolkit SART2",
+    wrapperParamDocs: {
+      instructions: {
+        type: "string",
+        default: "true",
+        description:
+          "Set to `false` or `0` to skip the title and instruction pages (alias for `show_instructions`). The task goes straight to the countdown.",
+      },
+      numeric_feedback: {
+        type: "string",
+        default: "true",
+        description:
+          "Set to `false` or `0` to hide the Go/No-Go counts and percentages on the training summary screen.",
+      },
+      device: {
+        type: "string",
+        default: "auto",
+        description:
+          "Instruction wording: `mobile` (tap the screen), `desktop` (press the space bar) or `auto` (detect a touch screen). Tapping always works as a response on any device.",
+      },
+    },
   },
   {
     id: "prices",

@@ -65,6 +65,27 @@ export class Sart2 extends Game {
         type: "boolean",
         description: "Whether to show the instruction and training block",
       },
+      show_instructions: {
+        default: true,
+        type: "boolean",
+        description: "Whether to show the title and instruction pages (false goes straight to the countdown)",
+      },
+      skippable_instructions: {
+        default: false,
+        type: "boolean",
+        description: "Whether to show a 'Skip instructions' button on the instruction pages",
+      },
+      numeric_feedback: {
+        default: true,
+        type: "boolean",
+        description: "Whether the training summary shows the Go/No-Go counts and percentages",
+      },
+      device: {
+        default: "auto",
+        type: "string",
+        enum: ["auto", "mobile", "desktop"],
+        description: "Wording of the instructions: 'mobile' (tap), 'desktop' (space bar) or 'auto' (detect touch screen)",
+      },
       show_quit_button: {
         default: false,
         type: "boolean",
@@ -123,57 +144,90 @@ export class Sart2 extends Game {
     this._listenersAttached = false;
     this._results = { training: this._emptyStats(), test: this._emptyStats() };
 
+    const dev = this.getParameter("device");
+    this._mobile =
+      dev === "mobile" ||
+      (dev !== "desktop" &&
+        typeof window !== "undefined" &&
+        window.matchMedia("(pointer: coarse)").matches);
+    // Wording for the input device, e.g. "Tap the screen" / "Press the space bar"
+    const P = this._mobile ? "Tap the screen" : "Press the space bar";
     const tutorial = this.getParameter("show_tutorial");
-    if (!tutorial) this._buildRealInstruction();
+    const showInstr = this.getParameter("show_instructions");
+    const skippable = this.getParameter("skippable_instructions");
+    const firstBlock = tutorial ? "training" : "test";
+
+    // The entry scene is the first one added
+    if (!showInstr) {
+      this._buildLaunchScene(firstBlock);
+    } else if (!tutorial) {
+      this._buildRealInstruction(P);
+    }
     this._buildTextScene("title", [
       { text: "SART", size: 56, y: 180 },
       { text: "Sustained Attention to Response Task", size: 20, y: 240 },
-      { text: "Press the space bar or tap the screen to read the instructions", size: 18, y: 640, color: PROMPT },
-    ], () => this._go("instructions1"));
+      { text: `${P} to read the instructions`, size: 18, y: 640, color: PROMPT },
+    ], () => this._go("instructions1"), { skip: skippable && "training" });
+    const how = this._mobile ? "tap the screen" : "press the SPACE BAR";
     this._buildTextScene("instructions1", [
       { text: "Instructions (page 1)", size: 26, y: 120 },
       {
-        text: "In this experiment you will be presented with the digits 1 to 9 in the center of the screen.\n\nYour task is to press the SPACE BAR (or tap the screen) in response to each digit, except for when the digit is a '{N}'.\n\nEach digit is followed by a circle with a cross, which you can ignore.",
+        text: `In this experiment you will be presented with the digits 1 to 9 in the center of the screen.\n\nYour task is to ${how} in response to each digit, except for when the digit is a '{N}'.\n\nEach digit is followed by a circle with a cross, which you can ignore.`,
         size: 20, y: 400, wrap: 340,
       },
-      { text: "Press the space bar or tap to read more…", size: 18, y: 700, color: PROMPT },
-    ], () => this._go("instructions2"));
+      { text: `${P} to read more…`, size: 18, y: 700, color: PROMPT },
+    ], () => this._go("instructions2"), { skip: skippable && "training" });
+    const press = this._mobile ? "tap" : "press";
     this._buildTextScene("instructions2", [
       { text: "Instructions (page 2)", size: 26, y: 120 },
       {
-        text: "For example, if you see the digit '1', press. If you see a '4', press. If you see a '{N}', DO NOT press. If you see a '7', press. And so on.\n\nPlease give equal importance to both the speed and accuracy of your responses.\n\nWhen you press correctly, the circle turns green.",
+        text: `For example, if you see the digit '1', ${press}. If you see a '4', ${press}. If you see a '{N}', DO NOT ${press}. If you see a '7', ${press}. And so on.\n\nPlease give equal importance to both the speed and accuracy of your responses.\n\nWhen you ${press} correctly, the circle turns green.`,
         size: 20, y: 400, wrap: 340,
       },
-      { text: "Press the space bar or tap to start the training block", size: 18, y: 700, color: PROMPT },
-    ], () => this._startBlock("training"));
+      { text: `${P} to start the training block`, size: 18, y: 700, color: PROMPT },
+    ], () => this._startBlock("training"), { skip: skippable && "training" });
     this._buildCountdownScene();
     this._buildTrialScene();
-    this._buildTextScene("summary-training", this._summaryItems("training"), () => this._go("instruction-real"));
-    if (tutorial) this._buildRealInstruction();
+    this._buildTextScene(
+      "summary-training",
+      this._summaryItems(P),
+      () => (showInstr ? this._go("instruction-real") : this._startBlock("test")),
+    );
+    if (showInstr && tutorial) this._buildRealInstruction(P);
     this._buildTextScene("end", [
       { text: "WELL DONE", size: 40, y: 200 },
       { text: "You have completed the real test.", size: 22, y: 270, wrap: 340 },
     ], null, { autoEndMs: 3000 });
   }
 
-  _buildRealInstruction() {
+  _buildRealInstruction(P) {
     this._buildTextScene("instruction-real", [
       { text: "Now you will start the real test block.", size: 24, y: 220, wrap: 340 },
       { text: "The same rules apply.\n\nPlease give equal importance to both the speed and accuracy of your responses.", size: 20, y: 400, wrap: 340 },
-      { text: "Press the space bar or tap to start the real test block", size: 18, y: 700, color: PROMPT },
-    ], () => this._startBlock("test"));
+      { text: `${P} to start the real test block`, size: 18, y: 700, color: PROMPT },
+    ], () => this._startBlock("test"), { skip: this.getParameter("skippable_instructions") && "test" });
+  }
+
+  /** Blank entry scene used when the instructions are skipped. */
+  _buildLaunchScene(block) {
+    const scene = new Scene({ name: "launch", backgroundColor: SCENE_BG });
+    this.addScene(scene);
+    scene.onAppear(() => {
+      this._attachListeners();
+      scene.run(Action.custom({ callback: () => this._startBlock(block) }));
+    });
   }
 
   _emptyStats() {
     return { go: 0, goMistakes: 0, noGo: 0, noGoMistakes: 0 };
   }
 
-  _summaryItems(block) {
-    // Filled in at show time (see _go), these are placeholders
+  _summaryItems(P) {
+    // Title/body are filled in at show time (see _fillSummary)
     return [
-      { text: block === "training" ? "WELL DONE" : "", size: 36, y: 100, name: "sumTitle" },
+      { text: "WELL DONE", size: 36, y: 100, name: "sumTitle" },
       { text: "", size: 20, y: 400, wrap: 340, name: "sumBody" },
-      { text: "Press the space bar or tap to continue", size: 18, y: 700, color: PROMPT },
+      { text: `${P} to continue`, size: 18, y: 700, color: PROMPT },
     ];
   }
 
@@ -193,6 +247,10 @@ export class Sart2 extends Game {
     const title = scene.children.find((c) => c.name === "sumTitle");
     const body = scene.children.find((c) => c.name === "sumBody");
     title.text = "WELL DONE";
+    if (!this.getParameter("numeric_feedback")) {
+      body.text = "You have completed the training block.";
+      return;
+    }
     body.text =
       `You have completed the training block.\n\n` +
       `Results in training block:\n` +
@@ -215,6 +273,18 @@ export class Sart2 extends Game {
           preferredMaxLayoutWidth: it.wrap,
         }),
       );
+    }
+    if (opts.skip) {
+      const skip = new Label({
+        text: "Skip instructions ›",
+        fontSize: 16,
+        fontColor: PROMPT,
+        position: { x: GAME_WIDTH - 75, y: 40 },
+        isUserInteractionEnabled: true,
+        zPosition: 20,
+      });
+      skip.onTapDown(() => this._startBlock(opts.skip));
+      scene.addChild(skip);
     }
     scene.onAppear(() => {
       this._attachListeners();

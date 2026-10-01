@@ -1,5 +1,5 @@
 import { Session } from "@m2c2kit/session";
-import { Sart2 } from "./sart2.js?v=2";
+import { Sart2 } from "./sart2.js?v=4";
 let webcamModule = null;
 let webgazerModule = null;
 let ambientLightModule = null;
@@ -26,6 +26,18 @@ for (const key of [
   if (val !== null) {
     paramOverrides[key] = parseFloat(val);
   }
+}
+for (const [urlKey, paramKey] of [
+  ["instructions", "show_instructions"],
+  ["skippable_instructions", "skippable_instructions"],
+  ["numeric_feedback", "numeric_feedback"],
+]) {
+  const v = params.get(urlKey);
+  if (v !== null) paramOverrides[paramKey] = v !== "false" && v !== "0";
+}
+const deviceParam = params.get("device");
+if (deviceParam === "mobile" || deviceParam === "desktop" || deviceParam === "auto") {
+  paramOverrides.device = deviceParam;
 }
 const tutorialParam = params.get("tutorial");
 if (tutorialParam !== null) {

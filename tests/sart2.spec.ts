@@ -81,3 +81,31 @@ test.describe("SART2", () => {
     expect(test.find((t: any) => t.digit === 3).correct).toBe(true);
   });
 });
+
+test.describe("SART2 options", () => {
+  const short = "training_trials=9&test_trials=9&error_feedback_ms=100&post_error_blank_ms=50";
+
+  test("instructions=false goes straight to the training trials", async ({ page }) => {
+    const logs: string[] = [];
+    page.on("console", (m) => logs.push(m.text()));
+    await page.goto(`${URL}?${short}&instructions=false`);
+    await waitForGameReady(page);
+    // no key presses: 4 s countdown then trials start by themselves
+    await expect
+      .poll(() => logs.filter((l) => l.includes("trial data:")).length, { timeout: 15_000 })
+      .toBeGreaterThanOrEqual(2);
+  });
+
+  test("skippable_instructions: tapping Skip starts the training block", async ({ page }) => {
+    const logs: string[] = [];
+    page.on("console", (m) => logs.push(m.text()));
+    await page.setViewportSize({ width: 400, height: 800 });
+    await page.goto(`${URL}?${short}&skippable_instructions=true`);
+    await waitForGameReady(page);
+    // Skip label sits at game coords (~325, 40) of the 400x800 canvas
+    await page.locator("#m2c2kit-canvas").click({ position: { x: 325, y: 40 } });
+    await expect
+      .poll(() => logs.filter((l) => l.includes("trial data:")).length, { timeout: 15_000 })
+      .toBeGreaterThanOrEqual(1);
+  });
+});
