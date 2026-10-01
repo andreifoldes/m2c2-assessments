@@ -1,0 +1,262 @@
+import { Session } from "@m2c2kit/session";
+import { VisualSearch } from "./visual-search.js?v=5";
+let webcamModule = null;
+let webgazerModule = null;
+let ambientLightModule = null;
+
+const assessment = new VisualSearch();
+// Test hook: lets automated tests read the current trial's target position.
+if (new URLSearchParams(window.location.search).get("test") === "1") {
+  window.__assessment = assessment;
+}
+
+const params = new URLSearchParams(window.location.search);
+const token = params.get("token");
+const callbackUrl = params.get("callback_url");
+// Optional participant identifier, echoed verbatim into every result output.
+const pid = params.get("pid");
+const debugMode = !token || !callbackUrl;
+
+const paramOverrides = {};
+for (const key of [
+  "number_of_trials",
+  "feedback_duration_ms",
+  "iti_ms",
+]) {
+  const val = params.get(key);
+  if (val !== null) {
+    paramOverrides[key] = parseFloat(val);
+  }
+}
+const tutorialParam = params.get("tutorial");
+if (tutorialParam !== null) {
+  paramOverrides.show_tutorial = tutorialParam !== "false" && tutorialParam !== "0";
+}
+if (Object.keys(paramOverrides).length > 0) {
+  assessment.setParameters(paramOverrides);
+}
+
+// webcam=1 or webcam=true enables the optional recording feature
+const webcamParam = params.get("webcam");
+const webcamEnabled = webcamParam === "1" || webcamParam === "true";
+if (webcamEnabled) {
+  try {
+    webcamModule = await import("../webcam/webcam.js");
+    webcamModule.initWebcamLogger(token, callbackUrl);
+  } catch (e) {
+    console.warn("[Visual Search] Could not load webcam module:", e);
+  }
+}
+
+// webgazer=1 or webgazer=true enables the optional eye tracking feature
+const webgazerParam = params.get("webgazer");
+const webgazerEnabled = webgazerParam === "1" || webgazerParam === "true";
+if (webgazerEnabled) {
+  try {
+    webgazerModule = await import("../webgazer/webgazer.js");
+    webgazerModule.initGazeLogger(token, callbackUrl);
+  } catch (e) {
+    console.warn("[Visual Search] Could not load webgazer module:", e);
+  }
+}
+
+// light=1 or light=true enables the optional ambient light sensor feature
+const lightParam = params.get("light");
+const lightEnabled = lightParam === "1" || lightParam === "true";
+if (lightEnabled) {
+  try {
+    ambientLightModule = await import("../ambient-light/ambient-light.js");
+    if (ambientLightModule.isAmbientLightSupported(true)) {
+      ambientLightModule.initLightLogger(token, callbackUrl);
+    } else {
+      ambientLightModule = null;
+    }
+  } catch (e) {
+    console.warn("[Visual Search] Could not load ambient light module:", e);
+  }
+}
+
+const allTrialData = [];
+
+const session = new Session({
+  activities: [assessment],
+});
+
+session.onActivityData((ev) => {
+  if (webgazerModule) {
+    webgazerModule.markTrialEnd();
+    webgazerModule.markTrialStart();
+  }
+  if (ambientLightModule) {
+    ambientLightModule.markTrialEnd();
+    ambientLightModule.markTrialStart();
+  }
+  allTrialData.push(ev.newData);
+  if (debugMode) {
+    console.log("[Visual Search debug] trial data:", ev.newData);
+  }
+});
+
+session.onEnd(async () => {
+  if (webgazerModule) {
+    try {
+      await webgazerModule.stopAndExportGaze("visual-search");
+    } catch (e) {
+      console.warn("[Visual Search] Gaze export failed:", e);
+    }
+  }
+
+  if (ambientLightModule) {
+    try {
+      await ambientLightModule.stopAndExportLight("visual-search");
+    } catch (e) {
+      console.warn("[Visual Search] Light export failed:", e);
+    }
+  }
+
+  if (webcamRecording && webcamModule) {
+    await webcamModule.stopAndDownloadRecording(webcamRecording, "visual-search");
+  }
+
+  // Embedded mode (e.g. ESMira PWA iframe): post results to the parent window
+  // so the host app can capture them and close the overlay. No HTTP callback.
+  if (new URLSearchParams(window.location.search).get("embed") === "1") {
+    const __t = allTrialData || [];
+    const __last = __t[__t.length - 1];
+    try {
+      if (window.parent && window.parent !== window)
+        window.parent.postMessage({
+          type: "m2c2:complete",
+          assessment: "visual-search",
+          pid,
+          summary: {
+            n_trials: __t.length,
+            duration_s: __last && typeof __last.elapsed_test_time_ms === "number"
+              ? +(__last.elapsed_test_time_ms / 1000).toFixed(1) : null,
+          },
+          data: { trials: __t },
+        }, "*");
+    } catch (e) { console.warn("[m2c2] parent postMessage failed", e); }
+    return;
+  }
+
+  if (debugMode) {
+    const lastTrial = allTrialData[allTrialData.length - 1];
+    const totalDurationSeconds = lastTrial
+      ? +(lastTrial.elapsed_test_time_ms / 1000).toFixed(1)
+      : 0;
+    const summary = {
+      totalTrials: allTrialData.length,
+      total_duration_seconds: totalDurationSeconds,
+      trials: allTrialData,
+    };
+    console.log("[Visual Search debug] all trial data:", summary);
+    const showEndScreen = params.get("show_end_screen") !== "false" && params.get("show_end_screen") !== "0";
+    if (showEndScreen) {
+      document.body.innerHTML = `
+        <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
+          <h1 style="color:#4CAF50;">Assessment Complete (Debug Mode)</h1>
+          <p>No token/callback_url provided &mdash; results shown below instead of being submitted.</p>
+          <p style="color:#555;">Total trials: ${allTrialData.length} &nbsp;|&nbsp; Session duration: ${totalDurationSeconds}s</p>
+          <details open style="text-align:left;max-width:600px;margin:20px auto;">
+            <summary style="cursor:pointer;color:#c68a00;font-size:16px;">Trial Data (JSON)</summary>
+            <pre style="background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;font-size:12px;color:#333;max-height:60vh;">${JSON.stringify(allTrialData, null, 2)}</pre>
+          </details>
+        </div>`;
+    }
+    return;
+  }
+
+  try {
+    const resp = await fetch(callbackUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        pid,
+        data: {
+          pid,
+          trials: allTrialData,
+          total_duration_seconds: allTrialData.length > 0
+            ? +(allTrialData[allTrialData.length - 1].elapsed_test_time_ms / 1000).toFixed(1)
+            : 0,
+        },
+      }),
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.detail || `Server error: ${resp.status}`);
+    }
+
+    const showEndScreen = params.get("show_end_screen") !== "false" && params.get("show_end_screen") !== "0";
+    if (showEndScreen) {
+      document.body.innerHTML = `
+      <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
+      <h1 style="color:#2e7d32;">Assessment Complete</h1>
+      <p style="color:#2e7d32;">Your results have been recorded. Thank you!</p>
+      <p>You can now close this window and return to Telegram.</p>
+      </div>`;
+    }
+
+    if (window.Telegram && window.Telegram.WebApp) {
+      setTimeout(() => window.Telegram.WebApp.close(), showEndScreen ? 2000 : 0);
+    }
+  } catch (err) {
+    console.error("Failed to submit results:", err);
+    document.body.innerHTML = `
+      <div style="text-align:center;padding:40px;font-family:sans-serif;color:#333;background:#fff;min-height:100vh;box-sizing:border-box;">
+        <h2 style="color:#c62828;">Submission Error</h2>
+        <p>Failed to submit results. Please contact the research team.</p>
+      </div>`;
+  }
+});
+
+// Conditionally show consent, then face positioning guide, then start recording
+let webcamRecording = null;
+
+if (webcamEnabled && webcamModule) {
+  const accepted = await webcamModule.showWebcamConsentOverlay();
+  if (accepted) {
+    try {
+      const stream = await webcamModule.getWebcamStream();
+      await webcamModule.showFacePositioningGuide(stream);
+      webcamRecording = webcamModule.startRecordingStream(stream);
+    } catch (_) {
+      console.warn("[Visual Search] Webcam recording unavailable, proceeding without it.");
+    }
+  }
+}
+
+// Ambient Light: consent → start collection
+if (lightEnabled && ambientLightModule) {
+  const accepted = await ambientLightModule.showLightConsentOverlay();
+  if (accepted) {
+    try {
+      ambientLightModule.startLightCollection();
+      ambientLightModule.markTrialStart();
+    } catch (e) {
+      console.warn("[Visual Search] Ambient light sensing unavailable, proceeding without it.", e);
+      ambientLightModule = null;
+    }
+  } else {
+    ambientLightModule = null;
+  }
+}
+
+// WebGazer: consent → init → calibrate → start collection
+if (webgazerEnabled && webgazerModule) {
+  const accepted = await webgazerModule.showGazeConsentOverlay();
+  if (accepted) {
+    try {
+      await webgazerModule.initWebGazer();
+      await webgazerModule.runCalibration();
+      webgazerModule.startGazeCollection();
+      webgazerModule.markTrialStart();
+    } catch (e) {
+      console.warn("[Visual Search] Eye tracking unavailable, proceeding without it.", e);
+    }
+  }
+}
+
+session.initialize();

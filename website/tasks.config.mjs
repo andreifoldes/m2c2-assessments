@@ -324,6 +324,18 @@ export const TASKS = [
       "[Moore et al., 2020](https://doi.org/10.1002/mpr.1859) — custom implementation",
   },
   {
+    id: "visual-search",
+    title: "Visual Search",
+    kind: "custom",
+    duration: "~150 s",
+    launchPath: "assessments/visual-search/",
+    sourceFile: "assessments/visual-search/visual-search.js",
+    wrapperFile: "assessments/visual-search/index.js",
+    blurb:
+      "A classic visual search task. Participants find and tap the letter L among rotated Ts as quickly as they can. Target color (red or black), whether one distractor is red, and set size (10 or 20 distractors) vary across trials, and each response is followed by accuracy and speed feedback.",
+    reference: "Re-implementation of a PsychoPy/PsychoJS visual search experiment",
+  },
+  {
     id: "symbol-search",
     title: "Symbol Search",
     kind: "m2c2kit",
