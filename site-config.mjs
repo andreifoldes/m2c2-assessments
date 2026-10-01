@@ -57,6 +57,13 @@ export default {
         show_quit_button: false,
       },
     },
+    {
+      name: "sart2",
+      versions: "1.0.0",
+      parameters: {
+        show_quit_button: false,
+      },
+    },
   ],
   configure: (context, session, assessment) => {
     const params = new URLSearchParams(window.location.search);
