@@ -36,7 +36,7 @@ export class Sart2 extends Game {
         description: "Number of trials in the training block",
       },
       test_trials: {
-        default: 225,
+        default: 72,
         type: "integer",
         description: "Number of trials in the real test block",
       },

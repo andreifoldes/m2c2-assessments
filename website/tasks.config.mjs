@@ -144,12 +144,12 @@ export const TASKS = [
     id: "sart2",
     title: "SART2",
     kind: "custom",
-    duration: "~270 s",
+    duration: "~150 s",
     launchPath: "assessments/sart2/",
     sourceFile: "assessments/sart2/sart2.js",
     wrapperFile: "assessments/sart2/index.js",
     blurb:
-      "Sustained Attention to Response Task with feedback. Digits 1-9 appear one at a time at random sizes; the participant presses the space bar (or taps) for every digit except 3. Each digit is followed by a circle-with-cross mask that turns green after a correct press, and errors trigger a 3 s 'MISTAKE' message. An 18-trial training block precedes the 225-trial test block.",
+      "Sustained Attention to Response Task with feedback. Digits 1-9 appear one at a time at random sizes; the participant presses the space bar (or taps) for every digit except 3. Each digit is followed by a circle-with-cross mask that turns green after a correct press, and errors trigger a 3 s 'MISTAKE' message. An 18-trial training block precedes the 72-trial test block.",
     reference:
       "[Stoet, 2010](https://doi.org/10.3758/BRM.42.4.1096) · [Robertson et al., 1997](https://doi.org/10.1016/S0028-3932(97)00015-8) — re-implementation of the PsyToolkit SART2",
   },
