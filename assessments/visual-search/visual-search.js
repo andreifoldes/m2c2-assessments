@@ -68,7 +68,7 @@ export class VisualSearch extends Game {
   constructor() {
     const defaultParameters = {
       number_of_trials: {
-        default: 80,
+        default: 20,
         type: "integer",
         description:
           "Number of search trials. Conditions are drawn in equal proportion and shuffled.",

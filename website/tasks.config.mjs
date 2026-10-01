@@ -340,7 +340,7 @@ export const TASKS = [
     id: "visual-search",
     title: "Visual Search",
     kind: "custom",
-    duration: "~150 s",
+    duration: "~120 s",
     launchPath: "assessments/visual-search/",
     sourceFile: "assessments/visual-search/visual-search.js",
     wrapperFile: "assessments/visual-search/index.js",
