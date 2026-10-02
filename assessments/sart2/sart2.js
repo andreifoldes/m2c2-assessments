@@ -73,7 +73,7 @@ export class Sart2 extends Game {
       skippable_instructions: {
         default: false,
         type: "boolean",
-        description: "Whether to show a 'Skip instructions' button on the instruction pages",
+        description: "Whether to show a 'Skip instructions' button on the instruction pages; tapping it skips the training block and starts the real test block",
       },
       numeric_feedback: {
         default: true,
@@ -167,7 +167,7 @@ export class Sart2 extends Game {
       { text: "SART", size: 56, y: 180 },
       { text: "Sustained Attention to Response Task", size: 20, y: 240 },
       { text: `${P} to read the instructions`, size: 18, y: 640, color: PROMPT },
-    ], () => this._go("instructions1"), { skip: skippable && "training" });
+    ], () => this._go("instructions1"), { skip: skippable && "test" });
     const how = this._mobile ? "tap the screen" : "press the SPACE BAR";
     this._buildTextScene("instructions1", [
       { text: "Instructions (page 1)", size: 26, y: 120 },
@@ -176,7 +176,7 @@ export class Sart2 extends Game {
         size: 20, y: 400, wrap: 340,
       },
       { text: `${P} to read more…`, size: 18, y: 700, color: PROMPT },
-    ], () => this._go("instructions2"), { skip: skippable && "training" });
+    ], () => this._go("instructions2"), { skip: skippable && "test" });
     const press = this._mobile ? "tap" : "press";
     this._buildTextScene("instructions2", [
       { text: "Instructions (page 2)", size: 26, y: 120 },
@@ -185,7 +185,7 @@ export class Sart2 extends Game {
         size: 20, y: 400, wrap: 340,
       },
       { text: `${P} to start the training block`, size: 18, y: 700, color: PROMPT },
-    ], () => this._startBlock("training"), { skip: skippable && "training" });
+    ], () => this._startBlock("training"), { skip: skippable && "test" });
     this._buildCountdownScene();
     this._buildTrialScene();
     this._buildTextScene(

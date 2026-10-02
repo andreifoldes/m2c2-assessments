@@ -96,7 +96,7 @@ test.describe("SART2 options", () => {
       .toBeGreaterThanOrEqual(2);
   });
 
-  test("skippable_instructions: tapping Skip starts the training block", async ({ page }) => {
+  test("skippable_instructions: tapping Skip goes straight to the real test block", async ({ page }) => {
     const logs: string[] = [];
     page.on("console", (m) => logs.push(m.text()));
     await page.setViewportSize({ width: 400, height: 800 });
