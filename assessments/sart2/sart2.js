@@ -560,10 +560,12 @@ export class Sart2 extends Game {
     this._getNode("digit").hidden = true;
     this._getNode("mistakeTitle").hidden = false;
     const body = this._getNode("mistakeBody");
+    const press = this._mobile ? "tap the screen" : "press the space bar";
+    const Press = press.charAt(0).toUpperCase() + press.slice(1);
     body.text =
       errorType === "commission"
-        ? `Do not press the space bar when you see a '${noGo}'!`
-        : `Press the space bar when you see any digit, apart from '${noGo}'!`;
+        ? `Do not ${press} when you see a '${noGo}'!`
+        : `${Press} when you see any digit, apart from '${noGo}'!`;
     body.hidden = false;
     scene.run(
       Action.sequence([
