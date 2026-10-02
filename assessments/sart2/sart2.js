@@ -20,6 +20,9 @@ const GAME_WIDTH = 400;
 const GAME_HEIGHT = 800;
 const CENTER_X = GAME_WIDTH / 2;
 const CENTER_Y = GAME_HEIGHT / 2;
+// Skip button: bottom centre; presses at or below SKIP_ZONE_Y belong to it, not to "advance"
+const SKIP_Y = 765;
+const SKIP_ZONE_Y = 735;
 
 // Digit font sizes of the original study, picked at random per trial
 const DIGIT_FONT_SIZES = [48, 72, 94, 100, 120];
@@ -140,6 +143,7 @@ export class Sart2 extends Game {
     this._trialIndex = 0;
     this._sessionStart = 0;
     this._onPress = null;
+    this._skipActive = false;
     this._lockUntil = 0;
     this._listenersAttached = false;
     this._results = { training: this._emptyStats(), test: this._emptyStats() };
@@ -166,7 +170,7 @@ export class Sart2 extends Game {
     this._buildTextScene("title", [
       { text: "SART", size: 56, y: 180 },
       { text: "Sustained Attention to Response Task", size: 20, y: 240 },
-      { text: `${P} to read the instructions`, size: 18, y: 640, color: PROMPT },
+      { text: `${P} to read the instructions`, size: 18, y: 620, color: PROMPT },
     ], () => this._go("instructions1"), { skip: skippable && "test" });
     const how = this._mobile ? "tap the screen" : "press the SPACE BAR";
     this._buildTextScene("instructions1", [
@@ -175,7 +179,7 @@ export class Sart2 extends Game {
         text: `In this experiment you will be presented with the digits 1 to 9 in the center of the screen.\n\nYour task is to ${how} in response to each digit, except for when the digit is a '{N}'.\n\nEach digit is followed by a circle with a cross, which you can ignore.`,
         size: 20, y: 400, wrap: 340,
       },
-      { text: `${P} to read more…`, size: 18, y: 700, color: PROMPT },
+      { text: `${P} to read more…`, size: 18, y: 650, color: PROMPT },
     ], () => this._go("instructions2"), { skip: skippable && "test" });
     const press = this._mobile ? "tap" : "press";
     this._buildTextScene("instructions2", [
@@ -184,7 +188,7 @@ export class Sart2 extends Game {
         text: `For example, if you see the digit '1', ${press}. If you see a '4', ${press}. If you see a '{N}', DO NOT ${press}. If you see a '7', ${press}. And so on.\n\nPlease give equal importance to both the speed and accuracy of your responses.\n\nWhen you ${press} correctly, the circle turns green.`,
         size: 20, y: 400, wrap: 340,
       },
-      { text: `${P} to start the training block`, size: 18, y: 700, color: PROMPT },
+      { text: `${P} to start the training block`, size: 18, y: 650, color: PROMPT },
     ], () => this._startBlock("training"), { skip: skippable && "test" });
     this._buildCountdownScene();
     this._buildTrialScene();
@@ -204,7 +208,7 @@ export class Sart2 extends Game {
     this._buildTextScene("instruction-real", [
       { text: "Now you will start the real test block.", size: 24, y: 220, wrap: 340 },
       { text: "The same rules apply.\n\nPlease give equal importance to both the speed and accuracy of your responses.", size: 20, y: 400, wrap: 340 },
-      { text: `${P} to start the real test block`, size: 18, y: 700, color: PROMPT },
+      { text: `${P} to start the real test block`, size: 18, y: 650, color: PROMPT },
     ], () => this._startBlock("test"), { skip: this.getParameter("skippable_instructions") && "test" });
   }
 
@@ -235,6 +239,7 @@ export class Sart2 extends Game {
 
   _go(sceneName) {
     this._onPress = null;
+    this._skipActive = false;
     this._lockUntil = Timer.now() + PRESS_LOCKOUT_MS;
     if (sceneName === "summary-training") this._fillSummary("training");
     this.presentScene(sceneName, Transition.none());
@@ -277,9 +282,9 @@ export class Sart2 extends Game {
     if (opts.skip) {
       const skip = new Label({
         text: "Skip instructions ›",
-        fontSize: 16,
+        fontSize: 20,
         fontColor: PROMPT,
-        position: { x: GAME_WIDTH - 75, y: 40 },
+        position: { x: CENTER_X, y: SKIP_Y },
         isUserInteractionEnabled: true,
         zPosition: 20,
       });
@@ -288,6 +293,7 @@ export class Sart2 extends Game {
     }
     scene.onAppear(() => {
       this._attachListeners();
+      this._skipActive = Boolean(opts.skip);
       this._onPress = onAdvance;
       if (opts.autoEndMs) {
         scene.run(
@@ -412,7 +418,14 @@ export class Sart2 extends Game {
       if (Timer.now() < this._lockUntil || !this._onPress) return;
       this._onPress();
     };
-    div.addEventListener("pointerdown", fire);
+    div.addEventListener("pointerdown", (e) => {
+      if (this._skipActive) {
+        // a press on the Skip button must not also advance to the next page
+        const r = div.getBoundingClientRect();
+        if (((e.clientY - r.top) / r.height) * GAME_HEIGHT >= SKIP_ZONE_Y) return;
+      }
+      fire();
+    });
     document.addEventListener("keydown", (e) => {
       if (e.code === "Space" || e.key === " ") {
         e.preventDefault();

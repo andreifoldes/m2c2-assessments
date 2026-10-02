@@ -102,8 +102,8 @@ test.describe("SART2 options", () => {
     await page.setViewportSize({ width: 400, height: 800 });
     await page.goto(`${URL}?${short}&skippable_instructions=true`);
     await waitForGameReady(page);
-    // Skip label sits at game coords (~325, 40) of the 400x800 canvas
-    await page.locator("#m2c2kit-canvas").click({ position: { x: 325, y: 40 } });
+    // Skip label sits at the bottom centre, game coords (200, 765) of the 400x800 canvas
+    await page.locator("#m2c2kit-canvas").click({ position: { x: 200, y: 765 } });
     await expect
       .poll(() => logs.filter((l) => l.includes("trial data:")).length, { timeout: 15_000 })
       .toBeGreaterThanOrEqual(1);
