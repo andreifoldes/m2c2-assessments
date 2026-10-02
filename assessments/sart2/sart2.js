@@ -87,7 +87,7 @@ export class Sart2 extends Game {
         default: "auto",
         type: "string",
         enum: ["auto", "mobile", "desktop"],
-        description: "Wording of the instructions: 'mobile' (tap), 'desktop' (space bar) or 'auto' (detect touch screen)",
+        description: "Wording of the instructions: 'mobile' (tap), 'desktop' (space bar) or 'auto' (touch screen or phone-sized viewport)",
       },
       show_quit_button: {
         default: false,
@@ -149,11 +149,13 @@ export class Sart2 extends Game {
     this._results = { training: this._emptyStats(), test: this._emptyStats() };
 
     const dev = this.getParameter("device");
+    // auto: a touch screen or a phone-sized viewport means tap wording
     this._mobile =
       dev === "mobile" ||
       (dev !== "desktop" &&
         typeof window !== "undefined" &&
-        window.matchMedia("(pointer: coarse)").matches);
+        (window.matchMedia("(pointer: coarse)").matches ||
+          Math.min(window.innerWidth, window.innerHeight) <= 600));
     // Wording for the input device, e.g. "Tap the screen" / "Press the space bar"
     const P = this._mobile ? "Tap the screen" : "Press the space bar";
     const tutorial = this.getParameter("show_tutorial");
