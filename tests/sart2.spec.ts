@@ -30,7 +30,7 @@ test.describe("SART2", () => {
 
     // 9 training + 9 test trials, short error feedback to keep the test quick
     await page.goto(
-      `${URL}?training_trials=9&test_trials=9&error_feedback_ms=100&post_error_blank_ms=50`,
+      `${URL}?tutorial=true&training_trials=9&test_trials=9&error_feedback_ms=100&post_error_blank_ms=50`,
     );
     await waitForGameReady(page);
 

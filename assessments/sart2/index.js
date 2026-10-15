@@ -1,5 +1,5 @@
 import { Session } from "@m2c2kit/session";
-import { Sart2 } from "./sart2.js?v=4";
+import { Sart2 } from "./sart2.js?v=5";
 let webcamModule = null;
 let webgazerModule = null;
 let ambientLightModule = null;

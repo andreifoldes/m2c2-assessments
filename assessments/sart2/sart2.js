@@ -64,9 +64,9 @@ export class Sart2 extends Game {
         description: "Blank screen after the error message in ms",
       },
       show_tutorial: {
-        default: true,
+        default: false,
         type: "boolean",
-        description: "Whether to show the instruction and training block",
+        description: "Whether to show a training block (with its summary) before the real test; off by default",
       },
       show_instructions: {
         default: true,
@@ -166,8 +166,6 @@ export class Sart2 extends Game {
     // The entry scene is the first one added
     if (!showInstr) {
       this._buildLaunchScene(firstBlock);
-    } else if (!tutorial) {
-      this._buildRealInstruction(P);
     }
     this._buildTextScene("title", [
       { text: "SART", size: 56, y: 180 },
@@ -178,31 +176,33 @@ export class Sart2 extends Game {
     this._buildTextScene("instructions1", [
       { text: "Instructions (page 1)", size: 26, y: 120 },
       {
-        text: `In this experiment you will be presented with the digits 1 to 9 in the center of the screen.\n\nYour task is to ${how} in response to each digit, except for when the digit is a '{N}'.\n\nEach digit is followed by a circle with a cross, which you can ignore.`,
+        text: `In this task, you will be presented with the digits 1 to 9 in the centre of the screen.\n\nYour task is to ${how} in response to each digit, except for when the digit is a '{N}'.\n\nEach digit is followed by a circle with a cross, which you can ignore.`,
         size: 20, y: 400, wrap: 340,
       },
       { text: `${P} to read more…`, size: 18, y: 650, color: PROMPT },
     ], () => this._go("instructions2"), { skip: skippable && "test" });
-    const press = this._mobile ? "tap" : "press";
+    const press = this._mobile ? "tap the screen" : "press the SPACE BAR";
     this._buildTextScene("instructions2", [
       { text: "Instructions (page 2)", size: 26, y: 120 },
       {
-        text: `For example, if you see the digit '1', ${press}. If you see a '4', ${press}. If you see a '{N}', DO NOT ${press}. If you see a '7', ${press}. And so on.\n\nPlease give equal importance to both the speed and accuracy of your responses.\n\nWhen you ${press} correctly, the circle turns green.`,
+        text: `For example, if you see the digit '1', ${press}. If you see a '4', ${press}. If you see a '{N}', do NOT ${press}. If you see a '7', ${press}. And so on.\n\nPlease give equal importance to both the speed and accuracy of your responses.`,
         size: 20, y: 400, wrap: 340,
       },
-      { text: `${P} to start the training block`, size: 18, y: 650, color: PROMPT },
-    ], () => this._startBlock("training"), { skip: skippable && "test" });
+      { text: `${P} to start ${tutorial ? "the training block" : "the task"}`, size: 18, y: 650, color: PROMPT },
+    ], () => this._startBlock(firstBlock), { skip: skippable && "test" });
     this._buildCountdownScene();
     this._buildTrialScene();
-    this._buildTextScene(
-      "summary-training",
-      this._summaryItems(P),
-      () => (showInstr ? this._go("instruction-real") : this._startBlock("test")),
-    );
-    if (showInstr && tutorial) this._buildRealInstruction(P);
+    if (tutorial) {
+      this._buildTextScene(
+        "summary-training",
+        this._summaryItems(P),
+        () => (showInstr ? this._go("instruction-real") : this._startBlock("test")),
+      );
+      if (showInstr) this._buildRealInstruction(P);
+    }
     this._buildTextScene("end", [
       { text: "WELL DONE", size: 40, y: 200 },
-      { text: "You have completed the real test.", size: 22, y: 270, wrap: 340 },
+      { text: "You have completed the task.", size: 22, y: 270, wrap: 340 },
     ], null, { autoEndMs: 3000 });
   }
 
