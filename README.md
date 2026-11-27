@@ -49,6 +49,7 @@ An adaptive Psychomotor Vigilance Test that measures sustained attention and rea
 | `decision_threshold` | number | `0.99619` | Posterior probability threshold to stop the test early. |
 | `feedback_duration_ms` | number | `1000` | How long feedback (RT value or error message) is displayed after each trial (ms). |
 | `tutorial` | string | `true` | Set to `false` or `0` to skip the tutorial screens. |
+| `show_trial_status` | string | `false` | Set to `true` or `1` to show a line at the bottom of the trial screen with the trial number and the LpFS count. |
 | `webcam` | string | — | Set to `1` or `true` to enable the optional camera recording feature. Participants are shown a consent prompt before the task; if they accept, the front camera records and the video is saved locally to their device at the end of the session. If absent or any other value, no prompt is shown. |
 | `webgazer` | string | — | Set to `1` or `true` to enable browser-based eye tracking via [WebGazer.js](https://github.com/brownhci/WebGazer). Participants see a consent prompt, then a 5-point gaze calibration. Gaze coordinates are recorded throughout the task and exported as a CSV file at session end. Can be combined with `webcam=1`. |
 
