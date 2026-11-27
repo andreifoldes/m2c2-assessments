@@ -1,5 +1,5 @@
 import { Session } from "@m2c2kit/session";
-import { PvtBa } from "./pvt-ba.js?v=5";
+import { PvtBa } from "./pvt-ba.js?v=6";
 let webcamModule = null;
 let webgazerModule = null;
 let ambientLightModule = null;
@@ -31,6 +31,11 @@ for (const key of [
 const tutorialParam = params.get("tutorial");
 if (tutorialParam !== null) {
   paramOverrides.show_tutorial = tutorialParam !== "false" && tutorialParam !== "0";
+}
+// show_trial_status=1 or =true brings back the "Trial N | LpFS: N" line
+const trialStatusParam = params.get("show_trial_status");
+if (trialStatusParam !== null) {
+  paramOverrides.show_trial_status = trialStatusParam === "true" || trialStatusParam === "1";
 }
 if (Object.keys(paramOverrides).length > 0) {
   assessment.setParameters(paramOverrides);

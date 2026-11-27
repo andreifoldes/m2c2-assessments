@@ -89,6 +89,12 @@ export class PvtBa extends Game {
         description:
           "Whether to show the detailed results page with High/Medium/Low classification. When false, participants see a simple completion message.",
       },
+      show_trial_status: {
+        default: false,
+        type: "boolean",
+        description:
+          "Whether to show a line at the bottom of the trial screen with the trial number and the count of lapses and false starts (LpFS); off by default",
+      },
     };
 
     super({
@@ -1302,8 +1308,10 @@ export class PvtBa extends Game {
       }
     }
 
-    const statusLabel = this._getNode("statusLabel");
-    statusLabel.text = `Trial ${this._algorithm.getTrialCount()} | LpFS: ${this._algorithm.getLpfsCount()}`;
+    if (this.getParameter("show_trial_status")) {
+      const statusLabel = this._getNode("statusLabel");
+      statusLabel.text = `Trial ${this._algorithm.getTrialCount()} | LpFS: ${this._algorithm.getLpfsCount()}`;
+    }
 
     const self = this;
     const feedbackDuration = this.getParameter("feedback_duration_ms");
